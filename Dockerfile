@@ -74,6 +74,8 @@ FROM nginx:1.27-alpine AS gateway
 COPY gateway/nginx.conf /etc/nginx/nginx.conf
 # 상류 선언이 없는 상태가 기본이며 배포가 이 디렉터리에 파일을 얹는다.
 COPY gateway/upstreams.d /etc/nginx/upstreams.d
+# 에이전트 화면 선언도 배포가 얹는다.
+COPY gateway/remotes.d /etc/nginx/remotes.d
 EXPOSE 3847
 CMD ["nginx", "-g", "daemon off;"]
 
