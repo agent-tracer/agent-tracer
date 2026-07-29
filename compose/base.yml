@@ -17,7 +17,8 @@ x-app-env: &app-env
 services:
   # ---- 데이터 저장소 ----
   event-db:
-    build: { context: ./event-db }
+    image: agent-tracer/event-db
+    build: { context: .., dockerfile: Dockerfile, target: event-db }
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-root}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-root}
@@ -104,29 +105,12 @@ services:
       CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
     ports: ["8083:8083"]
 
+  # 커넥터 등록을 재시도로 자가회복하며 앱 이미지 없이 기반만으로도 기동할 수 있다.
   connect-init:
-    # 커넥터 등록을 재시도로 자가회복하며 앱 이미지 없이 기반만으로도 기동할 수 있다.
-    image: curlimages/curl:8.10.1
+    image: agent-tracer/connect-init
+    build: { context: .., dockerfile: Dockerfile, target: connect-init }
     depends_on:
       connect: { condition: service_started }
-    volumes: [./debezium/event-ledger.json:/event-ledger.json:ro]
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - |
-        until curl -sf http://connect:8083/connectors >/dev/null; do sleep 2; done
-        until curl -sf -X PUT http://connect:8083/connectors/event-ledger/config \
-          -H 'Content-Type: application/json' -d @/event-ledger.json >/dev/null; do sleep 2; done
-        while :; do
-          s=$$(curl -s http://connect:8083/connectors/event-ledger/status || true)
-          case "$$(printf '%s' "$$s" | grep -o '"tasks":\[[^]]*')" in
-            *'"state":"RUNNING"'*) break ;;
-          esac
-          case "$$s" in *'"state":"FAILED"'*)
-            curl -s -X POST "http://connect:8083/connectors/event-ledger/restart?includeTasks=true&onlyFailed=true" >/dev/null || true ;;
-          esac
-          sleep 3
-        done
-        echo "event-ledger connector RUNNING"
 
   opensearch:
     image: opensearchproject/opensearch:2.17.1

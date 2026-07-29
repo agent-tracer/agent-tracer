@@ -76,3 +76,15 @@ COPY gateway/nginx.conf /etc/nginx/nginx.conf
 COPY gateway/upstreams.d /etc/nginx/upstreams.d
 EXPOSE 3847
 CMD ["nginx", "-g", "daemon off;"]
+
+# ---- event-db: pg_partman 을 얹은 Postgres 이며 변경 데이터 캡처를 위해 논리 복제를 켠다 ----
+FROM postgres:17 AS event-db
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends postgresql-17-partman \
+ && rm -rf /var/lib/apt/lists/*
+
+# ---- connect-init: 원장 커넥터를 등록하고 RUNNING 이 될 때까지 기다린 뒤 끝나는 원샷 ----
+FROM curlimages/curl:8.10.1 AS connect-init
+COPY compose/debezium/event-ledger.json /event-ledger.json
+COPY compose/debezium/register.sh /register.sh
+ENTRYPOINT ["/bin/sh", "/register.sh"]
