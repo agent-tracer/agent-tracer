@@ -205,10 +205,8 @@ services:
     build: { context: .., dockerfile: Dockerfile, target: web }
 
   gateway:
-    image: nginx:1.27-alpine
-    volumes:
-      - ../gateway/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ../gateway/upstreams.d:/etc/nginx/upstreams.d:ro
+    image: agent-tracer/gateway
+    build: { context: .., dockerfile: Dockerfile, target: gateway }
     ports: ["127.0.0.1:3847:3847"]
     depends_on: [ingest-api, tracer-api, tracer-web]
 

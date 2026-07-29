@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target: [migrate, ingest-api, tracer-api, web]
+        target: [migrate, ingest-api, tracer-api, web, gateway]
     steps:
       - uses: actions/checkout@v4
 

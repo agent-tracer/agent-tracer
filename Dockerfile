@@ -68,3 +68,11 @@ COPY services/tracer-web/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=web-builder /app/services/tracer-web/dist /usr/share/nginx/html
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
+
+# ---- gateway: 경로 접두사로 서비스를 나누는 단일 진입점 ----
+FROM nginx:1.27-alpine AS gateway
+COPY gateway/nginx.conf /etc/nginx/nginx.conf
+# 상류 선언이 없는 상태가 기본이며 배포가 이 디렉터리에 파일을 얹는다.
+COPY gateway/upstreams.d /etc/nginx/upstreams.d
+EXPOSE 3847
+CMD ["nginx", "-g", "daemon off;"]

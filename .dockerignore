@@ -9,6 +9,7 @@
 !libs
 !services
 !plugin
+!gateway
 
 # 되살린 경로 안에서도 산출물·의존성·로컬 상태·문서는 제외한다
 **/node_modules
