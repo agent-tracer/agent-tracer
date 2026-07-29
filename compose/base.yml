@@ -87,6 +87,47 @@ services:
         rpk topic create ingest.events -p 6 -r 1 --brokers redpanda:29092 || true
         rpk topic create notifications -p 3 -r 1 --brokers redpanda:29092 || true
 
+  connect:
+    image: debezium/connect:2.7.3.Final
+    depends_on:
+      redpanda: { condition: service_healthy }
+      event-db: { condition: service_healthy }
+    environment:
+      BOOTSTRAP_SERVERS: redpanda:29092
+      GROUP_ID: connect-cluster
+      CONFIG_STORAGE_TOPIC: _connect_configs
+      OFFSET_STORAGE_TOPIC: _connect_offsets
+      STATUS_STORAGE_TOPIC: _connect_status
+      KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+    ports: ["8083:8083"]
+
+  connect-init:
+    # 커넥터 등록을 재시도로 자가회복하며 앱 이미지 없이 기반만으로도 기동할 수 있다.
+    image: curlimages/curl:8.10.1
+    depends_on:
+      connect: { condition: service_started }
+    volumes: [./debezium/event-ledger.json:/event-ledger.json:ro]
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        until curl -sf http://connect:8083/connectors >/dev/null; do sleep 2; done
+        until curl -sf -X PUT http://connect:8083/connectors/event-ledger/config \
+          -H 'Content-Type: application/json' -d @/event-ledger.json >/dev/null; do sleep 2; done
+        while :; do
+          s=$$(curl -s http://connect:8083/connectors/event-ledger/status || true)
+          case "$$(printf '%s' "$$s" | grep -o '"tasks":\[[^]]*')" in
+            *'"state":"RUNNING"'*) break ;;
+          esac
+          case "$$s" in *'"state":"FAILED"'*)
+            curl -s -X POST "http://connect:8083/connectors/event-ledger/restart?includeTasks=true&onlyFailed=true" >/dev/null || true ;;
+          esac
+          sleep 3
+        done
+        echo "event-ledger connector RUNNING"
+
   opensearch:
     image: opensearchproject/opensearch:2.17.1
     environment:
