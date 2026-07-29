@@ -1,6 +1,6 @@
-import type { AgentBackendJobInput, JobStatusBase } from "~tracer-web/entities/job/model/job.js";
+import type { JobStatusBase } from "~tracer-web/entities/job/model/job.js";
 
-export interface TaskCleanupJobInput extends AgentBackendJobInput {
+export interface TaskCleanupJobInput {
   readonly filters: Record<string, unknown>;
 }
 

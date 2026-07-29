@@ -1,4 +1,4 @@
-import type { AgentBackendJobInput, JobStatusBase } from "~tracer-web/entities/job/model/job.js";
+import type { JobStatusBase } from "~tracer-web/entities/job/model/job.js";
 import type { TaskId } from "~tracer-web/shared/identity.js";
 
 export interface TitleSuggestion {
@@ -6,7 +6,7 @@ export interface TitleSuggestion {
   readonly rationale: string;
 }
 
-export interface TitleSuggestionJobInput extends AgentBackendJobInput {
+export interface TitleSuggestionJobInput {
   readonly taskId: TaskId;
 }
 

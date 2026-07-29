@@ -1,30 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
-    AI_AGENT_BACKEND,
-    DEFAULT_AI_AGENT_BACKEND,
     JOB_STATUS,
     RULE_GENERATION_INTENT_MAX_LENGTH,
     isCancelableJobStatus,
     isTerminalJobStatus,
-    normalizeAiAgentBackend,
     normalizeRuleGenerationIntent,
 } from "./job.const.js";
-
-describe("normalizeAiAgentBackend", () => {
-    it("정식 값과 CLI 호환 별칭을 정규화한다", () => {
-        expect(normalizeAiAgentBackend("python")).toBe(AI_AGENT_BACKEND.python);
-        expect(normalizeAiAgentBackend("claude-sdk")).toBe(AI_AGENT_BACKEND.claudeSdk);
-        expect(normalizeAiAgentBackend("ts")).toBe(AI_AGENT_BACKEND.claudeSdk);
-    });
-
-    it("사라진 백엔드 이름은 기본값으로 되돌린다", () => {
-        expect(normalizeAiAgentBackend("openai")).toBe(DEFAULT_AI_AGENT_BACKEND);
-    });
-
-    it("알 수 없는 값은 기본 backend로 되돌린다", () => {
-        expect(normalizeAiAgentBackend("unknown")).toBe(DEFAULT_AI_AGENT_BACKEND);
-    });
-});
 
 describe("isTerminalJobStatus", () => {
     it("완료·실패·취소를 종료 상태로 본다", () => {

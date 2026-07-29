@@ -7,29 +7,6 @@ export const JOB_KIND = {
 
 export type JobKind = (typeof JOB_KIND)[keyof typeof JOB_KIND];
 
-export const AI_AGENT_BACKEND = {
-    python: "python",
-    claudeSdk: "claude-sdk",
-} as const;
-
-export type AiAgentBackend = (typeof AI_AGENT_BACKEND)[keyof typeof AI_AGENT_BACKEND];
-
-export const DEFAULT_AI_AGENT_BACKEND: AiAgentBackend = AI_AGENT_BACKEND.python;
-
-// 잡 접수를 어느 백엔드가 받을지 gateway가 본문 없이 나누는 쿼리 파라미터이며 대화와 같은 이름을 쓴다.
-export const JOB_BACKEND_QUERY_PARAM = "backend";
-
-export function normalizeAiAgentBackend(
-    value: unknown,
-    fallback: AiAgentBackend = DEFAULT_AI_AGENT_BACKEND,
-): AiAgentBackend {
-    if (typeof value !== "string") return fallback;
-    const normalized = value.trim().toLowerCase();
-    if (normalized === AI_AGENT_BACKEND.python) return AI_AGENT_BACKEND.python;
-    if (normalized === AI_AGENT_BACKEND.claudeSdk || normalized === "ts") return AI_AGENT_BACKEND.claudeSdk;
-    return fallback;
-}
-
 export const RULE_GENERATION_FOCUS = {
     recent: "recent",
 } as const;
