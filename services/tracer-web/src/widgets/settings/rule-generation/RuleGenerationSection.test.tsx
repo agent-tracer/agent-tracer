@@ -3,11 +3,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createUiStore, UiStoreProvider } from "~tracer-web/shared/store/index.js";
 import { RuleGenerationSection } from "~tracer-web/widgets/settings/rule-generation/RuleGenerationSection.js";
 
+const settingsQuery: { data?: unknown; isLoading: boolean; error?: unknown } = {
+  data: { settings: [] },
+  isLoading: false,
+};
+
 vi.mock("~tracer-web/entities/setting/api/queries.js", () => ({
-  useAppSettingsQuery: () => ({
-    data: { settings: [] },
-    isLoading: false,
-  }),
+  useAppSettingsQuery: () => settingsQuery,
   useModelOptionsQuery: () => ({
     data: [{ id: "claude-haiku-4-5", label: "Claude Haiku 4.5" }],
   }),
@@ -24,7 +26,12 @@ vi.mock("~tracer-web/entities/setting/api/mutations.js", () => ({
 }));
 
 describe("규칙 생성 설정", () => {
-  afterEach(cleanup);
+  afterEach(() => {
+    cleanup();
+    settingsQuery.data = { settings: [] };
+    settingsQuery.isLoading = false;
+    delete settingsQuery.error;
+  });
 
   it("AI 출력 언어와 브라우저 설명 언어의 범위를 분리해 안내한다", () => {
     const store = createUiStore({ persisted: false });
@@ -58,5 +65,20 @@ describe("규칙 생성 설정", () => {
     );
 
     expect(screen.getByRole("option", { name: "Claude Haiku 4.5" })).toBeDefined();
+  });
+
+  it("설정 창구가 없는 배포에서는 아무것도 그리지 않는다", () => {
+    const missingSurface = Object.assign(new Error("not implemented"), { status: 501 });
+    settingsQuery.data = undefined;
+    settingsQuery.error = missingSurface;
+    const store = createUiStore({ persisted: false });
+
+    const { container } = render(
+      <UiStoreProvider store={store}>
+        <RuleGenerationSection />
+      </UiStoreProvider>,
+    );
+
+    expect(container.innerHTML).toBe("");
   });
 });

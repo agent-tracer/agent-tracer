@@ -26,6 +26,12 @@ export function isNotFoundError(error: unknown): boolean {
   return requestError.status === 404 || requestError.code === "not_found";
 }
 
+/** 501은 그 창구를 세우는 서비스가 배포에 없다는 상류의 확답이며 고장이 아니다. */
+export function isNotImplementedError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  return (error as ApiRequestError).status === 501;
+}
+
 export async function createResponseError(
   response: Response,
   pathname: string,

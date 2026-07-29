@@ -4,6 +4,7 @@ import {
   useDeleteAppSettingMutation,
   usePutAppSettingMutation,
 } from "~tracer-web/entities/setting/api/mutations.js";
+import { isNotImplementedError } from "~tracer-web/shared/api/client/response.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
 import {
   Button,
@@ -24,7 +25,7 @@ import {
 /** 규칙 생성 공급자와 출력 정책을 설정한다. */
 export function RuleGenerationSection() {
   const guidance = useGuidance();
-  const { data, isLoading } = useAppSettingsQuery();
+  const { data, isLoading, error } = useAppSettingsQuery();
   const modelOptions = useModelOptionsQuery();
   const putMutation = usePutAppSettingMutation();
   const deleteMutation = useDeleteAppSettingMutation();
@@ -67,6 +68,9 @@ export function RuleGenerationSection() {
       setFeedback(`Failed to clear ${key}: ${(err as Error).message}`);
     }
   }
+
+  // 설정 창구를 세우는 에이전트 서비스가 없는 배포에서는 이 설정이 존재하지 않는다.
+  if (isNotImplementedError(error)) return null;
 
   return (
     <Card surface="canvas" className="py-5 px-6">
