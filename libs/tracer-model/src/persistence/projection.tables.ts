@@ -14,7 +14,6 @@ export const REBUILDABLE_TABLES = [
 export const OWNED_TABLES = [
     "rules",
     "recipes",
-    "app_settings",
     "users",
     "task_user_state",
     "task_cleanup_suggestions",

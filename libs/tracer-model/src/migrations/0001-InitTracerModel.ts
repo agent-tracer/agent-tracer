@@ -27,7 +27,6 @@ export class InitTracerModel1785300000000 implements MigrationInterface {
         await queryRunner.query(`CREATE INDEX "verdicts_turn" ON "verdicts" ("turn_id") `);
         await queryRunner.query(`CREATE TABLE "search_outbox" ("id" text NOT NULL, "user_id" text NOT NULL, "target" text NOT NULL, "target_id" text NOT NULL, "attempts" integer NOT NULL DEFAULT '0', "last_error" text, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_f0e10017d6287176243c2926453" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE INDEX "search_outbox_created" ON "search_outbox" ("created_at") `);
-        await queryRunner.query(`CREATE TABLE "app_settings" ("scope" text NOT NULL, "key" text NOT NULL, "value" text NOT NULL, "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_5670cdf891495c8223e16ed02fe" PRIMARY KEY ("scope", "key"))`);
         await queryRunner.query(`CREATE TABLE "sessions" ("id" text NOT NULL, "user_id" text NOT NULL, "task_id" text NOT NULL, "runtime_source" text NOT NULL, "runtime_session_id" text NOT NULL, "status" text NOT NULL, "summary" text, "started_at" TIMESTAMP WITH TIME ZONE NOT NULL, "ended_at" TIMESTAMP WITH TIME ZONE, CONSTRAINT "PK_3238ef96f18b355b671619111bc" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE INDEX "sessions_user_task" ON "sessions" ("user_id", "task_id", "started_at") `);
         await queryRunner.query(`CREATE TABLE "tasks" ("id" text NOT NULL, "user_id" text NOT NULL, "title" text NOT NULL, "title_rank" text NOT NULL DEFAULT 'auto', "slug" text NOT NULL, "workspace_path" text, "status" text NOT NULL, "task_kind" text NOT NULL, "origin" text NOT NULL, "cli_source" text, "parent_task_id" text, "parent_session_id" text, "background_of_task_id" text, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL, "last_session_started_at" TIMESTAMP WITH TIME ZONE, "last_event_at" TIMESTAMP WITH TIME ZONE, "last_applied_seq" bigint, CONSTRAINT "PK_e5598b50e5aff20056c6d6acd08" PRIMARY KEY ("id", "user_id"))`);
@@ -138,7 +137,6 @@ export class InitTracerModel1785300000000 implements MigrationInterface {
         await queryRunner.query(`DROP INDEX "public"."verdicts_turn"`);
         await queryRunner.query(`DROP TABLE "search_outbox"`);
         await queryRunner.query(`DROP INDEX "public"."search_outbox_created"`);
-        await queryRunner.query(`DROP TABLE "app_settings"`);
         await queryRunner.query(`DROP TABLE "sessions"`);
         await queryRunner.query(`DROP INDEX "public"."sessions_user_task"`);
         await queryRunner.query(`DROP TABLE "tasks"`);

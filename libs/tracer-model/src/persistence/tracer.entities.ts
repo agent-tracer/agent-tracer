@@ -9,7 +9,6 @@ import { RecipeEntity } from "../recipe/recipe.entity.js";
 import { RuleEntity } from "../rule/rule.entity.js";
 import { VerdictEntity } from "../rule/verification/verdict.entity.js";
 import { SearchOutboxEntity } from "../search/search.outbox.entity.js";
-import { AppSettingEntity } from "../settings/app.setting.entity.js";
 import { SessionEntity } from "../session/session.entity.js";
 import { TaskEntity } from "../task/task.entity.js";
 import { TaskUserStateEntity } from "../task/user-state/task.user.state.entity.js";
@@ -33,7 +32,6 @@ export const TRACER_ENTITIES = [
     RecipeApplicationEntity,
     TaskCleanupSuggestionEntity,
     UserEntity,
-    AppSettingEntity,
     SearchOutboxEntity,
     DaemonHealthEntity,
     MemoEntity,
