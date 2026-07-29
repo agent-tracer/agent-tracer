@@ -11,6 +11,7 @@ import { sessionFeature } from "~tracer-api/domain/session/session.feature.js";
 import { tagFeature } from "~tracer-api/domain/tag/tag.feature.js";
 import { taskFeature } from "~tracer-api/domain/task/task.feature.js";
 import { timelineFeature } from "~tracer-api/domain/timeline/timeline.feature.js";
+import { userFeature } from "~tracer-api/domain/user/user.feature.js";
 import { AuthGuard } from "~tracer-api/config/auth.guard.js";
 import { RateLimitGuard, resolveApiRateLimiter } from "~tracer-api/config/rate.limit.guard.js";
 import { GlobalExceptionFilter } from "~tracer-api/config/exception.filter.js";
@@ -40,6 +41,7 @@ const apiFeatures: readonly ApiFeatureCatalog[] = [
     tagFeature,
     taskFeature,
     timelineFeature,
+    userFeature,
 ];
 
 /** tracer-api의 슬라이스를 모아 앱 전역 배선과 함께 조립하는 근원 모듈이다. */

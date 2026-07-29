@@ -26,6 +26,8 @@ import {
     TransactionRunner,
     TurnEntity,
     TurnRepository,
+    UserEntity,
+    UserRepository,
     VerdictEntity,
     VerdictRepository,
 } from "@agent-tracer/tracer-model";
@@ -47,4 +49,5 @@ export const repositoryProviders: Provider[] = [
     { provide: MemoRepository, inject: [TRACER_DATA_SOURCE], useFactory: (ds: DataSource) => new MemoRepository(ds.getRepository(MemoEntity)) },
     { provide: TagRepository, inject: [TRACER_DATA_SOURCE], useFactory: (ds: DataSource) => new TagRepository(ds.getRepository(TagEntity)) },
     { provide: TaskTagRepository, inject: [TRACER_DATA_SOURCE], useFactory: (ds: DataSource) => new TaskTagRepository(ds.getRepository(TaskTagEntity)) },
+    { provide: UserRepository, inject: [TRACER_DATA_SOURCE], useFactory: (ds: DataSource) => new UserRepository(ds.getRepository(UserEntity)) },
 ];
