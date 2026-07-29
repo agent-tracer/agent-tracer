@@ -14,6 +14,7 @@ export class EnqueueRuleJobUsecase {
 
     async execute(kind: string, taskId: string, eventId: string, prompt: string): Promise<void> {
         if (!isRuleGenerationTrigger(kind, taskId, eventId, prompt)) return;
+        if (!this.cache.isSupported()) return;
         try {
             if (await this.jobs.hasActiveJob(taskId)) return;
             await this.jobs.enqueue(taskId, eventId, this.cache.snapshot().maxRulesPerTask);

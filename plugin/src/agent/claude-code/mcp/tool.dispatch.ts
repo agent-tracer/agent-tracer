@@ -105,7 +105,7 @@ export async function callTool(name: string, args: unknown): Promise<ToolCallRes
             const parsed = parseGetRecipeArgs(args);
             if (!parsed) return invalidArgs();
             const fetched = await onGetRecipe(mcpRuntime.recipe, parsed.recipeId);
-            if (fetched.kind === "unavailable") {
+            if (fetched.kind === "unavailable" || fetched.kind === "unsupported") {
                 return {text: "Could not reach the recipe server. Try again.", isError: true};
             }
             const target = resolveTarget();

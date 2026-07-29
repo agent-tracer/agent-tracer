@@ -20,6 +20,17 @@ describe("EnqueueRuleJobUsecase", () => {
         expect(jobs.enqueued).toEqual([{taskId: "t1", anchorEventId: "e1", maxRules: 3}]);
     });
 
+    it("설정 창구가 없는 배포에서는 잡을 넣지 않는다", async () => {
+        const jobs = new InMemoryRuleJob();
+        const cache = cacheWith(3);
+        cache.markUnsupported();
+
+        await new EnqueueRuleJobUsecase(jobs, cache)
+            .execute(KIND.userMessage, "t1", "e1", "/rule 이번 턴에서 규칙을 뽑아줘");
+
+        expect(jobs.enqueued).toEqual([]);
+    });
+
     it("플러그인 네임스페이스가 붙은 호출도 규칙 명령으로 본다", async () => {
         const jobs = new InMemoryRuleJob();
 
