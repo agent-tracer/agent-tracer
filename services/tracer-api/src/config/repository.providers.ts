@@ -3,6 +3,10 @@ import type { DataSource } from "typeorm";
 import {
     EventEntity,
     EventRepository,
+    RecipeApplicationEntity,
+    RecipeApplicationRepository,
+    RecipeEntity,
+    RecipeRepository,
     RuleEntity,
     RuleRepository,
     SessionEntity,
@@ -11,6 +15,7 @@ import {
     TaskRepository,
     TaskUserStateEntity,
     TaskUserStateRepository,
+    TransactionRunner,
     TurnEntity,
     TurnRepository,
     VerdictEntity,
@@ -27,4 +32,7 @@ export const repositoryProviders: Provider[] = [
     { provide: TurnRepository, inject: [TRACER_DATA_SOURCE], useFactory: (ds: DataSource) => new TurnRepository(ds.getRepository(TurnEntity)) },
     { provide: RuleRepository, inject: [TRACER_DATA_SOURCE], useFactory: (ds: DataSource) => new RuleRepository(ds.getRepository(RuleEntity)) },
     { provide: VerdictRepository, inject: [TRACER_DATA_SOURCE], useFactory: (ds: DataSource) => new VerdictRepository(ds.getRepository(VerdictEntity)) },
+    { provide: RecipeRepository, inject: [TRACER_DATA_SOURCE], useFactory: (ds: DataSource) => new RecipeRepository(ds.getRepository(RecipeEntity)) },
+    { provide: RecipeApplicationRepository, inject: [TRACER_DATA_SOURCE], useFactory: (ds: DataSource) => new RecipeApplicationRepository(ds.getRepository(RecipeApplicationEntity)) },
+    { provide: TransactionRunner, inject: [TRACER_DATA_SOURCE], useFactory: (ds: DataSource) => new TransactionRunner(ds) },
 ];
