@@ -1,0 +1,41 @@
+import type { EventEntity } from "@agent-tracer/tracer-model";
+import type { EventReaderPort } from "../event.reader.port.js";
+
+/** 이벤트 조회 포트의 인메모리 대역이다. */
+export class InMemoryEventReader implements EventReaderPort {
+    private readonly rows = new Map<string, EventEntity>();
+
+    seed(...events: readonly EventEntity[]): void {
+        for (const event of events) this.rows.set(event.id, event);
+    }
+
+    all(): EventEntity[] {
+        return this.ordered();
+    }
+
+    findByIds(ids: readonly string[]): Promise<EventEntity[]> {
+        return Promise.resolve(this.ordered().filter((event) => ids.includes(event.id)));
+    }
+
+    findByTurn(turnId: string): Promise<EventEntity[]> {
+        return Promise.resolve(this.ordered().filter((event) => event.turnId === turnId));
+    }
+
+    findByTaskSinceEvent(userId: string, taskId: string, anchorEventId: string): Promise<EventEntity[]> {
+        const anchor = this.rows.get(anchorEventId);
+        if (anchor === undefined) return Promise.resolve([]);
+        const events = this.ordered().filter(
+            (event) => event.userId === userId && event.taskId === taskId && BigInt(event.seq) >= BigInt(anchor.seq),
+        );
+        return Promise.resolve(events);
+    }
+
+    async maxSeqSinceEvent(userId: string, taskId: string, anchorEventId: string): Promise<string | null> {
+        const events = await this.findByTaskSinceEvent(userId, taskId, anchorEventId);
+        return events.at(-1)?.seq ?? null;
+    }
+
+    private ordered(): EventEntity[] {
+        return [...this.rows.values()].sort((a, b) => (BigInt(a.seq) < BigInt(b.seq) ? -1 : 1));
+    }
+}

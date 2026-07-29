@@ -2,6 +2,7 @@ import { Module, type DynamicModule, type Provider, type Type } from "@nestjs/co
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { createOpenSearchClient, TokenBucketLimiter } from "@agent-tracer/platform";
 import type { createDataSource, createKafka } from "@agent-tracer/platform";
+import { ruleFeature } from "~tracer-api/domain/rule/rule.feature.js";
 import { sessionFeature } from "~tracer-api/domain/session/session.feature.js";
 import { taskFeature } from "~tracer-api/domain/task/task.feature.js";
 import { timelineFeature } from "~tracer-api/domain/timeline/timeline.feature.js";
@@ -25,6 +26,7 @@ interface ApiFeatureCatalog {
 }
 
 const apiFeatures: readonly ApiFeatureCatalog[] = [
+    ruleFeature,
     sessionFeature,
     taskFeature,
     timelineFeature,
