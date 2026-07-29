@@ -4,9 +4,8 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     projects: [
-      "packages/*/vitest.config.ts",
-      "packages/*/vite.config.ts",
-      "packages/server/*/*/vitest.config.ts",
+      "{libs,services,plugin}/**/vitest.config.ts",
+      "services/*/vite.config.ts",
     ],
   },
 });
