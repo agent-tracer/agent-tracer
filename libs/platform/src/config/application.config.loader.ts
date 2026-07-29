@@ -6,7 +6,7 @@ import { mergeApplicationConfig } from "./application.config.merge.js";
 import type { ApplicationConfig } from "./application.config.schema.js";
 
 const PACKAGE_ROOT = path.dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = path.resolve(PACKAGE_ROOT, "../../../../../..");
+const REPO_ROOT = path.resolve(PACKAGE_ROOT, "../../../..");
 const APPLICATION_YAML_PATH = path.join(REPO_ROOT, "application.yaml");
 const APPLICATION_LOCAL_YAML_PATH = path.join(REPO_ROOT, "application.local.yaml");
 
