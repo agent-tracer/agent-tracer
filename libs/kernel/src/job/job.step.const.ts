@@ -16,16 +16,6 @@ export const AI_JOB_STEP_ROLES = [
     AI_JOB_STEP_ROLE.graph,
 ] as const satisfies readonly AiJobStepRole[];
 
-export const AI_JOB_GRAPH_EVENT_KIND = {
-    nodeStarted: "node.started",
-    nodeCompleted: "node.completed",
-    nodeFailed: "node.failed",
-    routeSelected: "route.selected",
-    validationFailed: "validation.failed",
-} as const;
-
-export type AiJobGraphEventKind = (typeof AI_JOB_GRAPH_EVENT_KIND)[keyof typeof AI_JOB_GRAPH_EVENT_KIND];
-
 export interface AiJobStepToolCall {
     readonly id: string;
     readonly name: string;
@@ -47,7 +37,6 @@ export interface AiJobStepPayload {
     readonly cacheCreationTokens?: number | undefined;
     readonly stopReason?: string | undefined;
     readonly nodeName?: string | undefined;
-    readonly eventKind?: AiJobGraphEventKind | undefined;
     readonly durationMs?: number | undefined;
 }
 
