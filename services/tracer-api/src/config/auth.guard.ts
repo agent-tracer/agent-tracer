@@ -11,7 +11,7 @@ import {
 import { MONITOR_USER_HEADER } from "@agent-tracer/kernel";
 import { MONITOR_SESSION_COOKIE } from "~tracer-api/support/session.const.js";
 import { SKIP_GATE_METADATA_KEY } from "~tracer-api/support/skip-gate.decorator.js";
-import { logWarn } from "~tracer-api/config/log.js";
+import { logWarn } from "~tracer-api/support/log.js";
 import { routePatternOf } from "~tracer-api/config/http.request.util.js";
 
 /** 데몬은 Bearer 토큰(purpose=api), 웹은 세션 쿠키(purpose=session), 에이전트 실행은 실행 범위 토큰으로 신원을 검증하고 자기신고 헤더를 검증된 값으로 확정한다. */

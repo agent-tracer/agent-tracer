@@ -3,7 +3,7 @@ import { Catch, HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import type { Request, Response } from "express";
 import { DomainError } from "@agent-tracer/platform";
 import { createApiErrorEnvelope, isApiErrorEnvelope, MONITOR_USER_HEADER } from "@agent-tracer/kernel";
-import { errorMessage, logError, logWarn } from "~tracer-api/config/log.js";
+import { errorMessage, logError, logWarn } from "~tracer-api/support/log.js";
 import { headerValue, routePatternOf } from "~tracer-api/config/http.request.util.js";
 
 const INTERNAL_SERVER_ERROR_BODY = createApiErrorEnvelope("internal_server_error", "Internal server error");
