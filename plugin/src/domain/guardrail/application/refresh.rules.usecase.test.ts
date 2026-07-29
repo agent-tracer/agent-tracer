@@ -1,0 +1,34 @@
+import {RULE_EXPECTATION_KIND, RULE_REVIEW_STATE} from "@agent-tracer/kernel";
+import {describe, expect, it} from "vitest";
+import {RefreshRulesUsecase} from "~plugin/domain/guardrail/application/refresh.rules.usecase.js";
+import {InMemoryRuleSource} from "~plugin/domain/guardrail/port/__fakes__/in-memory.rule.source.js";
+import type {RuleSourcePort} from "~plugin/domain/guardrail/port/rule.source.port.js";
+
+const RULE = {
+    id: "rule-1",
+    name: "검증 실행",
+    verdictStatus: null,
+    escalated: false,
+    severity: "info",
+    taskId: "task-1",
+    reviewState: RULE_REVIEW_STATE.active,
+    anchorEventId: "anchor-1",
+    expectation: {kind: RULE_EXPECTATION_KIND.command, commandMatches: ["npm test"]},
+} as const;
+
+describe("RefreshRulesUsecase", () => {
+    it("서버가 준 규칙을 그대로 돌려준다", async () => {
+        const usecase = new RefreshRulesUsecase(new InMemoryRuleSource([RULE]));
+
+        expect(await usecase.execute()).toEqual([RULE]);
+    });
+
+    it("서버 조회가 실패하면 캐시를 갈아엎지 않도록 null을 낸다", async () => {
+        const failing: RuleSourcePort = {
+            recordNudge: () => Promise.resolve(),
+            fetchAll: () => Promise.reject(new Error("unreachable")),
+        };
+
+        expect(await new RefreshRulesUsecase(failing).execute()).toBeNull();
+    });
+});
