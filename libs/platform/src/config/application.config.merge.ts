@@ -17,12 +17,12 @@ export function mergeApplicationConfig(
     env: NodeJS.ProcessEnv,
 ): ApplicationConfig {
     const merged = { ...base, ...local };
-    const runtimeDb = section(merged, "runtimeDb");
+    const eventDb = section(merged, "eventDb");
     const tracerDb = section(merged, "tracerDb");
     const kafka = section(merged, "kafka");
     const opensearch = section(merged, "opensearch");
     const temporal = section(merged, "temporal");
-    const runtimeApi = section(merged, "runtimeApi");
+    const ingestApi = section(merged, "ingestApi");
     const tracerApi = section(merged, "tracerApi");
     const projector = section(merged, "projector");
     const user = env["POSTGRES_USER"] ?? "monitor";
@@ -42,16 +42,16 @@ export function mergeApplicationConfig(
         profile: (env["MONITOR_PROFILE"] as "local" | "prd" | undefined)
             ?? (merged["profile"] as "local" | "prd" | undefined)
             ?? "local",
-        runtimeApi: { port: envInt(env, "RUNTIME_API_PORT", (runtimeApi["port"] as number | undefined) ?? 3901) },
+        ingestApi: { port: envInt(env, "INGEST_API_PORT", (ingestApi["port"] as number | undefined) ?? 3901) },
         tracerApi: { port: envInt(env, "TRACER_API_PORT", (tracerApi["port"] as number | undefined) ?? 3902) },
         projector: { port: envInt(env, "PROJECTOR_PORT", (projector["port"] as number | undefined) ?? 3903) },
         listenHost: env["MONITOR_LISTEN_HOST"] ?? (merged["listenHost"] as string | undefined) ?? "127.0.0.1",
-        runtimeDb: {
-            host: env["RUNTIME_DB_HOST"] ?? (runtimeDb["host"] as string | undefined) ?? "127.0.0.1",
-            port: envInt(env, "RUNTIME_DB_PORT", (runtimeDb["port"] as number | undefined) ?? 5432),
+        eventDb: {
+            host: env["EVENT_DB_HOST"] ?? (eventDb["host"] as string | undefined) ?? "127.0.0.1",
+            port: envInt(env, "EVENT_DB_PORT", (eventDb["port"] as number | undefined) ?? 5432),
             username: user,
             password,
-            database: (runtimeDb["database"] as string | undefined) ?? "runtime",
+            database: (eventDb["database"] as string | undefined) ?? "runtime",
         },
         tracerDb: {
             host: env["TRACER_DB_HOST"] ?? (tracerDb["host"] as string | undefined) ?? "127.0.0.1",

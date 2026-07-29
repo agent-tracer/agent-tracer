@@ -22,7 +22,7 @@ async function bootstrap(): Promise<void> {
     const config = loadApplicationConfig();
     // 마이그레이션은 배포 선행 스텝이 소유하고 부트는 스키마 버전만 검사한다.
     const dataSource = createDataSource({
-        db: config.runtimeDb,
+        db: config.eventDb,
         entities: [LedgerEventEntity, EventIngestKeyEntity],
         migrations: [],
         migrationsRun: false,
@@ -40,7 +40,7 @@ async function bootstrap(): Promise<void> {
     app.useBodyParser("json", { limit: BODY_LIMIT });
 
     const host = config.listenHost;
-    const { port } = config.runtimeApi;
+    const { port } = config.ingestApi;
     await app.listen(port, host);
     const rateLimit = resolveIngestRateLimitConfig();
     logInfo({

@@ -10,11 +10,11 @@ const dbSchema = z.object({
 
 export const applicationConfigSchema = z.object({
     profile: z.enum(["local", "prd"]),
-    runtimeApi: z.object({ port: z.number().int().positive().max(65535) }),
+    ingestApi: z.object({ port: z.number().int().positive().max(65535) }),
     tracerApi: z.object({ port: z.number().int().positive().max(65535) }),
     projector: z.object({ port: z.number().int().positive().max(65535) }),
     listenHost: z.string().min(1),
-    runtimeDb: dbSchema,
+    eventDb: dbSchema,
     tracerDb: dbSchema,
     kafka: z.object({ brokers: z.array(z.string().min(1)).min(1) }),
     opensearch: z.object({ node: z.string().min(1) }),

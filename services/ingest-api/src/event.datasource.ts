@@ -6,7 +6,7 @@ import { LEDGER_MIGRATIONS } from "~ingest-api/migrations/registry.js";
 
 // 마이그레이션 CLI가 읽는 DataSource이며 원장 엔티티와 마이그레이션을 등록한다.
 const eventDataSource = createDataSource({
-    db: loadApplicationConfig().runtimeDb,
+    db: loadApplicationConfig().eventDb,
     entities: [LedgerEventEntity, EventIngestKeyEntity],
     migrations: [...LEDGER_MIGRATIONS],
 });

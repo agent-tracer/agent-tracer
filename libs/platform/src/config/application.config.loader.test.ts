@@ -35,36 +35,36 @@ describe("loadApplicationConfig", () => {
         provideYaml(
             {
                 profile: "prd",
-                runtimeApi: { port: 4101 },
+                ingestApi: { port: 4101 },
                 kafka: { brokers: ["base:9092"] },
             },
             {
                 profile: "local",
-                runtimeApi: { port: 4201 },
+                ingestApi: { port: 4201 },
                 kafka: { brokers: ["local:9092"] },
             },
         );
-        vi.stubEnv("RUNTIME_API_PORT", "4301");
+        vi.stubEnv("INGEST_API_PORT", "4301");
         vi.stubEnv("KAFKA_BROKERS", "env-a:9092, ,env-b:9092");
 
         const loadApplicationConfig = await loadFreshConfig();
         const config = loadApplicationConfig();
 
         expect(config.profile).toBe("local");
-        expect(config.runtimeApi.port).toBe(4301);
+        expect(config.ingestApi.port).toBe(4301);
         expect(config.kafka.brokers).toEqual(["env-a:9092", "env-b:9092"]);
     });
 
     it("환경변수가 바뀌어도 최초에 검증한 설정을 재사용한다", async () => {
-        provideYaml({ runtimeApi: { port: 4101 } });
+        provideYaml({ ingestApi: { port: 4101 } });
         const loadApplicationConfig = await loadFreshConfig();
 
         const first = loadApplicationConfig();
-        vi.stubEnv("RUNTIME_API_PORT", "4301");
+        vi.stubEnv("INGEST_API_PORT", "4301");
         const second = loadApplicationConfig();
 
         expect(second).toBe(first);
-        expect(second.runtimeApi.port).toBe(4101);
+        expect(second.ingestApi.port).toBe(4101);
     });
 
     it("잘못된 환경변수 포트를 스키마 검증에서 거부한다", async () => {
@@ -88,7 +88,7 @@ describe("loadApplicationConfig", () => {
 
         expect(config.tracerDb.username).toBe("agent_execution_writer");
         expect(config.tracerDb.password).toBe("agentexecution");
-        expect(config.runtimeDb.username).toBe("root");
+        expect(config.eventDb.username).toBe("root");
     });
 
     it("깃발이 없으면 tracerDb도 관리자 계정 그대로 붙는다", async () => {
