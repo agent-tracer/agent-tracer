@@ -6,6 +6,7 @@ import { cleanupFeature } from "~tracer-api/domain/cleanup/cleanup.feature.js";
 import { memoFeature } from "~tracer-api/domain/memo/memo.feature.js";
 import { recipeFeature } from "~tracer-api/domain/recipe/recipe.feature.js";
 import { ruleFeature } from "~tracer-api/domain/rule/rule.feature.js";
+import { searchFeature } from "~tracer-api/domain/search/search.feature.js";
 import { sessionFeature } from "~tracer-api/domain/session/session.feature.js";
 import { tagFeature } from "~tracer-api/domain/tag/tag.feature.js";
 import { taskFeature } from "~tracer-api/domain/task/task.feature.js";
@@ -34,6 +35,7 @@ const apiFeatures: readonly ApiFeatureCatalog[] = [
     memoFeature,
     recipeFeature,
     ruleFeature,
+    searchFeature,
     sessionFeature,
     tagFeature,
     taskFeature,
