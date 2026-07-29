@@ -1,0 +1,72 @@
+import {
+    RULE_EXPECTATION_KIND,
+    RULE_EXPECTED_ACTIONS,
+    RULE_SEVERITIES,
+} from "@agent-tracer/kernel/rule/definition/rule.vocabulary.js";
+import {CITATION_MAX} from "~plugin/domain/rulegen/model/proposal.validation.model.js";
+
+/** 구조화 출력과 파서가 함께 참조하는 최상위 키다. */
+export const RULE_OUTPUT_ROOT_KEY = "rules" as const;
+
+/** 구조화 출력으로 받는 규칙 제안의 유일한 JSON 스키마다. */
+export function buildRuleOutputSchema(): Record<string, unknown> {
+    return {
+        type: "object",
+        properties: {
+            [RULE_OUTPUT_ROOT_KEY]: {
+                type: "array",
+                items: {
+                    type: "object",
+                    properties: {
+                        name: {type: "string"},
+                        expect: {
+                            type: "object",
+                            oneOf: [
+                                {
+                                    type: "object",
+                                    properties: {
+                                        kind: {type: "string", enum: [RULE_EXPECTATION_KIND.command]},
+                                        commandMatches: {type: "array", items: {type: "string"}},
+                                    },
+                                    required: ["kind", "commandMatches"],
+                                },
+                                {
+                                    type: "object",
+                                    properties: {
+                                        kind: {type: "string", enum: [RULE_EXPECTATION_KIND.pattern]},
+                                        pattern: {type: "string"},
+                                        tool: {type: "string", enum: [...RULE_EXPECTED_ACTIONS]},
+                                    },
+                                    required: ["kind", "pattern"],
+                                },
+                                {
+                                    type: "object",
+                                    properties: {
+                                        kind: {type: "string", enum: [RULE_EXPECTATION_KIND.action]},
+                                        tool: {type: "string", enum: [...RULE_EXPECTED_ACTIONS]},
+                                    },
+                                    required: ["kind", "tool"],
+                                },
+                            ],
+                        },
+                        citedTurnIds: {
+                            type: "array",
+                            items: {type: "string"},
+                            maxItems: CITATION_MAX,
+                        },
+                        citedEventIds: {
+                            type: "array",
+                            items: {type: "string"},
+                            maxItems: CITATION_MAX,
+                        },
+                        severity: {type: "string", enum: [...RULE_SEVERITIES]},
+                        rationale: {type: "string"},
+                    },
+                    // 수용 계약(kernel의 ruleProposalSchema)이 rationale을 선택으로 두므로 구조화 출력도 강제하지 않는다.
+                    required: ["name", "expect", "citedTurnIds", "citedEventIds"],
+                },
+            },
+        },
+        required: [RULE_OUTPUT_ROOT_KEY],
+    };
+}
