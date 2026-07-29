@@ -1,8 +1,6 @@
 import type { Provider } from "@nestjs/common";
 import type { DataSource } from "typeorm";
 import {
-    AppSettingEntity,
-    AppSettingRepository,
     DaemonHealthEntity,
     DaemonHealthRepository,
     EventEntity,
@@ -58,5 +56,4 @@ export const repositoryProviders: Provider[] = [
     { provide: TaskTagRepository, inject: [TRACER_DATA_SOURCE], useFactory: (ds: DataSource) => new TaskTagRepository(ds.getRepository(TaskTagEntity)) },
     { provide: UserRepository, inject: [TRACER_DATA_SOURCE], useFactory: (ds: DataSource) => new UserRepository(ds.getRepository(UserEntity)) },
     { provide: DaemonHealthRepository, inject: [TRACER_DATA_SOURCE], useFactory: (ds: DataSource) => new DaemonHealthRepository(ds.getRepository(DaemonHealthEntity)) },
-    { provide: AppSettingRepository, inject: [TRACER_DATA_SOURCE], useFactory: (ds: DataSource) => new AppSettingRepository(ds.getRepository(AppSettingEntity)) },
 ];
