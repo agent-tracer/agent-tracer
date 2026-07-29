@@ -11,6 +11,8 @@ import {
     RuleRepository,
     SessionEntity,
     SessionRepository,
+    TaskCleanupSuggestionEntity,
+    TaskCleanupSuggestionRepository,
     TaskEntity,
     TaskRepository,
     TaskUserStateEntity,
@@ -35,4 +37,5 @@ export const repositoryProviders: Provider[] = [
     { provide: RecipeRepository, inject: [TRACER_DATA_SOURCE], useFactory: (ds: DataSource) => new RecipeRepository(ds.getRepository(RecipeEntity)) },
     { provide: RecipeApplicationRepository, inject: [TRACER_DATA_SOURCE], useFactory: (ds: DataSource) => new RecipeApplicationRepository(ds.getRepository(RecipeApplicationEntity)) },
     { provide: TransactionRunner, inject: [TRACER_DATA_SOURCE], useFactory: (ds: DataSource) => new TransactionRunner(ds) },
+    { provide: TaskCleanupSuggestionRepository, inject: [TRACER_DATA_SOURCE], useFactory: (ds: DataSource) => new TaskCleanupSuggestionRepository(ds.getRepository(TaskCleanupSuggestionEntity)) },
 ];
