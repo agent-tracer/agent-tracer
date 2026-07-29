@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 
 import { DATA_SOURCES, migrationRun } from "./migrate.mjs";
 
-describe("마이그레이션 러너", () => {
+describe("스키마 이행 러너", () => {
   it("조회 모델을 먼저 실행하고 원장을 뒤에 실행한다", () => {
     assert.deepEqual(DATA_SOURCES.map((source) => source.name), ["tracer", "event"]);
   });

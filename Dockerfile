@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-# ---- 매니페스트 베이스: package.json 레이어만 먼저 복사해 npm ci를 캐싱한다 ----
+# ---- 매니페스트 베이스: package.json 레이어만 앞세워 npm ci를 캐싱한다 ----
 FROM node:24-slim AS deps-base
 
 WORKDIR /app

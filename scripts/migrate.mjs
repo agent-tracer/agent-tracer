@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 두 원장의 마이그레이션을 차례로 실행하고 하나라도 실패하면 그 자리에서 멈춘다.
+// 두 원장의 스키마 이행을 차례로 실행하고 하나라도 실패하면 그 자리에서 멈춘다.
 
 import { spawnSync } from "node:child_process";
 import path from "node:path";
@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const TYPEORM_CLI = "node_modules/typeorm/cli.js";
 
-/** 마이그레이션을 소유한 데이터 소스이며 적힌 차례대로 실행한다. */
+/** 스키마 이행을 소유한 데이터 소스이며 적힌 차례대로 실행한다. */
 export const DATA_SOURCES = Object.freeze([
   Object.freeze({
     name: "tracer",
