@@ -1,0 +1,167 @@
+import {spawn} from "node:child_process";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import {ensureAgentTracerHome, resolveAgentTracerPaths, type AgentTracerPaths} from "~plugin/config/home.paths.js";
+import {resolvePluginRoot} from "~plugin/config/plugin.root.js";
+import {probeSocket, requestDaemon} from "~plugin/daemon/ipc/socket.client.js";
+import {resolveDaemonAction} from "~plugin/daemon/lifecycle/daemon.version.js";
+import {
+    parseDaemonDeliveryResponse,
+    parseDaemonGuardrailResponse,
+    parseDaemonHintsResponse,
+    parseDaemonPromptContextResponse,
+    type DaemonDeliveryRequest,
+    type DaemonDeliveryResponse,
+    type DaemonGuardrailRequest,
+    type DaemonHintsRequest,
+    type DaemonPromptContextRequest,
+    type DaemonPromptContextResponse,
+} from "~plugin/daemon/port/daemon.socket.port.js";
+import type {GuardrailVerdict} from "~plugin/domain/guardrail/model/verdict.model.js";
+import type {PreprocessingHint, PreprocessingHintsRequest} from "~plugin/domain/hint/model/hint.model.js";
+
+const HINTS_TIMEOUT_MS = 500;
+const EMPTY_PROMPT_CONTEXT: DaemonPromptContextResponse = {rules: [], hints: []};
+const GUARDRAIL_TIMEOUT_MS = 1000;
+const ASSISTANT_TEXT_MAX = 8_000;
+
+// swc-node 소스 실행이므로 컴파일된 진입점이 없으면 로더를 붙여 소스를 그대로 띄운다.
+const SOURCE_LOADER = "@swc-node/register/esm-register";
+
+function daemonEntry(): {readonly executable: string; readonly args: readonly string[]} {
+    const root = resolvePluginRoot();
+    const compiled = path.join(root, "dist/daemon/main.js");
+    if (fs.existsSync(compiled)) return {executable: process.execPath, args: [compiled]};
+    return {
+        executable: process.execPath,
+        args: ["--import", SOURCE_LOADER, path.join(root, "src/daemon/main.ts")],
+    };
+}
+
+function spawnDaemon(paths: AgentTracerPaths): void {
+    const {executable, args} = daemonEntry();
+    ensureAgentTracerHome(paths);
+    let logFd: number | undefined;
+    try {
+        logFd = fs.openSync(paths.logPath, "a");
+    } catch {
+        logFd = undefined;
+    }
+    const child = spawn(executable, [...args], {
+        detached: true,
+        stdio: logFd !== undefined ? ["ignore", logFd, logFd] : "ignore",
+        env: {
+            ...process.env,
+            AGENT_TRACER_DAEMON_CHILD: "1",
+            AGENT_TRACER_DAEMON_SOCKET: paths.socketPath,
+        },
+    });
+    child.unref();
+    if (logFd === undefined) return;
+    try {
+        fs.closeSync(logFd);
+    } catch {
+        return;
+    }
+}
+
+/** 훅 호출마다 데몬 생존과 버전을 확인하고 낡았으면 최신 버전으로 다시 띄운다. */
+export async function ensureDaemonRunning(env: NodeJS.ProcessEnv = process.env): Promise<void> {
+    if (env.AGENT_TRACER_DAEMON_CHILD === "1") return;
+    if (env.AGENT_TRACER_DAEMON_AUTOSTART === "0") return;
+    const paths = resolveAgentTracerPaths(env);
+    if (await resolveDaemonAction(paths) === "spawn") spawnDaemon(paths);
+}
+
+export function isDaemonAlive(paths: AgentTracerPaths = resolveAgentTracerPaths()): Promise<boolean> {
+    return probeSocket(paths.socketPath);
+}
+
+/** 데몬에서 전처리 힌트를 조회하고 데몬이 없으면 조용히 비운다. */
+export async function queryDaemonHints(
+    taskId: string,
+    request: PreprocessingHintsRequest,
+): Promise<readonly PreprocessingHint[]> {
+    if (!taskId) return [];
+    const paths = resolveAgentTracerPaths();
+    try {
+        return await requestDaemon(
+            paths.socketPath,
+            {type: "hints", taskId, request} satisfies DaemonHintsRequest,
+            HINTS_TIMEOUT_MS,
+            (parsed) => parseDaemonHintsResponse(parsed)?.hints ?? [],
+            [],
+        );
+    } catch {
+        void ensureDaemonRunning();
+        return [];
+    }
+}
+
+/** 데몬이 스풀을 서버로 배출하고 있는지 묻고 데몬이 없으면 판단을 미룬다. */
+export async function queryDaemonDelivery(): Promise<DaemonDeliveryResponse | null> {
+    const paths = resolveAgentTracerPaths();
+    try {
+        return await requestDaemon(
+            paths.socketPath,
+            {type: "delivery"} satisfies DaemonDeliveryRequest,
+            HINTS_TIMEOUT_MS,
+            (parsed) => parseDaemonDeliveryResponse(parsed),
+            null,
+        );
+    } catch {
+        return null;
+    }
+}
+
+/** 프롬프트 앞에서 규칙과 힌트를 한 번의 왕복으로 함께 조회한다. */
+export async function queryDaemonPromptContext(taskId: string): Promise<DaemonPromptContextResponse> {
+    if (!taskId) return EMPTY_PROMPT_CONTEXT;
+    const paths = resolveAgentTracerPaths();
+    try {
+        return await requestDaemon(
+            paths.socketPath,
+            {
+                type: "prompt-context",
+                taskId,
+                request: {trigger: "user_prompt"},
+            } satisfies DaemonPromptContextRequest,
+            HINTS_TIMEOUT_MS,
+            (parsed) => parseDaemonPromptContextResponse(parsed) ?? EMPTY_PROMPT_CONTEXT,
+            EMPTY_PROMPT_CONTEXT,
+        );
+    } catch {
+        void ensureDaemonRunning();
+        return EMPTY_PROMPT_CONTEXT;
+    }
+}
+
+
+/** 데몬에서 턴 종료 가드레일 판정을 조회한다. */
+export async function queryDaemonGuardrail(
+    taskId: string,
+    sessionId?: string,
+    candidateAssistantText?: string,
+): Promise<readonly GuardrailVerdict[]> {
+    if (!taskId) return [];
+    const paths = resolveAgentTracerPaths();
+    try {
+        return await requestDaemon(
+            paths.socketPath,
+            {
+                type: "guardrail",
+                taskId,
+                ...(sessionId !== undefined ? {sessionId} : {}),
+                ...(candidateAssistantText
+                    ? {candidateAssistantText: candidateAssistantText.slice(0, ASSISTANT_TEXT_MAX)}
+                    : {}),
+            } satisfies DaemonGuardrailRequest,
+            GUARDRAIL_TIMEOUT_MS,
+            (parsed) => parseDaemonGuardrailResponse(parsed)?.verdicts ?? [],
+            [],
+        );
+    } catch {
+        void ensureDaemonRunning();
+        return [];
+    }
+}
