@@ -91,7 +91,13 @@ export default defineConfig(async ({ mode }) => {
         },
         // 값이 없으면 프록시가 없으니 remoteEntry는 자연스럽게 404이고 호스트는 그대로 돈다.
         ...(env["AGENT_REMOTE_URL"]
-          ? { [AGENT_REMOTE_MOUNT_PATH]: { target: env["AGENT_REMOTE_URL"], changeOrigin: true } }
+          ? {
+              [AGENT_REMOTE_MOUNT_PATH]: {
+                target: env["AGENT_REMOTE_URL"],
+                changeOrigin: true,
+                rewrite: (path: string) => path.replace(AGENT_REMOTE_MOUNT_PATH, ""),
+              },
+            }
           : {}),
       },
     },
