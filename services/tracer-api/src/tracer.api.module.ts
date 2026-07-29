@@ -2,9 +2,17 @@ import { Module, type DynamicModule, type Provider, type Type } from "@nestjs/co
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { createOpenSearchClient, TokenBucketLimiter } from "@agent-tracer/platform";
 import type { createDataSource, createKafka } from "@agent-tracer/platform";
+import { cleanupFeature } from "~tracer-api/domain/cleanup/cleanup.feature.js";
+import { healthFeature } from "~tracer-api/domain/health/health.feature.js";
+import { memoFeature } from "~tracer-api/domain/memo/memo.feature.js";
+import { recipeFeature } from "~tracer-api/domain/recipe/recipe.feature.js";
+import { ruleFeature } from "~tracer-api/domain/rule/rule.feature.js";
+import { searchFeature } from "~tracer-api/domain/search/search.feature.js";
 import { sessionFeature } from "~tracer-api/domain/session/session.feature.js";
+import { tagFeature } from "~tracer-api/domain/tag/tag.feature.js";
 import { taskFeature } from "~tracer-api/domain/task/task.feature.js";
 import { timelineFeature } from "~tracer-api/domain/timeline/timeline.feature.js";
+import { userFeature } from "~tracer-api/domain/user/user.feature.js";
 import { AuthGuard } from "~tracer-api/config/auth.guard.js";
 import { RateLimitGuard, resolveApiRateLimiter } from "~tracer-api/config/rate.limit.guard.js";
 import { GlobalExceptionFilter } from "~tracer-api/config/exception.filter.js";
@@ -25,9 +33,17 @@ interface ApiFeatureCatalog {
 }
 
 const apiFeatures: readonly ApiFeatureCatalog[] = [
+    cleanupFeature,
+    healthFeature,
+    memoFeature,
+    recipeFeature,
+    ruleFeature,
+    searchFeature,
     sessionFeature,
+    tagFeature,
     taskFeature,
     timelineFeature,
+    userFeature,
 ];
 
 /** tracer-api의 슬라이스를 모아 앱 전역 배선과 함께 조립하는 근원 모듈이다. */
