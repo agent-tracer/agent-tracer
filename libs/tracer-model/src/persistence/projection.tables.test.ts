@@ -31,7 +31,7 @@ describe("프로젝션 분류", () => {
         expect(() => {
             assertRebuildable("rules");
         }).toThrow(/재생 가능한 테이블만/);
-        for (const table of ["recipes", "app_settings", "tags"]) {
+        for (const table of ["recipes", "users", "tags"]) {
             expect(isOwnedTable(table)).toBe(true);
             expect(() => assertRebuildable(table)).toThrow();
         }

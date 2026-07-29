@@ -43,13 +43,9 @@ export * from "./recipe/application/recipe.application.repository.js";
 export * from "./cleanup/task.cleanup.suggestion.entity.js";
 export * from "./cleanup/task.cleanup.suggestion.repository.js";
 
-// settings·user
-export * from "./settings/settings.const.js";
+// user
 export * from "./user/user.entity.js";
-export * from "./settings/app.setting.entity.js";
-export * from "./settings/settings.catalog.domain.js";
 export * from "./user/user.repository.js";
-export * from "./settings/app.setting.repository.js";
 
 // search outbox
 export * from "./search/search.outbox.const.js";
