@@ -59,7 +59,7 @@ describe("TracerApiModule", () => {
 describe("tracer-api의 두 진입 모듈", () => {
     it("application 포트가 선언한 주입 토큰을 남김없이 배선한다", () => {
         const api = TracerApiModule.forRoot(undefined as never, undefined as never, undefined as never);
-        const projector = ProjectorModule.forRoot({} as unknown as ProjectorDeps);
+        const projector = ProjectorModule.forRoot({ otlp: {} } as unknown as ProjectorDeps);
         const provided = providedTokens([...api.providers ?? [], ...projector.providers ?? []]);
 
         const unwired = [...declaredPortTokens()]

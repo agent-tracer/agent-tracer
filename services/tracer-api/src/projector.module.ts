@@ -19,11 +19,22 @@ import { SearchConsumer } from "~tracer-api/domain/index/inbound/search.consumer
 import { ADVISORY_LOCK as INDEX_ADVISORY_LOCK, type AdvisoryLockPort as IndexAdvisoryLockPort } from "~tracer-api/domain/index/port/advisory.lock.port.js";
 import { SEARCH_INDEX_WRITER, type SearchIndexWriterPort } from "~tracer-api/domain/index/port/search.index.writer.port.js";
 import type { SearchOutboxDrainRepositories } from "~tracer-api/domain/index/port/search.outbox.drain.repository.port.js";
+import { ExportOtlpUseCase } from "~tracer-api/domain/export/application/export.otlp.usecase.js";
+import { HttpOtlpExporter } from "~tracer-api/domain/export/adapter/http.otlp.exporter.adapter.js";
+import { OtlpConsumer } from "~tracer-api/domain/export/inbound/otlp.consumer.js";
+import { OTLP_EXPORTER } from "~tracer-api/domain/export/port/otlp.exporter.port.js";
 import {
     DB_EVENT_CONSUMER,
     NOTIFICATION_PRODUCER,
+    OTLP_EVENT_CONSUMER,
+    OTLP_EXPORT_ENDPOINT,
     SEARCH_EVENT_CONSUMER,
 } from "~tracer-api/support/projector.tokens.js";
+
+export interface OtlpExportDeps {
+    readonly consumer: KafkaConsumer;
+    readonly endpoint: string;
+}
 
 export interface ProjectorDeps {
     readonly database: TracerDatabase;
@@ -33,12 +44,22 @@ export interface ProjectorDeps {
     readonly searchEventConsumer: KafkaConsumer;
     readonly searchIndex: SearchIndexWriterPort;
     readonly clock: IClock;
+    readonly otlp?: OtlpExportDeps | undefined;
 }
 
-/** 기능 슬라이스의 포트 토큰을 실제 어댑터 인스턴스에 잇는 이 앱의 유일한 배선 지점이다. */
+/** 세 기능 슬라이스의 포트 토큰을 실제 어댑터 인스턴스에 잇는 이 앱의 유일한 배선 지점이다. */
 @Module({})
 export class ProjectorModule {
     static forRoot(deps: ProjectorDeps): DynamicModule {
+        const otlpProviders = deps.otlp
+            ? [
+                ExportOtlpUseCase,
+                OtlpConsumer,
+                { provide: OTLP_EXPORTER, useClass: HttpOtlpExporter },
+                { provide: OTLP_EVENT_CONSUMER, useValue: deps.otlp.consumer },
+                { provide: OTLP_EXPORT_ENDPOINT, useValue: deps.otlp.endpoint },
+            ]
+            : [];
         return {
             module: ProjectorModule,
             providers: [
@@ -66,8 +87,15 @@ export class ProjectorModule {
 
                 { provide: DB_EVENT_CONSUMER, useValue: deps.dbEventConsumer },
                 { provide: SEARCH_EVENT_CONSUMER, useValue: deps.searchEventConsumer },
+
+                ...otlpProviders,
             ],
-            exports: [DbConsumer, SearchConsumer, SearchOutboxDrainUseCase],
+            exports: [
+                DbConsumer,
+                SearchConsumer,
+                SearchOutboxDrainUseCase,
+                ...(deps.otlp ? [OtlpConsumer] : []),
+            ],
         };
     }
 }
