@@ -1,0 +1,35 @@
+/** Claude Code가 사용자 알림을 보내면 실행되는 훅이며 idle_prompt는 사용자 입력을 기다리는 동안에도 온다. */
+import {readNotification} from "~plugin/agent/claude-code/payload/workspace.payload.js";
+import {
+    claudeRuntime,
+    ensureClaudeSession,
+    ensureSubagentSession,
+    runHook,
+} from "~plugin/agent/claude-code/runtime.js";
+import {onLifecycleEvent} from "~plugin/domain/ingest/inbound/tool.hook.js";
+import {notificationEvent} from "~plugin/domain/ingest/model/lifecycle.event.model.js";
+
+await runHook("Notification", {
+    parse: readNotification,
+    handler: async (payload) => {
+        const target = payload.agentId !== undefined
+            ? await ensureSubagentSession(
+                payload.sessionId,
+                payload.agentId,
+                payload.agentType,
+                undefined,
+                payload.transcriptPath,
+            )
+            : await ensureClaudeSession(payload.sessionId, undefined, {
+                resume: false,
+                transcriptPath: payload.transcriptPath,
+            });
+        await onLifecycleEvent(claudeRuntime.ingest, [
+            notificationEvent(
+                target,
+                payload.notificationType ?? "unknown",
+                payload.notificationMessage,
+            ),
+        ]);
+    },
+});
