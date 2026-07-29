@@ -3,6 +3,8 @@ import type { DataSource } from "typeorm";
 import {
     EventEntity,
     EventRepository,
+    MemoEntity,
+    MemoRepository,
     RecipeApplicationEntity,
     RecipeApplicationRepository,
     RecipeEntity,
@@ -38,4 +40,5 @@ export const repositoryProviders: Provider[] = [
     { provide: RecipeApplicationRepository, inject: [TRACER_DATA_SOURCE], useFactory: (ds: DataSource) => new RecipeApplicationRepository(ds.getRepository(RecipeApplicationEntity)) },
     { provide: TransactionRunner, inject: [TRACER_DATA_SOURCE], useFactory: (ds: DataSource) => new TransactionRunner(ds) },
     { provide: TaskCleanupSuggestionRepository, inject: [TRACER_DATA_SOURCE], useFactory: (ds: DataSource) => new TaskCleanupSuggestionRepository(ds.getRepository(TaskCleanupSuggestionEntity)) },
+    { provide: MemoRepository, inject: [TRACER_DATA_SOURCE], useFactory: (ds: DataSource) => new MemoRepository(ds.getRepository(MemoEntity)) },
 ];

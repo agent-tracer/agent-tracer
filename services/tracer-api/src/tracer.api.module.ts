@@ -3,6 +3,7 @@ import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { createOpenSearchClient, TokenBucketLimiter } from "@agent-tracer/platform";
 import type { createDataSource, createKafka } from "@agent-tracer/platform";
 import { cleanupFeature } from "~tracer-api/domain/cleanup/cleanup.feature.js";
+import { memoFeature } from "~tracer-api/domain/memo/memo.feature.js";
 import { recipeFeature } from "~tracer-api/domain/recipe/recipe.feature.js";
 import { ruleFeature } from "~tracer-api/domain/rule/rule.feature.js";
 import { sessionFeature } from "~tracer-api/domain/session/session.feature.js";
@@ -29,6 +30,7 @@ interface ApiFeatureCatalog {
 
 const apiFeatures: readonly ApiFeatureCatalog[] = [
     cleanupFeature,
+    memoFeature,
     recipeFeature,
     ruleFeature,
     sessionFeature,
