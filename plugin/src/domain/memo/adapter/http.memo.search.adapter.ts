@@ -1,0 +1,52 @@
+import {MEMOS_PATH} from "@agent-tracer/kernel/api/memo.query.const.js";
+import {getJson, type Fetched} from "~plugin/config/http.js";
+import type {MemoSearchPort, MemoSearchResultItem} from "~plugin/domain/memo/port/memo.search.port.js";
+import {isRecord} from "~plugin/support/json.js";
+
+const FETCH_TIMEOUT_MS = 3000;
+
+interface MemosEnvelope {
+    readonly data?: {readonly items?: unknown[]};
+}
+
+/** 서버 메모 목록을 캐시 없이 매 호출 라이브로 읽는다. */
+export class HttpMemoSearchAdapter implements MemoSearchPort {
+    constructor(
+        private readonly baseUrl: string,
+        private readonly headers: Record<string, string>,
+    ) {}
+
+    async listByTask(taskId: string): Promise<Fetched<readonly MemoSearchResultItem[]>> {
+        const fetched = await getJson<MemosEnvelope>(
+            `${this.baseUrl}${MEMOS_PATH}?taskId=${encodeURIComponent(taskId)}`,
+            this.headers,
+            FETCH_TIMEOUT_MS,
+        );
+        if (fetched.kind !== "found") return fetched;
+        const rawItems = fetched.value.data?.items;
+        const items = Array.isArray(rawItems) ? rawItems : [];
+        return {
+            kind: "found",
+            value: items.map(parseMemoItem).filter((item): item is MemoSearchResultItem => item !== null),
+        };
+    }
+}
+
+function parseMemoItem(item: unknown): MemoSearchResultItem | null {
+    if (!isRecord(item)) return null;
+    const id = item["id"];
+    const taskId = item["taskId"];
+    const body = item["body"];
+    if (typeof id !== "string" || typeof taskId !== "string" || typeof body !== "string") return null;
+    const eventId = item["eventId"];
+    const author = item["author"];
+    const updatedAt = item["updatedAt"];
+    return {
+        id,
+        taskId,
+        eventId: typeof eventId === "string" ? eventId : null,
+        author: typeof author === "string" ? author : "",
+        body,
+        ...(typeof updatedAt === "string" ? {updatedAt} : {}),
+    };
+}

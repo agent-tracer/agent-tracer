@@ -1,0 +1,23 @@
+{
+  "name": "@agent-tracer/plugin",
+  "version": "0.7.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node --import @swc-node/register/esm-register build.ts",
+    "lint:types": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.2.139",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@agent-tracer/kernel": "*",
+    "@swc/core": "^1.13.3",
+    "@types/node": "^24.13.3",
+    "esbuild": "^0.27.7",
+    "typescript": "^5.9.2",
+    "vitest": "^3.0.0"
+  }
+}

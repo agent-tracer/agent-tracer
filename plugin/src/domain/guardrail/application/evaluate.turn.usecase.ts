@@ -1,0 +1,35 @@
+import type {RecentEvent} from "~plugin/domain/ingest/model/recent.event.model.js";
+import {selectBlockingVerdicts} from "~plugin/domain/guardrail/model/enforce.model.js";
+import {guardrailLogLine} from "~plugin/domain/guardrail/model/guardrail.log.model.js";
+import type {GuardrailRule} from "~plugin/domain/guardrail/model/rule.model.js";
+import type {TurnContext} from "~plugin/domain/guardrail/model/turn.window.model.js";
+import {evaluateTurnAgainstRules, type GuardrailVerdict} from "~plugin/domain/guardrail/model/verdict.model.js";
+import type {RuleSourcePort} from "~plugin/domain/guardrail/port/rule.source.port.js";
+
+/** 판정 전체와 그중 턴을 붙잡아야 하는 것을 함께 낸다. */
+export interface TurnGuardrailResult {
+    readonly verdicts: readonly GuardrailVerdict[];
+    readonly blocking: readonly GuardrailVerdict[];
+}
+
+/** 턴이 끝나기 전에 규칙 이행 여부를 판정하고, 막은 것은 알렸다고 서버에 남긴다. */
+export class EvaluateTurnUsecase {
+    constructor(private readonly rules: RuleSourcePort) {}
+
+    execute(
+        events: readonly RecentEvent[],
+        rules: readonly GuardrailRule[],
+        taskId: string,
+        context: TurnContext = {},
+    ): TurnGuardrailResult {
+        const verdicts = evaluateTurnAgainstRules(events, rules, taskId, context);
+        const blocking = selectBlockingVerdicts(verdicts);
+        for (const verdict of blocking) {
+            // 넛지 집계는 규칙 수명 판정의 입력이라 조용히 새면 규칙이 영영 도태되지 않는다.
+            void this.rules.recordNudge(verdict.ruleId).catch(() => {
+                process.stderr.write(guardrailLogLine(`failed to record nudge for rule ${verdict.ruleId}`));
+            });
+        }
+        return {verdicts, blocking};
+    }
+}

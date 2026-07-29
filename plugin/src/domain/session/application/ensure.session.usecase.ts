@@ -1,0 +1,100 @@
+import {
+    bindingKey,
+    capBindingStore,
+    type BindingRecord,
+} from "~plugin/domain/binding/model/binding.model.js";
+import type {BindingStorePort} from "~plugin/domain/binding/port/binding.store.port.js";
+import {toRunIngestEvent} from "~plugin/domain/ingest/model/ingest.event.model.js";
+import type {EventSinkPort} from "~plugin/domain/ingest/port/event.sink.port.js";
+import type {IdGeneratorPort} from "~plugin/domain/ingest/port/id.generator.port.js";
+import {restored, type EnsuredSession} from "~plugin/domain/session/model/ensured.session.model.js";
+import type {ClockPort} from "~plugin/domain/session/port/clock.port.js";
+import {
+    sessionStartedEvent,
+    taskLinkedEvent,
+    type SessionBindingInput,
+} from "~plugin/domain/session/model/session.event.model.js";
+
+/** 런타임 세션을 기존 태스크에 복원하거나 새 태스크에 연결한다. */
+export class EnsureSessionUsecase {
+    constructor(
+        private readonly bindings: BindingStorePort,
+        private readonly sink: EventSinkPort,
+        private readonly ids: IdGeneratorPort,
+        private readonly clock: ClockPort,
+    ) {}
+
+    async execute(input: SessionBindingInput): Promise<EnsuredSession> {
+        const key = bindingKey(input.runtimeSource, input.runtimeSessionId);
+        const titled = input.titled ?? true;
+
+        if (!(await this.bindings.acquireLock())) {
+            const contended = this.bindings.read()[key];
+            if (contended) return restored(contended);
+            throw new Error("bindings lock unavailable, cannot create session binding");
+        }
+
+        let created: BindingRecord | undefined;
+        let existing: BindingRecord | undefined;
+        let retitled = false;
+        let firstTitling = false;
+        let resumedFromPrior: BindingRecord | undefined;
+        try {
+            const store = this.bindings.read();
+            existing = store[key];
+            if (!existing) {
+                resumedFromPrior = input.resumedFrom
+                    ? store[bindingKey(input.runtimeSource, input.resumedFrom)]
+                    : undefined;
+                created = {
+                    taskId: resumedFromPrior?.taskId ?? (input.taskId?.trim() || this.ids.next()),
+                    sessionId: this.ids.next(),
+                    runtimeSource: input.runtimeSource,
+                    runtimeSessionId: input.runtimeSessionId,
+                    ...(input.workspacePath ? {workspacePath: input.workspacePath} : {}),
+                    ...(input.runtimePid !== undefined ? {runtimePid: input.runtimePid} : {}),
+                    createdAt: new Date(this.clock.now()).toISOString(),
+                    titled,
+                    ...(resumedFromPrior ? {resumed: true} : {}),
+                };
+                store[key] = created;
+                this.bindings.write(capBindingStore(store));
+            } else if (titled && existing.titled !== true) {
+                firstTitling = existing.resumed !== true;
+                existing = {...existing, titled: true};
+                store[key] = existing;
+                this.bindings.write(store);
+                retitled = true;
+            }
+        } finally {
+            this.bindings.releaseLock();
+        }
+
+        if (existing) {
+            if (retitled) await this.append(taskLinkedEvent(existing.taskId, input.title));
+            return restored(existing, firstTitling);
+        }
+        if (!created) throw new Error("session binding was not created");
+
+        await this.append(sessionStartedEvent(created.taskId, created.sessionId, {
+            ...input,
+            ...(resumedFromPrior
+                ? {parentSessionId: resumedFromPrior.sessionId, resume: true}
+                : {}),
+        }));
+        return {
+            taskId: created.taskId,
+            sessionId: created.sessionId,
+            taskCreated: !resumedFromPrior,
+            firstTitling: !resumedFromPrior && titled,
+        };
+    }
+
+    private async append(event: Parameters<typeof toRunIngestEvent>[0]): Promise<void> {
+        await this.sink.append([toRunIngestEvent(
+            event,
+            new Date(this.clock.now()).toISOString(),
+            () => this.ids.next(),
+        )]);
+    }
+}
