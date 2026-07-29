@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "lint:types": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "search:reindex": "SWC_NODE_PROJECT=tsconfig.json node --import @swc-node/register/esm-register src/search.reindex.main.ts"
   },
   "dependencies": {
     "@agent-tracer/kernel": "*",

@@ -1,0 +1,122 @@
+import { describe, expect, it, vi } from "vitest";
+import type { Client } from "@opensearch-project/opensearch";
+import type { SearchBulkOperation } from "~tracer-api/domain/index/port/search.index.writer.port.js";
+import { OpenSearchIndexAdapter } from "~tracer-api/domain/index/adapter/open.search.index.adapter.js";
+
+describe("OpenSearchIndexAdapter", () => {
+    it("애플리케이션 벌크 명령을 OpenSearch 요청으로 변환한다", async () => {
+        const bulk = vi.fn(async () => ({ body: { errors: false, items: [{ index: {} }, { update: {} }] } }));
+        const adapter = new OpenSearchIndexAdapter({ bulk } as unknown as Client);
+        const operations: SearchBulkOperation[] = [
+            { action: "index", index: "events-v1", id: "e1", document: { title: "이벤트" } },
+            { action: "update", index: "tasks-v1", id: "t1", document: { status: "running" }, upsert: true },
+        ];
+
+        const result = await adapter.writeBulk(operations);
+
+        expect(bulk).toHaveBeenCalledWith({
+            body: [
+                { index: { _index: "events-v1", _id: "e1" } },
+                { title: "이벤트" },
+                { update: { _index: "tasks-v1", _id: "t1" } },
+                { doc: { status: "running" }, doc_as_upsert: true },
+            ],
+            refresh: false,
+        });
+        expect(result).toEqual({ errors: false, itemCount: 2 });
+    });
+
+    it("벌크 실패가 있으면 첫 실패 사유를 함께 돌려준다", async () => {
+        const bulk = vi.fn(async () => ({
+            body: {
+                errors: true,
+                items: [
+                    { index: {} },
+                    { update: { error: { type: "mapper_parsing_exception", reason: "필드 타입 불일치" } } },
+                ],
+            },
+        }));
+        const adapter = new OpenSearchIndexAdapter({ bulk } as unknown as Client);
+        const operations: SearchBulkOperation[] = [
+            { action: "index", index: "events-v1", id: "e1", document: {} },
+            { action: "update", index: "tasks-v1", id: "t1", document: {}, upsert: true },
+        ];
+
+        const result = await adapter.writeBulk(operations);
+
+        expect(result).toEqual({ errors: true, itemCount: 2, firstErrorReason: "필드 타입 불일치" });
+    });
+
+    it("신규 인덱스 생성 시 요청받은 경우에만 alias를 붙인다", async () => {
+        const create = vi.fn(async (_request: { index: string; body: Record<string, unknown> }) => ({}));
+        const client = {
+            indices: {
+                exists: vi.fn(async () => ({ body: false })),
+                getAlias: vi.fn(async () => ({ body: {} })),
+                create,
+            },
+        } as unknown as Client;
+        const adapter = new OpenSearchIndexAdapter(client);
+        const definition = {
+            alias: "events",
+            index: "events-v2",
+            settings: { number_of_shards: 1 },
+            mappings: { properties: {} },
+        };
+
+        await adapter.ensureIndex(definition, true);
+        await adapter.ensureIndex({ ...definition, index: "events-v3" }, false);
+
+        expect(create.mock.calls[0]?.[0]).toMatchObject({
+            index: "events-v2",
+            body: { aliases: { events: {} } },
+        });
+        expect(create.mock.calls[1]?.[0]).toEqual({
+            index: "events-v3",
+            body: {
+                settings: definition.settings,
+                mappings: definition.mappings,
+            },
+        });
+    });
+
+    it("alias가 이미 다른 인덱스에 붙어 있으면 신규 인덱스에 함께 붙이지 않는다", async () => {
+        const create = vi.fn(async (_request: { index: string; body: Record<string, unknown> }) => ({}));
+        const client = {
+            indices: {
+                exists: vi.fn(async () => ({ body: false })),
+                getAlias: vi.fn(async () => ({ body: { "tasks-v1": { aliases: { tasks: {} } } } })),
+                create,
+            },
+        } as unknown as Client;
+        const adapter = new OpenSearchIndexAdapter(client);
+
+        await adapter.ensureIndex(
+            { alias: "tasks", index: "tasks-v2", settings: {}, mappings: { properties: {} } },
+            true,
+        );
+
+        expect(create.mock.calls[0]?.[0]).toEqual({
+            index: "tasks-v2",
+            body: { settings: {}, mappings: { properties: {} } },
+        });
+    });
+
+    it("문서 삭제 요청을 그대로 전달한다", async () => {
+        const del = vi.fn(async () => ({}));
+        const adapter = new OpenSearchIndexAdapter({ delete: del } as unknown as Client);
+
+        await adapter.deleteDocument("memos-v1", "m1");
+
+        expect(del).toHaveBeenCalledWith({ index: "memos-v1", id: "m1" });
+    });
+
+    it("이미 없는 문서를 지우는 404는 실패로 보지 않는다", async () => {
+        const del = vi.fn(async () => {
+            throw Object.assign(new Error("not_found"), { statusCode: 404 });
+        });
+        const adapter = new OpenSearchIndexAdapter({ delete: del } as unknown as Client);
+
+        await expect(adapter.deleteDocument("memos-v1", "gone")).resolves.toBeUndefined();
+    });
+});

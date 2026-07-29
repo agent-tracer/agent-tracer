@@ -13,12 +13,25 @@ import { CLOCK } from "~tracer-api/domain/projection/port/clock.port.js";
 import { NOTIFICATION_PUBLISHER } from "~tracer-api/domain/projection/port/notification.publisher.port.js";
 import { TRACER_DATABASE, type TracerDatabase } from "~tracer-api/domain/projection/port/tracer.database.port.js";
 import { KafkaNotificationPublisher } from "~tracer-api/domain/projection/adapter/kafka.notification.publisher.adapter.js";
-import { DB_EVENT_CONSUMER, NOTIFICATION_PRODUCER } from "~tracer-api/support/projector.tokens.js";
+import { IndexSearchUseCase } from "~tracer-api/domain/index/application/index.search.usecase.js";
+import { SearchOutboxDrainUseCase } from "~tracer-api/domain/index/application/search.outbox.drain.usecase.js";
+import { SearchConsumer } from "~tracer-api/domain/index/inbound/search.consumer.js";
+import { ADVISORY_LOCK as INDEX_ADVISORY_LOCK, type AdvisoryLockPort as IndexAdvisoryLockPort } from "~tracer-api/domain/index/port/advisory.lock.port.js";
+import { SEARCH_INDEX_WRITER, type SearchIndexWriterPort } from "~tracer-api/domain/index/port/search.index.writer.port.js";
+import type { SearchOutboxDrainRepositories } from "~tracer-api/domain/index/port/search.outbox.drain.repository.port.js";
+import {
+    DB_EVENT_CONSUMER,
+    NOTIFICATION_PRODUCER,
+    SEARCH_EVENT_CONSUMER,
+} from "~tracer-api/support/projector.tokens.js";
 
 export interface ProjectorDeps {
     readonly database: TracerDatabase;
+    readonly indexLock: IndexAdvisoryLockPort<SearchOutboxDrainRepositories>;
     readonly producer: KafkaProducer;
     readonly dbEventConsumer: KafkaConsumer;
+    readonly searchEventConsumer: KafkaConsumer;
+    readonly searchIndex: SearchIndexWriterPort;
     readonly clock: IClock;
 }
 
@@ -45,9 +58,16 @@ export class ProjectorModule {
                 KafkaNotificationPublisher,
                 { provide: NOTIFICATION_PRODUCER, useValue: deps.producer },
 
+                IndexSearchUseCase,
+                SearchOutboxDrainUseCase,
+                SearchConsumer,
+                { provide: INDEX_ADVISORY_LOCK, useValue: deps.indexLock },
+                { provide: SEARCH_INDEX_WRITER, useValue: deps.searchIndex },
+
                 { provide: DB_EVENT_CONSUMER, useValue: deps.dbEventConsumer },
+                { provide: SEARCH_EVENT_CONSUMER, useValue: deps.searchEventConsumer },
             ],
-            exports: [DbConsumer],
+            exports: [DbConsumer, SearchConsumer, SearchOutboxDrainUseCase],
         };
     }
 }
