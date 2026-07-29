@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Provider } from "@nestjs/common";
+import { ProjectorModule, type ProjectorDeps } from "./projector.module.js";
 import { TracerApiModule } from "./tracer.api.module.js";
 
 // vitest는 vite의 import.meta.glob을 제공하지만 이 패키지 tsconfig에는 vite 타입이 없다.
@@ -53,10 +54,13 @@ describe("TracerApiModule", () => {
 
         expect(unresolved).toEqual([]);
     });
+});
 
-    it("application 포트가 선언한 주입 토큰을 모두 배선한다", () => {
-        const module = TracerApiModule.forRoot(undefined as never, undefined as never, undefined as never);
-        const provided = providedTokens(module.providers ?? []);
+describe("tracer-api의 두 진입 모듈", () => {
+    it("application 포트가 선언한 주입 토큰을 남김없이 배선한다", () => {
+        const api = TracerApiModule.forRoot(undefined as never, undefined as never, undefined as never);
+        const projector = ProjectorModule.forRoot({ otlp: {} } as unknown as ProjectorDeps);
+        const provided = providedTokens([...api.providers ?? [], ...projector.providers ?? []]);
 
         const unwired = [...declaredPortTokens()]
             .filter(([token]) => !provided.has(token))

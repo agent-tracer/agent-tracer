@@ -11,7 +11,7 @@ import {
 } from "@agent-tracer/platform";
 import { TRACER_ENTITIES } from "@agent-tracer/tracer-model";
 import { TRACER_MIGRATIONS } from "@agent-tracer/tracer-model/migrations/registry.js";
-import { errorMessage, logError, logInfo } from "~tracer-api/config/log.js";
+import { errorMessage, logError, logInfo } from "~tracer-api/support/log.js";
 import { NotificationBroadcaster } from "~tracer-api/config/notification.broadcaster.js";
 import { NotificationConsumer } from "~tracer-api/config/notification.consumer.js";
 import { WsGateway } from "~tracer-api/domain/session/inbound/ws.gateway.js";

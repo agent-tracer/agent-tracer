@@ -2,7 +2,7 @@ import { Injectable, type CallHandler, type ExecutionContext, type NestIntercept
 import type { Request, Response } from "express";
 import type { Observable } from "rxjs";
 import { MONITOR_USER_HEADER } from "@agent-tracer/kernel";
-import { logInfo } from "~tracer-api/config/log.js";
+import { logInfo } from "~tracer-api/support/log.js";
 import { headerValue, routePatternOf } from "~tracer-api/config/http.request.util.js";
 
 /** 요청당 한 줄만 남겨 응답이 실제로 나간 뒤의 최종 상태 코드를 기록한다. */

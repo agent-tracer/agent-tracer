@@ -2,7 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { Client } from "@opensearch-project/opensearch";
 import type { TaskSearchIndexPort } from "~tracer-api/domain/task/port/task.search.index.port.js";
 import { OPENSEARCH_CLIENT, TASKS_INDEX } from "~tracer-api/config/opensearch.client.const.js";
-import { errorMessage, logWarn } from "~tracer-api/config/log.js";
+import { errorMessage, logWarn } from "~tracer-api/support/log.js";
 
 /** OpenSearch SDK를 태스크 검색 색인 쓰기 포트에 맞추는 어댑터다. */
 @Injectable()
