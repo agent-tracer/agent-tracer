@@ -8,7 +8,7 @@ describe("RefreshRuleSettingUsecase", () => {
     it("서버 설정의 규칙 상한을 캐시에 반영한다", async () => {
         const cache = new RuleGenerationSettingCache();
 
-        expect(await new RefreshRuleSettingUsecase(new InMemoryRuleSetting({maxRulesPerTask: 4, model: "claude-haiku-4-5"}), cache).execute()).toEqual({maxRulesPerTask: 4, model: "claude-haiku-4-5"});
+        expect(await new RefreshRuleSettingUsecase(new InMemoryRuleSetting({kind: "found", value: {maxRulesPerTask: 4, model: "claude-haiku-4-5"}}), cache).execute()).toEqual({maxRulesPerTask: 4, model: "claude-haiku-4-5"});
         expect(cache.snapshot().maxRulesPerTask).toBe(4);
     });
 
@@ -26,9 +26,18 @@ describe("RefreshRuleSettingUsecase", () => {
         const cache = new RuleGenerationSettingCache();
         cache.replace({maxRulesPerTask: 3, model: null});
 
-        await new RefreshRuleSettingUsecase(new InMemoryRuleSetting(null), cache).execute();
+        await new RefreshRuleSettingUsecase(new InMemoryRuleSetting({kind: "unavailable"}), cache).execute();
 
         expect(cache.snapshot().maxRulesPerTask).toBe(3);
+        expect(cache.isSupported()).toBe(true);
+    });
+
+    it("설정 창구가 없다는 확답을 받으면 규칙 생성을 접는다", async () => {
+        const cache = new RuleGenerationSettingCache();
+
+        await new RefreshRuleSettingUsecase(new InMemoryRuleSetting({kind: "unsupported"}), cache).execute();
+
+        expect(cache.isSupported()).toBe(false);
     });
 
     it("아무것도 못 읽었으면 기본 상한을 쓴다", () => {

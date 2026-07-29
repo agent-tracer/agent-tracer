@@ -33,6 +33,7 @@ export async function getJson<T>(
         return {kind: "unavailable"};
     }
     if (response.status === 404) return {kind: "absent"};
+    if (response.status === 501) return {kind: "unsupported"};
     if (!response.ok) return {kind: "unavailable"};
     try {
         const parsed: unknown = await response.json();

@@ -5,6 +5,7 @@ import {
     type RuleGenerationSettings,
 } from "~plugin/domain/rulegen/model/rule.command.model.js";
 import type {RuleSettingPort} from "~plugin/domain/rulegen/port/rule.setting.port.js";
+import type {Fetched} from "~plugin/support/fetched.js";
 
 interface SettingsEnvelope {
     readonly data?: {readonly items?: readonly {readonly key: string; readonly maskedValue: string}[]};
@@ -17,15 +18,19 @@ export class HttpRuleSettingAdapter implements RuleSettingPort {
         private readonly headers: Record<string, string>,
     ) {}
 
-    async fetch(): Promise<RuleGenerationSettings | null> {
-        const fetched = await getJson<SettingsEnvelope>(`${this.baseUrl}/api/v1/settings`, this.headers);
-        const items = fetched.kind === "found" ? fetched.value.data?.items : undefined;
-        if (items === undefined) return null;
+    async fetch(): Promise<Fetched<RuleGenerationSettings>> {
+        const fetched = await getJson<SettingsEnvelope>(`${this.baseUrl}/api/agent/settings`, this.headers);
+        if (fetched.kind !== "found") return fetched;
+        const items = fetched.value.data?.items;
+        if (items === undefined) return {kind: "unavailable"};
         const maxRules = items.find((item) => item.key === APP_SETTING_KEYS.ruleGenMaxRulesPerTask);
         const model = items.find((item) => item.key === APP_SETTING_KEYS.anthropicModel);
         return {
-            maxRulesPerTask: parseMaxRulesPerTask(maxRules?.maskedValue),
-            model: model?.maskedValue.trim() || null,
+            kind: "found",
+            value: {
+                maxRulesPerTask: parseMaxRulesPerTask(maxRules?.maskedValue),
+                model: model?.maskedValue.trim() || null,
+            },
         };
     }
 }

@@ -1,8 +1,9 @@
 import {afterEach, describe, expect, it, vi} from "vitest";
-import {resolveTimeoutSignal} from "~plugin/config/http.js";
+import {getJson, resolveTimeoutSignal} from "~plugin/config/http.js";
 
 afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
 });
 
 describe("resolveTimeoutSignal", () => {
@@ -22,5 +23,21 @@ describe("resolveTimeoutSignal", () => {
 
         expect(resolved).toBe(controller.signal);
         expect(timeoutSpy).not.toHaveBeenCalled();
+    });
+});
+
+describe("getJson", () => {
+    it("501은 그 창구가 배포에 없다는 확답으로 읽는다", async () => {
+        vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", {status: 501})));
+
+        expect(await getJson("http://127.0.0.1:3847/api/agent/settings", {})).toEqual({kind: "unsupported"});
+    });
+
+    it("404는 자원이 없다는 확답이고 그 밖의 실패는 확답이 아니다", async () => {
+        vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", {status: 404})));
+        expect(await getJson("http://127.0.0.1:3847/api/v1/recipes/x", {})).toEqual({kind: "absent"});
+
+        vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", {status: 502})));
+        expect(await getJson("http://127.0.0.1:3847/api/v1/recipes/x", {})).toEqual({kind: "unavailable"});
     });
 });

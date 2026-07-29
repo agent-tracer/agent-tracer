@@ -37,18 +37,29 @@ export interface RuleGenerationSettings {
     readonly model: string | null;
 }
 
-/** 갱신 주기 사이에 두 유스케이스가 함께 보는 규칙 생성 설정이다. */
+/** 갱신 주기 사이에 두 유스케이스가 함께 보는 규칙 생성 설정이며 창구가 없다는 확답도 함께 담는다. */
 export class RuleGenerationSettingCache {
     private settings: RuleGenerationSettings = {
         maxRulesPerTask: RULE_GENERATION_MAX_RULES,
         model: null,
     };
+    private supported = true;
 
     snapshot(): RuleGenerationSettings {
         return this.settings;
     }
 
+    /** 설정 창구가 없다고 확인되기 전까지 규칙 생성은 제공된다. */
+    isSupported(): boolean {
+        return this.supported;
+    }
+
     replace(settings: RuleGenerationSettings): void {
         this.settings = settings;
+        this.supported = true;
+    }
+
+    markUnsupported(): void {
+        this.supported = false;
     }
 }

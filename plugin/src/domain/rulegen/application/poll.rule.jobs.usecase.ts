@@ -50,6 +50,7 @@ export class PollRuleJobsUsecase {
     }
 
     async execute(): Promise<void> {
+        if (!this.settings.isSupported()) return;
         let pending: readonly PendingRuleJob[];
         try {
             pending = await this.jobs.pendingJobs();

@@ -48,6 +48,18 @@ afterEach(() => {
 });
 
 describe("PollRuleJobsUsecase", () => {
+    it("설정 창구가 없는 배포에서는 잡을 집어 가지 않는다", async () => {
+        const jobs = withWorkspace(new InMemoryRuleJob([jobWith({})]));
+        const spy = spyRunner();
+        const cache = settingCache();
+        cache.markUnsupported();
+
+        await new PollRuleJobsUsecase(jobs, spy.runner, new ManualScheduler(), cache).execute();
+
+        expect(jobs.claimed).toEqual([]);
+        expect(spy.requests).toEqual([]);
+    });
+
     it("pending 잡을 클레임한 뒤 입력의 초점과 규칙 상한을 실행기에 넘긴다", async () => {
         vi.spyOn(process.stderr, "write").mockReturnValue(true);
         const jobs = withWorkspace(new InMemoryRuleJob([
