@@ -1,0 +1,29 @@
+import { describe, expect, it } from "vitest";
+import type { TimelineEventRecord } from "~tracer-web/entities/task/model/timeline/event.js";
+import { laneThemeFor, laneThemeForEvent } from "~tracer-web/entities/task/model/lane-theme.js";
+
+describe("타임라인 레인 테마", () => {
+  it("서버 레인을 화면 레인과 테마 토큰으로 매핑한다", () => {
+    expect(laneThemeFor("exploration")).toEqual({
+      key: "expl",
+      label: "EXPL",
+      cssColor: "var(--ph-expl)",
+    });
+    expect(laneThemeFor("questions").key).toBe("rule");
+  });
+
+  it("어시스턴트 레인을 사용자 레인과 다른 화면 레인으로 가른다", () => {
+    expect(laneThemeFor("assistant")).toEqual({
+      key: "asst",
+      label: "ASST",
+      cssColor: "var(--ph-asst)",
+    });
+    expect(laneThemeFor("user").key).toBe("user");
+  });
+
+  it("이벤트는 자기 서버 레인의 테마를 받는다", () => {
+    const event = { lane: "implementation" } as TimelineEventRecord;
+
+    expect(laneThemeForEvent(event)).toEqual(laneThemeFor("implementation"));
+  });
+});
