@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, test, vi } from "vitest";
-import { AI_AGENT_BACKEND, JOB_KIND } from "~tracer-web/entities/job/model/job.js";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { JOB_KIND } from "~tracer-web/entities/job/model/job.js";
 import { TaskId } from "~tracer-web/shared/identity.js";
 import type { GenerateRulesJobStatus } from "~tracer-web/entities/job/model/rule-generation.js";
 import { getJson, postJson } from "~tracer-web/shared/api/client/json-methods.js";
@@ -25,7 +25,7 @@ beforeEach(() => {
 });
 
 describe("enqueueJob", () => {
-  test("idempotency key를 요청 본문에 싣는다", async () => {
+  it("idempotency key를 요청 본문에 싣는다", async () => {
     mockPostJson.mockResolvedValue({
       jobId: "job-1",
       status: "pending",
@@ -41,40 +41,16 @@ describe("enqueueJob", () => {
     });
   });
 
-  test("agent backend를 요청 본문 최상위에 싣는다", async () => {
+  it("선택 필드 없이 잡을 접수한다", async () => {
     mockPostJson.mockResolvedValue({
       jobId: "job-1",
       status: "pending",
       createdAt: "2026-01-01T00:00:00.000Z",
     });
 
-    await enqueueJob(
-      JOB_KIND.recipeScan,
-      { taskId: "task-1" },
-      { agentBackend: AI_AGENT_BACKEND.claudeSdk },
-    );
+    await enqueueJob(JOB_KIND.recipeScan, { taskId: "task-1" });
 
     expect(mockPostJson).toHaveBeenCalledWith("/api/v1/jobs", {
-      kind: JOB_KIND.recipeScan,
-      input: { taskId: "task-1" },
-      agentBackend: AI_AGENT_BACKEND.claudeSdk,
-    });
-  });
-
-  test("python 백엔드는 본문이 아니라 쿼리로 Graph 축 자기 접수 경로에 보낸다", async () => {
-    mockPostJson.mockResolvedValue({
-      jobId: "job-1",
-      status: "pending",
-      createdAt: "2026-01-01T00:00:00.000Z",
-    });
-
-    await enqueueJob(
-      JOB_KIND.recipeScan,
-      { taskId: "task-1" },
-      { agentBackend: AI_AGENT_BACKEND.python },
-    );
-
-    expect(mockPostJson).toHaveBeenCalledWith("/api/v1/jobs?backend=python", {
       kind: JOB_KIND.recipeScan,
       input: { taskId: "task-1" },
     });
@@ -82,25 +58,17 @@ describe("enqueueJob", () => {
 });
 
 describe("cancelJob", () => {
-  test("Graph 축 자기 접수로 돈 잡은 취소도 같은 쿼리로 보낸다", async () => {
+  it("잡 식별자만 받아 고정 경로로 취소한다", async () => {
     mockPostJson.mockResolvedValue({ job: { id: "job-1" } });
 
-    await cancelJob({ id: "job-1", input: { agentBackend: AI_AGENT_BACKEND.python } });
-
-    expect(mockPostJson).toHaveBeenCalledWith("/api/v1/jobs/job-1/cancel?backend=python", {});
-  });
-
-  test("다리 경로로 돈 잡은 쿼리 없이 취소한다", async () => {
-    mockPostJson.mockResolvedValue({ job: { id: "job-1" } });
-
-    await cancelJob({ id: "job-1", input: {} });
+    await cancelJob({ id: "job-1" });
 
     expect(mockPostJson).toHaveBeenCalledWith("/api/v1/jobs/job-1/cancel", {});
   });
 });
 
 describe("fetchLatestJob", () => {
-  test("서버 JobDto의 result와 usage를 화면용 잡 상태로 정규화한다", async () => {
+  it("서버 JobDto의 result와 usage를 화면용 잡 상태로 정규화한다", async () => {
     mockGetJson.mockResolvedValue({
       job: {
         id: "job-1",
@@ -141,7 +109,7 @@ describe("fetchLatestJob", () => {
 });
 
 describe("fetchJobEvidence", () => {
-  test("잡 상세와 trajectory를 인코딩된 잡 경로로 조회한다", async () => {
+  it("잡 상세와 trajectory를 인코딩된 잡 경로로 조회한다", async () => {
     mockGetJson
       .mockResolvedValueOnce({ job: { id: "job/1" } })
       .mockResolvedValueOnce([{

@@ -1,8 +1,8 @@
-import type { AiAgentBackend, JobKind, JobStatus } from "@agent-tracer/kernel";
-import { AI_AGENT_BACKEND, JOB_BACKEND_QUERY_PARAM, JOB_KIND, JOB_STATUS } from "@agent-tracer/kernel";
+import type { JobKind, JobStatus } from "@agent-tracer/kernel";
+import { JOB_KIND, JOB_STATUS } from "@agent-tracer/kernel";
 
-export type { AiAgentBackend, JobKind, JobStatus };
-export { AI_AGENT_BACKEND, JOB_BACKEND_QUERY_PARAM, JOB_KIND, JOB_STATUS };
+export type { JobKind, JobStatus };
+export { JOB_KIND, JOB_STATUS };
 
 export const JOB_STATUSES: readonly JobStatus[] = Object.values(JOB_STATUS);
 
@@ -18,10 +18,6 @@ export interface JobStatusBase {
   readonly updatedAt: string;
   readonly startedAt: string | null;
   readonly completedAt: string | null;
-}
-
-export interface AgentBackendJobInput {
-  readonly agentBackend?: AiAgentBackend;
 }
 
 export function isActiveJobStatus(status: JobStatus | undefined): boolean {

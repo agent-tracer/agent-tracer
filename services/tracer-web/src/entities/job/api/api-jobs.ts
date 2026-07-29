@@ -1,10 +1,4 @@
-import {
-  AI_AGENT_BACKEND,
-  JOB_BACKEND_QUERY_PARAM,
-  type AiAgentBackend,
-  type JobKind,
-  type JobStatus,
-} from "~tracer-web/entities/job/model/job.js";
+import type { JobKind, JobStatus } from "~tracer-web/entities/job/model/job.js";
 import type { TaskId } from "~tracer-web/shared/identity.js";
 import type { AiJobStepList, JobDto, JobListDto } from "@agent-tracer/kernel";
 import { getJson, postJson } from "~tracer-web/shared/api/client/json-methods.js";
@@ -20,22 +14,17 @@ export interface JobEnqueueResponse {
 
 export interface EnqueueJobOptions {
   readonly idempotencyKey?: string;
-  readonly agentBackend?: AiAgentBackend;
 }
 
-// 잡을 큐에 넣으며, python 선택은 본문이 아니라 edge가 보는 쿼리로 Graph 축 자기 접수 경로에 보낸다.
 export function enqueueJob<TInput>(
   kind: JobKind,
   input: TInput,
   options: EnqueueJobOptions = {},
 ): Promise<JobEnqueueResponse> {
-  const routeToGraph = options.agentBackend === AI_AGENT_BACKEND.python;
-  const query = routeToGraph ? `?${JOB_BACKEND_QUERY_PARAM}=${encodeURIComponent(options.agentBackend ?? "")}` : "";
-  return postJson<JobEnqueueResponse>(`/api/v1/jobs${query}`, {
+  return postJson<JobEnqueueResponse>("/api/v1/jobs", {
     kind,
     input,
     ...(options.idempotencyKey !== undefined ? { idempotencyKey: options.idempotencyKey } : {}),
-    ...(!routeToGraph && options.agentBackend !== undefined ? { agentBackend: options.agentBackend } : {}),
   });
 }
 
@@ -80,11 +69,7 @@ export async function fetchJobHistory(
   return getJson<JobListDto>(`/api/v1/jobs/history${query ? `?${query}` : ""}`);
 }
 
-// Graph 축 자기 접수 경로로 돈 잡은 취소도 그 경로로 가야 하므로, 접수 때 실은
-// agentBackend 표식을 잡 본문에서 되읽어 같은 쿼리로 되돌린다.
-export async function cancelJob(job: Pick<JobDto, "id" | "input">): Promise<JobDto> {
-  const agentBackend = job.input["agentBackend"];
-  const query = agentBackend === AI_AGENT_BACKEND.python ? `?${JOB_BACKEND_QUERY_PARAM}=${agentBackend}` : "";
-  const res = await postJson<{ readonly job: JobDto }>(`/api/v1/jobs/${job.id}/cancel${query}`, {});
+export async function cancelJob(job: Pick<JobDto, "id">): Promise<JobDto> {
+  const res = await postJson<{ readonly job: JobDto }>(`/api/v1/jobs/${job.id}/cancel`, {});
   return res.job;
 }

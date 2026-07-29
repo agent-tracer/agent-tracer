@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 import type { JobDto } from "@agent-tracer/kernel";
-import type { AiAgentBackend, JobKind } from "~tracer-web/entities/job/model/job.js";
+import type { JobKind } from "~tracer-web/entities/job/model/job.js";
 import { cancelJob, enqueueJob } from "~tracer-web/entities/job/api/api-jobs.js";
 import { monitorQueryKeys } from "~tracer-web/shared/api/query-keys.js";
 
@@ -10,14 +10,10 @@ export function useEnqueueJob<TInput>(kind: JobKind) {
   const idempotencyKeysRef = useRef(new Map<string, { key: string; inFlight: number }>());
   return useMutation({
     mutationFn: async (input: TInput) => {
-      const { jobInput, agentBackend } = splitAgentBackend(input);
-      const signature = createJobSubmissionSignature(kind, { input: jobInput, agentBackend });
+      const signature = createJobSubmissionSignature(kind, input);
       const idempotencyKey = acquireIdempotencyKey(idempotencyKeysRef.current, kind, signature);
       try {
-        return await enqueueJob(kind, jobInput, {
-          idempotencyKey,
-          ...(agentBackend !== undefined ? { agentBackend } : {}),
-        });
+        return await enqueueJob(kind, input, { idempotencyKey });
       } finally {
         releaseIdempotencyKey(idempotencyKeysRef.current, signature, idempotencyKey);
       }
@@ -33,7 +29,7 @@ export function useEnqueueJob<TInput>(kind: JobKind) {
 export function useCancelJobMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (job: Pick<JobDto, "id" | "input">) => cancelJob(job),
+    mutationFn: (job: Pick<JobDto, "id">) => cancelJob(job),
     onSuccess: (job) => {
       void queryClient.invalidateQueries({ queryKey: monitorQueryKeys.jobsHistoryPrefix() });
       void queryClient.invalidateQueries({ queryKey: monitorQueryKeys.job(job.id) });
@@ -42,20 +38,6 @@ export function useCancelJobMutation() {
       });
     },
   });
-}
-
-function splitAgentBackend<TInput>(input: TInput): {
-  readonly jobInput: TInput;
-  readonly agentBackend?: AiAgentBackend;
-} {
-  if (typeof input !== "object" || input === null || !("agentBackend" in input)) {
-    return { jobInput: input };
-  }
-  const { agentBackend, ...rest } = input as TInput & { readonly agentBackend?: AiAgentBackend };
-  return {
-    jobInput: rest as TInput,
-    ...(agentBackend !== undefined ? { agentBackend } : {}),
-  };
 }
 
 function createJobSubmissionSignature(kind: JobKind, input: unknown): string {
