@@ -9,7 +9,7 @@ import { federation } from "@module-federation/vite";
 import { resolveViteMonitorConfig } from "./src/shared/config/vite-monitor-config.js";
 
 // 연합 리모트가 원격 진입점으로 고정해 쓰는 경로다.
-const AGENT_REMOTE_MOUNT_PATH = "/remote/agent";
+const AGENT_REMOTE_MOUNT_PATH = "/agent";
 
 const PACKAGE_ROOT = fileURLToPath(new URL(".", import.meta.url));
 

@@ -30,7 +30,7 @@ describe("enqueueJob", () => {
 
     await enqueueJob(JOB_KIND.recipeScan, { filters: {} }, { idempotencyKey: "scan-click-1" });
 
-    expect(mockPostJson).toHaveBeenCalledWith("/api/v1/jobs", {
+    expect(mockPostJson).toHaveBeenCalledWith("/api/agent/jobs", {
       kind: JOB_KIND.recipeScan,
       input: { filters: {} },
       idempotencyKey: "scan-click-1",
@@ -42,7 +42,7 @@ describe("enqueueJob", () => {
 
     await enqueueJob(JOB_KIND.recipeScan, { taskId: "task-1" });
 
-    expect(mockPostJson).toHaveBeenCalledWith("/api/v1/jobs", {
+    expect(mockPostJson).toHaveBeenCalledWith("/api/agent/jobs", {
       kind: JOB_KIND.recipeScan,
       input: { taskId: "task-1" },
     });
@@ -55,7 +55,7 @@ describe("cancelJob", () => {
 
     await cancelJob({ id: "job-1" });
 
-    expect(mockPostJson).toHaveBeenCalledWith("/api/v1/jobs/job-1/cancel", {});
+    expect(mockPostJson).toHaveBeenCalledWith("/api/agent/jobs/job-1/cancel", {});
   });
 });
 
@@ -87,7 +87,7 @@ describe("fetchLatestJob", () => {
     );
 
     expect(mockGetJson).toHaveBeenCalledWith(
-      "/api/v1/jobs/latest?kind=rule.generation&taskId=task-1",
+      "/api/agent/jobs/latest?kind=rule.generation&taskId=task-1",
     );
     expect(res.job).toMatchObject({
       id: "job-1",
@@ -115,8 +115,8 @@ describe("fetchJobEvidence", () => {
     const job = await fetchJob("job/1");
     const steps = await fetchJobSteps("job/1");
 
-    expect(mockGetJson).toHaveBeenNthCalledWith(1, "/api/v1/jobs/job%2F1");
-    expect(mockGetJson).toHaveBeenNthCalledWith(2, "/api/v1/jobs/job%2F1/steps");
+    expect(mockGetJson).toHaveBeenNthCalledWith(1, "/api/agent/jobs/job%2F1");
+    expect(mockGetJson).toHaveBeenNthCalledWith(2, "/api/agent/jobs/job%2F1/steps");
     expect(job.job.id).toBe("job/1");
     expect(steps[0]?.content).toBe("Inspect task evidence");
   });

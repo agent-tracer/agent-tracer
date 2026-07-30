@@ -6,6 +6,9 @@ import { toJobStatus } from "~tracer-web/entities/job/api/job.mapper.js";
 
 // ─── Jobs (통합 비동기 잡) ─────────────────────────────────────────────────
 
+// 잡은 에이전트 서비스가 소유하므로 게이트웨이의 에이전트 접두사 아래로 부른다.
+const JOBS = "/api/agent/jobs";
+
 export interface JobEnqueueResponse {
   readonly job: JobDto;
 }
@@ -19,7 +22,7 @@ export function enqueueJob<TInput>(
   input: TInput,
   options: EnqueueJobOptions = {},
 ): Promise<JobEnqueueResponse> {
-  return postJson<JobEnqueueResponse>("/api/v1/jobs", {
+  return postJson<JobEnqueueResponse>(JOBS, {
     kind,
     input,
     ...(options.idempotencyKey !== undefined ? { idempotencyKey: options.idempotencyKey } : {}),
@@ -27,11 +30,11 @@ export function enqueueJob<TInput>(
 }
 
 export function fetchJob(jobId: string): Promise<{ readonly job: JobDto }> {
-  return getJson<{ readonly job: JobDto }>(`/api/v1/jobs/${encodeURIComponent(jobId)}`);
+  return getJson<{ readonly job: JobDto }>(`${JOBS}/${encodeURIComponent(jobId)}`);
 }
 
 export function fetchJobSteps(jobId: string): Promise<AiJobStepList> {
-  return getJson<AiJobStepList>(`/api/v1/jobs/${encodeURIComponent(jobId)}/steps`);
+  return getJson<AiJobStepList>(`${JOBS}/${encodeURIComponent(jobId)}/steps`);
 }
 
 // 종류별 최신 잡 상태.
@@ -42,7 +45,7 @@ export async function fetchLatestJob<T>(
   const params = new URLSearchParams({ kind });
   if (options?.taskId) params.set("taskId", options.taskId);
   const res = await getJson<{ readonly job: JobDto | null }>(
-    `/api/v1/jobs/latest?${params.toString()}`,
+    `${JOBS}/latest?${params.toString()}`,
   );
   return { job: res.job !== null ? (toJobStatus(res.job) as T) : null };
 }
@@ -64,10 +67,10 @@ export async function fetchJobHistory(
   if (options.limit !== undefined) params.set("limit", String(options.limit));
   if (options.offset !== undefined) params.set("offset", String(options.offset));
   const query = params.toString();
-  return getJson<JobListDto>(`/api/v1/jobs/history${query ? `?${query}` : ""}`);
+  return getJson<JobListDto>(`${JOBS}/history${query ? `?${query}` : ""}`);
 }
 
 export async function cancelJob(job: Pick<JobDto, "id">): Promise<JobDto> {
-  const res = await postJson<{ readonly job: JobDto }>(`/api/v1/jobs/${job.id}/cancel`, {});
+  const res = await postJson<{ readonly job: JobDto }>(`${JOBS}/${job.id}/cancel`, {});
   return res.job;
 }
