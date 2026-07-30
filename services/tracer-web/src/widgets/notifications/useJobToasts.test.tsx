@@ -2,20 +2,20 @@ import { act, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { JOB_KIND, JOB_STATUS } from "~tracer-web/entities/job/model/job.js";
 import type { MonitorRealtimeMessage } from "~tracer-web/app/realtime/messages.js";
-import { useSdkJobToasts } from "~tracer-web/widgets/notifications/useSdkJobToasts.js";
+import { useJobToasts } from "~tracer-web/widgets/notifications/useJobToasts.js";
 import { useToastStore } from "~tracer-web/widgets/notifications/toastStore.js";
 
 afterEach(() => {
   useToastStore.getState().clear();
 });
 
-describe("useSdkJobToasts", () => {
+describe("useJobToasts", () => {
   it("서버 계약의 제목 제안 완료 알림을 사람이 읽는 제목으로 표시한다", () => {
-    const { result } = renderHook(() => useSdkJobToasts());
+    const { result } = renderHook(() => useJobToasts());
 
     act(() => {
       result.current({
-        type: "sdk_job.updated",
+        type: "job.updated",
         payload: {
           jobId: "job-1",
           kind: "title.suggestion",
@@ -33,7 +33,7 @@ describe("useSdkJobToasts", () => {
   });
 
   it("모든 SDK 잡 종류의 완료 알림을 사람이 읽는 제목으로 표시한다", () => {
-    const { result } = renderHook(() => useSdkJobToasts());
+    const { result } = renderHook(() => useJobToasts());
     const cases = [
       [JOB_KIND.titleSuggestion, "Title suggestion complete"],
       [JOB_KIND.taskCleanup, "Task cleanup complete"],
@@ -44,7 +44,7 @@ describe("useSdkJobToasts", () => {
     for (const [kind, title] of cases) {
       act(() => {
         result.current({
-          type: "sdk_job.updated",
+          type: "job.updated",
           payload: { kind, status: JOB_STATUS.completed, summary: title },
         } satisfies MonitorRealtimeMessage);
       });
@@ -56,15 +56,15 @@ describe("useSdkJobToasts", () => {
   });
 
   it("진행 전/진행 중 잡 알림은 토스트로 표시하지 않는다", () => {
-    const { result } = renderHook(() => useSdkJobToasts());
+    const { result } = renderHook(() => useJobToasts());
 
     act(() => {
       result.current({
-        type: "sdk_job.updated",
+        type: "job.updated",
         payload: { kind: JOB_KIND.recipeScan, status: JOB_STATUS.pending },
       } satisfies MonitorRealtimeMessage);
       result.current({
-        type: "sdk_job.updated",
+        type: "job.updated",
         payload: { kind: JOB_KIND.recipeScan, status: JOB_STATUS.running },
       } satisfies MonitorRealtimeMessage);
     });
@@ -73,11 +73,11 @@ describe("useSdkJobToasts", () => {
   });
 
   it("실패 알림을 에러 토스트로 표시한다", () => {
-    const { result } = renderHook(() => useSdkJobToasts());
+    const { result } = renderHook(() => useJobToasts());
 
     act(() => {
       result.current({
-        type: "sdk_job.updated",
+        type: "job.updated",
         payload: {
           kind: JOB_KIND.taskCleanup,
           status: JOB_STATUS.failed,

@@ -24,13 +24,9 @@ export interface RulesChangedPayload {
     readonly taskId?: string;
 }
 
-export type SdkJobKind = JobKind;
-
-export type SdkJobStatus = JobStatus;
-
-export interface SdkJobUpdatedPayload {
-    readonly kind: SdkJobKind;
-    readonly status: SdkJobStatus;
+export interface JobUpdatedPayload {
+    readonly kind: JobKind;
+    readonly status: JobStatus;
     readonly taskId?: string;
     readonly jobId?: string;
     readonly summary?: string;
@@ -67,8 +63,8 @@ export type MonitorRealtimeMessage = {
     readonly type: "rules.changed";
     readonly payload: RulesChangedPayload;
 } | {
-    readonly type: "sdk_job.updated";
-    readonly payload: SdkJobUpdatedPayload;
+    readonly type: "job.updated";
+    readonly payload: JobUpdatedPayload;
 };
 export function parseRealtimeMessage(raw: string): MonitorRealtimeMessage | null {
     try {
