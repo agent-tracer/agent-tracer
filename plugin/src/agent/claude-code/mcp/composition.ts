@@ -16,6 +16,7 @@ import {HttpRecipeFetchAdapter} from "~plugin/domain/recipe/adapter/http.recipe.
 import {HttpRecipeOutcomeReportAdapter} from "~plugin/domain/recipe/adapter/http.recipe.outcome.report.adapter.js";
 import {HttpRecipeScanJobAdapter} from "~plugin/domain/recipe/adapter/http.recipe.scan.job.adapter.js";
 import {HttpRecipeSearchAdapter} from "~plugin/domain/recipe/adapter/http.recipe.search.adapter.js";
+import {CheckRecipeScanAvailabilityUsecase} from "~plugin/domain/recipe/application/check.recipe.scan.availability.usecase.js";
 import {ClearRecipeMarkUsecase} from "~plugin/domain/recipe/application/clear.recipe.mark.usecase.js";
 import {GetRecipeUsecase} from "~plugin/domain/recipe/application/get.recipe.usecase.js";
 import {MarkRecipeOpenedUsecase} from "~plugin/domain/recipe/application/mark.recipe.opened.usecase.js";
@@ -35,9 +36,11 @@ const headers = monitorUserHeaders(identity);
 const clock = {now: (): number => Date.now()};
 const ids: IdGeneratorPort = {next: generateUlid};
 
+const recipeScanJobs = new HttpRecipeScanJobAdapter(baseUrl, headers);
 const recipe: RecipeHook = {
     getRecipe: new GetRecipeUsecase(new HttpRecipeFetchAdapter(baseUrl, headers)),
-    requestScan: new RequestRecipeScanUsecase(new HttpRecipeScanJobAdapter(baseUrl, headers)),
+    requestScan: new RequestRecipeScanUsecase(recipeScanJobs),
+    checkScanAvailable: new CheckRecipeScanAvailabilityUsecase(recipeScanJobs),
     reportOutcome: new ReportRecipeOutcomeUsecase(new HttpRecipeOutcomeReportAdapter(baseUrl, headers)),
     searchRecipes: new SearchRecipesUsecase(new HttpRecipeSearchAdapter(baseUrl, headers)),
 };

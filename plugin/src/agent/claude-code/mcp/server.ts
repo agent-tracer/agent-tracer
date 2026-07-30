@@ -1,6 +1,6 @@
 /** Claude Code가 세션마다 띄우는 stdio MCP 서버 진입점이며 모든 도구가 서버를 직접 호출한다. */
 import {resolveDaemonVersion} from "~plugin/daemon/lifecycle/daemon.health.js";
-import {callTool, MCP_TOOLS} from "~plugin/agent/claude-code/mcp/tool.dispatch.js";
+import {callTool, resolveAvailableTools} from "~plugin/agent/claude-code/mcp/tool.dispatch.js";
 import {readJsonRpcRequests, writeJsonRpcMessage, type JsonRpcRequest} from "~plugin/agent/claude-code/mcp/rpc.js";
 import {isRecord} from "~plugin/support/json.js";
 
@@ -45,7 +45,7 @@ function handleRequest(request: JsonRpcRequest): void {
             });
             return;
         case "tools/list":
-            respond(id, {tools: MCP_TOOLS});
+            void resolveAvailableTools().then((tools) => respond(id, {tools}));
             return;
         case "tools/call": {
             const params = isRecord(request.params) ? request.params : {};

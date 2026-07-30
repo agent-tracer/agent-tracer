@@ -35,6 +35,7 @@ import {GetRecipeUsecase} from "~plugin/domain/recipe/application/get.recipe.use
 import {MarkRecipeOpenedUsecase} from "~plugin/domain/recipe/application/mark.recipe.opened.usecase.js";
 import {ReadPendingRecipeMarkUsecase} from "~plugin/domain/recipe/application/read.pending.recipe.mark.usecase.js";
 import {ReportRecipeOutcomeUsecase} from "~plugin/domain/recipe/application/report.recipe.outcome.usecase.js";
+import {CheckRecipeScanAvailabilityUsecase} from "~plugin/domain/recipe/application/check.recipe.scan.availability.usecase.js";
 import {RequestRecipeScanUsecase} from "~plugin/domain/recipe/application/request.recipe.scan.usecase.js";
 import {SearchRecipesUsecase} from "~plugin/domain/recipe/application/search.recipes.usecase.js";
 import type {RecipeHook, RecipeOutcomeMarkHook} from "~plugin/domain/recipe/inbound/recipe.hook.js";
@@ -100,6 +101,7 @@ const binding: BindingHook = {
 const recipe: RecipeHook = {
     getRecipe: new GetRecipeUsecase(new HttpRecipeFetchAdapter(transport.baseUrl, headers)),
     requestScan: new RequestRecipeScanUsecase(recipeJobs),
+    checkScanAvailable: new CheckRecipeScanAvailabilityUsecase(recipeJobs),
     reportOutcome: new ReportRecipeOutcomeUsecase(new HttpRecipeOutcomeReportAdapter(transport.baseUrl, headers)),
     searchRecipes: new SearchRecipesUsecase(new HttpRecipeSearchAdapter(transport.baseUrl, headers)),
 };

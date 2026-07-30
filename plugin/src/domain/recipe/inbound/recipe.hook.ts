@@ -1,3 +1,4 @@
+import type {CheckRecipeScanAvailabilityUsecase} from "~plugin/domain/recipe/application/check.recipe.scan.availability.usecase.js";
 import type {ClearRecipeMarkUsecase} from "~plugin/domain/recipe/application/clear.recipe.mark.usecase.js";
 import type {GetRecipeUsecase} from "~plugin/domain/recipe/application/get.recipe.usecase.js";
 import type {MarkRecipeOpenedUsecase} from "~plugin/domain/recipe/application/mark.recipe.opened.usecase.js";
@@ -17,6 +18,7 @@ import type {Fetched} from "~plugin/support/fetched.js";
 export interface RecipeHook {
     readonly getRecipe: GetRecipeUsecase;
     readonly requestScan: RequestRecipeScanUsecase;
+    readonly checkScanAvailable: CheckRecipeScanAvailabilityUsecase;
     readonly reportOutcome: ReportRecipeOutcomeUsecase;
     readonly searchRecipes: SearchRecipesUsecase;
 }
@@ -41,6 +43,10 @@ export function onRecipeSearchRequested(
 
 export function onRecipeScanRequested(hook: RecipeHook, request: RecipeScanRequest): Promise<boolean> {
     return hook.requestScan.execute(request);
+}
+
+export function onRecipeScanAvailabilityRequested(hook: RecipeHook): Promise<boolean> {
+    return hook.checkScanAvailable.execute();
 }
 
 export function onRecipeOutcomeReported(
