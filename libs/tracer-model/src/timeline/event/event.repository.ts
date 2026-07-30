@@ -95,6 +95,10 @@ export class EventRepository implements EventReader {
         return this.repo.find({ where: { id: In(ids) } });
     }
 
+    async findById(userId: string, id: string): Promise<EventEntity | null> {
+        return this.repo.findOne({ where: { userId, id } });
+    }
+
     // 페이지 하나가 잘라낸 부분집합인지 판단할 전체 개수이며, 페이지 쿼리와 분리해 상한 없이 센다.
     async countByTask(userId: string, taskId: string): Promise<number> {
         return this.repo.count({ where: { userId, taskId } });
