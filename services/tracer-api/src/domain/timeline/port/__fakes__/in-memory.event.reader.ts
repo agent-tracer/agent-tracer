@@ -30,6 +30,10 @@ export class InMemoryTimelineEventReader implements TimelineEventReaderPort {
         return Promise.resolve(this.ownedBy(userId, taskId).length);
     }
 
+    findById(userId: string, id: string): Promise<EventEntity | null> {
+        return Promise.resolve(this.rows.find((event) => event.id === id && event.userId === userId) ?? null);
+    }
+
     findTimelineWindow(userId: string, taskId: string, cursor: string | undefined, limit: number): Promise<EventEntity[]> {
         const page = this.ownedBy(userId, taskId)
             .filter((event) => cursor === undefined || BigInt(event.seq) < BigInt(cursor))

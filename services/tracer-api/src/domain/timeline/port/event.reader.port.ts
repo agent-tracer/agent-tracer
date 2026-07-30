@@ -14,4 +14,6 @@ export interface TimelineEventReaderPort {
     /** 커서보다 이른 이벤트를 seq 내림차순으로 준다. */
     findTimelineWindow(userId: string, taskId: string, cursor: string | undefined, limit: number): Promise<EventEntity[]>;
     countByTask(userId: string, taskId: string): Promise<number>;
+    /** 이 사용자의 이벤트 하나를 준다. */
+    findById(userId: string, id: string): Promise<EventEntity | null>;
 }
