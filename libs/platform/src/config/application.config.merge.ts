@@ -27,13 +27,6 @@ export function mergeApplicationConfig(
     const projector = section(merged, "projector");
     const user = env["POSTGRES_USER"] ?? "monitor";
     const password = env["POSTGRES_PASSWORD"] ?? "monitor";
-    // 잡·채팅·생성 워커만 이 깃발을 세워 최소 권한 역할로 붙고 나머지는 그대로 관리자 계정을 쓴다.
-    const tracerDbUser = env["TRACER_DB_CONNECTION_ROLE"] === "worker"
-        ? env["AGENT_DB_EXECUTION_USER"] ?? user
-        : user;
-    const tracerDbPassword = env["TRACER_DB_CONNECTION_ROLE"] === "worker"
-        ? env["AGENT_DB_EXECUTION_PASSWORD"] ?? password
-        : password;
     const brokersEnv = env["KAFKA_BROKERS"];
     const brokers = brokersEnv
         ? brokersEnv.split(",").map((broker) => broker.trim()).filter(Boolean)
@@ -56,8 +49,8 @@ export function mergeApplicationConfig(
         tracerDb: {
             host: env["TRACER_DB_HOST"] ?? (tracerDb["host"] as string | undefined) ?? "127.0.0.1",
             port: envInt(env, "TRACER_DB_PORT", (tracerDb["port"] as number | undefined) ?? 5433),
-            username: tracerDbUser,
-            password: tracerDbPassword,
+            username: user,
+            password,
             database: (tracerDb["database"] as string | undefined) ?? "tracer",
         },
         kafka: { brokers },
