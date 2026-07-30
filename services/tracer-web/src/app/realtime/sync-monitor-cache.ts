@@ -67,7 +67,7 @@ export function syncMonitorCache(
     case "rules.changed":
       syncRulesChange(client, message.payload.taskId);
       return;
-    case "sdk_job.updated":
+    case "job.updated":
       invalidate(
         client,
         monitorQueryKeys.jobsHistoryPrefix(),

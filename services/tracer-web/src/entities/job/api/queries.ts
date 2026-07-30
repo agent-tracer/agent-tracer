@@ -33,7 +33,7 @@ export interface JobHistoryFilters {
   readonly offset?: number;
 }
 
-// WS `sdk_job.updated`가 빠른 경로다.
+// WS `job.updated`가 빠른 경로다.
 export function useJobsHistoryQuery(filters: JobHistoryFilters = {}): UseQueryResult<JobListDto> {
   const limit = filters.limit ?? 50;
   const offset = filters.offset ?? 0;

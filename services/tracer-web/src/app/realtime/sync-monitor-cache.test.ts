@@ -36,7 +36,7 @@ describe("syncMonitorCache", () => {
     const invalidate = vi.spyOn(client, "invalidateQueries");
 
     syncMonitorCache(client, {
-      type: "sdk_job.updated",
+      type: "job.updated",
       payload: {
         kind: JOB_KIND.recipeScan,
         status: JOB_STATUS.completed,

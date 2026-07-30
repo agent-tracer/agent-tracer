@@ -21,7 +21,7 @@ import {
   useThemeAttrSync,
 } from "~tracer-web/shared/store/index.js";
 import { Toaster } from "~tracer-web/widgets/notifications/Toaster.js";
-import { useSdkJobToasts } from "~tracer-web/widgets/notifications/useSdkJobToasts.js";
+import { useJobToasts } from "~tracer-web/widgets/notifications/useJobToasts.js";
 import { CompactAppLayout } from "~tracer-web/app/layout/CompactAppLayout.js";
 import { ShortcutsOverlay } from "~tracer-web/app/layout/ShortcutsOverlay.js";
 import { WideAppLayout } from "~tracer-web/app/layout/WideAppLayout.js";
@@ -36,7 +36,7 @@ export function AppShell() {
   const selectedTaskId = useSelectedTaskId();
   const viewport = useViewport();
   const [wsConnected, setWsConnected] = useState(false);
-  const onSdkJobMessage = useSdkJobToasts();
+  const onJobMessage = useJobToasts();
   const sidebarWidth = useSidebarWidth();
   const inspectorWidth = useInspectorWidth();
   const setSidebarWidth = useSetSidebarWidth();
@@ -54,7 +54,7 @@ export function AppShell() {
     url: getMonitorWsUrl(),
     selectedTaskId,
     onConnectionChange: setWsConnected,
-    onMessage: onSdkJobMessage,
+    onMessage: onJobMessage,
   });
 
   useEffect(() => {
