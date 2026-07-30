@@ -75,32 +75,16 @@ describe("loadApplicationConfig", () => {
         expect(() => loadApplicationConfig()).toThrow();
     });
 
-    it("TRACER_DB_CONNECTION_ROLE=worker일 때만 tracerDb가 최소 권한 역할 자격으로 붙는다", async () => {
+    it("두 데이터베이스에 같은 앱 계정으로 연결한다", async () => {
         provideYaml({});
         vi.stubEnv("POSTGRES_USER", "root");
         vi.stubEnv("POSTGRES_PASSWORD", "root-secret");
-        vi.stubEnv("AGENT_DB_EXECUTION_USER", "agent_execution_writer");
-        vi.stubEnv("AGENT_DB_EXECUTION_PASSWORD", "agentexecution");
-        vi.stubEnv("TRACER_DB_CONNECTION_ROLE", "worker");
 
         const loadApplicationConfig = await loadFreshConfig();
         const config = loadApplicationConfig();
 
-        expect(config.tracerDb.username).toBe("agent_execution_writer");
-        expect(config.tracerDb.password).toBe("agentexecution");
         expect(config.eventDb.username).toBe("root");
-    });
-
-    it("깃발이 없으면 tracerDb도 관리자 계정 그대로 붙는다", async () => {
-        provideYaml({});
-        vi.stubEnv("POSTGRES_USER", "root");
-        vi.stubEnv("POSTGRES_PASSWORD", "root-secret");
-        vi.stubEnv("AGENT_DB_EXECUTION_USER", "agent_execution_writer");
-        vi.stubEnv("AGENT_DB_EXECUTION_PASSWORD", "agentexecution");
-
-        const loadApplicationConfig = await loadFreshConfig();
-        const config = loadApplicationConfig();
-
+        expect(config.eventDb.password).toBe("root-secret");
         expect(config.tracerDb.username).toBe("root");
         expect(config.tracerDb.password).toBe("root-secret");
     });
