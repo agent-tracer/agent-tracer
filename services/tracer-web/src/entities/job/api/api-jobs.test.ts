@@ -26,11 +26,7 @@ beforeEach(() => {
 
 describe("enqueueJob", () => {
   it("idempotency key를 요청 본문에 싣는다", async () => {
-    mockPostJson.mockResolvedValue({
-      jobId: "job-1",
-      status: "pending",
-      createdAt: "2026-01-01T00:00:00.000Z",
-    });
+    mockPostJson.mockResolvedValue({ job: { id: "job-1", status: "pending" } });
 
     await enqueueJob(JOB_KIND.recipeScan, { filters: {} }, { idempotencyKey: "scan-click-1" });
 
@@ -42,11 +38,7 @@ describe("enqueueJob", () => {
   });
 
   it("선택 필드 없이 잡을 접수한다", async () => {
-    mockPostJson.mockResolvedValue({
-      jobId: "job-1",
-      status: "pending",
-      createdAt: "2026-01-01T00:00:00.000Z",
-    });
+    mockPostJson.mockResolvedValue({ job: { id: "job-1", status: "pending" } });
 
     await enqueueJob(JOB_KIND.recipeScan, { taskId: "task-1" });
 
