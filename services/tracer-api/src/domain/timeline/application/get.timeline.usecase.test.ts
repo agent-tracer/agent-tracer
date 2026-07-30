@@ -46,7 +46,7 @@ describe("GetTimelineUseCase", () => {
     it("소유한 태스크의 타임라인 페이지를 반환한다", async () => {
         const useCase = makeUseCase([makeTask("t1", "u1")]);
         const result = await useCase.execute({ userId: "u1", taskId: "t1" });
-        expect(result).toEqual({ items: [], nextCursor: null });
+        expect(result).toEqual({ items: [], total: 0, nextCursor: null });
     });
 
     it("남의 태스크 타임라인은 존재하지 않는 것처럼 null을 반환한다", async () => {
@@ -84,5 +84,44 @@ describe("GetTimelineUseCase", () => {
         expect(page2?.nextCursor).toBeNull();
         const combined = [...(page2?.items ?? []), ...(page1?.items ?? [])].map((item) => item.id);
         expect(combined).toEqual(["e1", "e2", "e3", "e4", "e5"]);
+    });
+
+    it("전체 이벤트 수를 페이지 상한과 무관하게 함께 낸다", async () => {
+        const events = [1, 2, 3, 4, 5].map((n) => makeEvent(`e${n}`, String(n), "t1"));
+        const useCase = makeUseCase([makeTask("t1", "u1")], events);
+
+        const result = await useCase.execute({ userId: "u1", taskId: "t1", limit: 2 });
+
+        expect(result?.items).toHaveLength(2);
+        expect(result?.total).toBe(5);
+    });
+
+    it("asc로 부르면 가장 이른 이벤트부터 읽고 커서가 앞으로 나아간다", async () => {
+        const events = [1, 2, 3, 4, 5].map((n) => makeEvent(`e${n}`, String(n), "t1"));
+        const useCase = makeUseCase([makeTask("t1", "u1")], events);
+
+        const page1 = await useCase.execute({ userId: "u1", taskId: "t1", limit: 3, order: "asc" });
+        expect(page1?.items.map((item) => item.id)).toEqual(["e1", "e2", "e3"]);
+        expect(page1?.nextCursor).toBe("3");
+
+        const page2 = await useCase.execute({
+            userId: "u1",
+            taskId: "t1",
+            limit: 3,
+            order: "asc",
+            cursor: page1!.nextCursor!,
+        });
+        expect(page2?.items.map((item) => item.id)).toEqual(["e4", "e5"]);
+        expect(page2?.nextCursor).toBeNull();
+    });
+
+    it("desc를 명시해도 방향을 생략한 것과 같은 장을 낸다", async () => {
+        const events = [1, 2, 3, 4, 5].map((n) => makeEvent(`e${n}`, String(n), "t1"));
+        const useCase = makeUseCase([makeTask("t1", "u1")], events);
+
+        const omitted = await useCase.execute({ userId: "u1", taskId: "t1", limit: 3 });
+        const explicit = await useCase.execute({ userId: "u1", taskId: "t1", limit: 3, order: "desc" });
+
+        expect(explicit).toEqual(omitted);
     });
 });
