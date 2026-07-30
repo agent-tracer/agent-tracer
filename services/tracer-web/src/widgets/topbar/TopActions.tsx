@@ -22,11 +22,12 @@ import { cn } from "~tracer-web/shared/ui/lib/cn.js";
 export function TopActions() {
   return (
     <div className="flex items-center gap-2">
-      <AgentBackendSelect />
       <RecipesButton />
       <RulesButton />
       <TagsButton />
       <MemosButton />
+      {/* 고른 축은 바로 오른쪽 세 화면이 부르는 에이전트 창구에만 걸린다. */}
+      <AgentBackendSelect />
       <ChatButton />
       <JobsButton />
       <EvaluationButton />
