@@ -15,12 +15,14 @@ export function requiresAgentBackendChoice(catalog: AgentUpstreamCatalog): boole
   return catalog.upstreams.length > 1;
 }
 
-/** 선언에 없는 선택은 배포가 달라졌다는 뜻이므로 버린다. */
-export function reconcileAgentBackend(
+/** 목록을 받은 뒤에 부르며 상류가 둘 이상이면 선언에 있는 이름 하나를 늘 낸다. */
+export function resolveAgentBackend(
   catalog: AgentUpstreamCatalog,
   selected: string | null,
 ): string | null {
-  if (selected === null) return null;
   if (!requiresAgentBackendChoice(catalog)) return null;
-  return catalog.upstreams.some((upstream) => upstream.name === selected) ? selected : null;
+  if (selected !== null && catalog.upstreams.some((upstream) => upstream.name === selected)) {
+    return selected;
+  }
+  return catalog.upstreams[0]?.name ?? null;
 }
