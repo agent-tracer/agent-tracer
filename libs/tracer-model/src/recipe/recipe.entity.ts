@@ -113,11 +113,11 @@ export class RecipeEntity {
         recipe.contributingSlices = [...input.contributingSlices];
         recipe.rationale = input.rationale ?? null;
         recipe.language = input.language ?? null;
-        recipe.rev = 1;
+        recipe.rev = input.rev;
         recipe.parentRecipeId = input.parentRecipeId ?? null;
         recipe.sourceJobId = input.sourceJobId ?? null;
-        recipe.userEdited = false;
-        recipe.lastEditedBy = RECIPE_EDITOR.agent;
+        recipe.userEdited = input.author === RECIPE_EDITOR.user;
+        recipe.lastEditedBy = input.author;
         recipe.error = null;
         recipe.createdAt = now;
         recipe.updatedAt = now;

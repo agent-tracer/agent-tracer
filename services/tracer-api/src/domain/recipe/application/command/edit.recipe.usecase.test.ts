@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { RECIPE_EDITOR } from "@agent-tracer/kernel";
 import { NotFoundException } from "@nestjs/common";
 import { InvariantViolationError, RecipeEntity, type RecipeCandidateInput } from "@agent-tracer/tracer-model";
 import { FixedClock } from "~tracer-api/domain/recipe/port/__fakes__/fixed.clock.js";
@@ -12,6 +13,8 @@ function candidateInput(id: string): RecipeCandidateInput {
     return {
         id,
         userId: "u1",
+        author: RECIPE_EDITOR.agent,
+        rev: 1,
         title: "제목",
         intent: "intent",
         description: "설명",

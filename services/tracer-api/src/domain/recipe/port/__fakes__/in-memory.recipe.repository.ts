@@ -31,6 +31,13 @@ export class InMemoryRecipeRepository implements RecipeRepositoryPort {
         return Promise.resolve(this.all().filter((r) => r.userId === userId && r.status === status));
     }
 
+    findBySourceJobId(userId: string, sourceJobId: string): Promise<RecipeEntity[]> {
+        const rows = this.all()
+            .filter((r) => r.userId === userId && r.sourceJobId === sourceJobId)
+            .sort((left, right) => left.createdAt.getTime() - right.createdAt.getTime());
+        return Promise.resolve(rows);
+    }
+
     upsert(recipe: RecipeEntity): Promise<void> {
         this.rows.set(recipe.id, recipe);
         return Promise.resolve();

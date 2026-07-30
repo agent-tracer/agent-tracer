@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { RECIPE_EDITOR } from "@agent-tracer/kernel";
 import { NotFoundException } from "@nestjs/common";
 import { RecipeEntity, type RecipeRepository, type SearchOutboxEntity } from "@agent-tracer/tracer-model";
 import { FixedClock } from "~tracer-api/domain/recipe/port/__fakes__/fixed.clock.js";
@@ -13,6 +14,8 @@ function makeRecipe(id: string, userId = "u1"): RecipeEntity {
         {
             id,
             userId,
+            author: RECIPE_EDITOR.agent,
+            rev: 1,
             title: "제목",
             intent: "intent",
             description: "설명",

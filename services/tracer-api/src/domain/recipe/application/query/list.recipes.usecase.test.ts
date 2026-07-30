@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { RECIPE_EDITOR } from "@agent-tracer/kernel";
 import { RecipeEntity, TaskEntity } from "@agent-tracer/tracer-model";
 import { InMemoryRecipeApplicationRepository } from "~tracer-api/domain/recipe/port/__fakes__/in-memory.recipe.application.repository.js";
 import { InMemoryRecipeRepository } from "~tracer-api/domain/recipe/port/__fakes__/in-memory.recipe.repository.js";
@@ -12,6 +13,8 @@ function makeRecipe(id: string, sliceTaskIds: readonly string[]): RecipeEntity {
         {
             id,
             userId: "u1",
+            author: RECIPE_EDITOR.agent,
+            rev: 1,
             title: "제목",
             intent: "intent",
             description: "설명",

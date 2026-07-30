@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { RECIPE_EDITOR } from "@agent-tracer/kernel";
 import { RecipeEntity } from "./recipe.entity.js";
 import { RecipeApplicationEntity } from "./application/recipe.application.entity.js";
 import { RecipeLifecycle } from "./recipe.lifecycle.domain.js";
@@ -10,6 +11,8 @@ function makeRecipe(input: Partial<RecipeCandidateInput> = {}, createdAt: Date =
     const base: RecipeCandidateInput = {
         id: "r1",
         userId: "u1",
+        author: RECIPE_EDITOR.agent,
+        rev: 1,
         title: "제목",
         intent: "intent",
         description: "설명",

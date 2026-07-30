@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { NotFoundException } from "@nestjs/common";
-import { RECIPE_OUTCOME } from "@agent-tracer/kernel";
+import { RECIPE_EDITOR, RECIPE_OUTCOME } from "@agent-tracer/kernel";
 import { RecipeApplicationEntity, RecipeEntity, type RecipeCandidateInput } from "@agent-tracer/tracer-model";
 import { FixedClock } from "~tracer-api/domain/recipe/port/__fakes__/fixed.clock.js";
 import { SequentialRecipeIdGenerator } from "~tracer-api/domain/recipe/port/__fakes__/sequential.recipe.id.generator.js";
@@ -14,6 +14,8 @@ function candidateInput(id: string): RecipeCandidateInput {
     return {
         id,
         userId: "u1",
+        author: RECIPE_EDITOR.agent,
+        rev: 1,
         title: "제목",
         intent: "intent",
         description: "설명",
