@@ -11,7 +11,9 @@ export interface SearchEventsInput {
     readonly lane?: string;
     readonly from?: string;
     readonly to?: string;
+    readonly toolName?: string;
     readonly limit?: number;
+    readonly offset?: number;
 }
 
 @Injectable()
@@ -33,6 +35,8 @@ export class SearchEventsUseCase {
                 ...(input.lane !== undefined ? { lane: input.lane } : {}),
                 ...(input.from !== undefined ? { from: input.from } : {}),
                 ...(input.to !== undefined ? { to: input.to } : {}),
+                ...(input.toolName !== undefined ? { toolName: input.toolName } : {}),
+                ...(input.offset !== undefined ? { offset: input.offset } : {}),
             }),
             this.memoSearch.search({
                 userId: input.userId,
@@ -40,6 +44,7 @@ export class SearchEventsUseCase {
                 hasEvent: true,
                 ...(input.q !== undefined ? { q: input.q } : {}),
                 ...(input.taskId !== undefined ? { taskId: input.taskId } : {}),
+                ...(input.offset !== undefined ? { offset: input.offset } : {}),
             }),
         ]);
         return { items: [...events, ...memos] };

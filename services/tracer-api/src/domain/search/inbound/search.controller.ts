@@ -43,7 +43,9 @@ export class SearchController {
             ...(query.lane !== undefined ? { lane: query.lane } : {}),
             ...(query.from !== undefined ? { from: query.from } : {}),
             ...(query.to !== undefined ? { to: query.to } : {}),
+            ...(query.toolName !== undefined ? { toolName: query.toolName } : {}),
             ...(query.limit !== undefined ? { limit: query.limit } : {}),
+            ...(query.offset !== undefined ? { offset: query.offset } : {}),
         });
     }
 }

@@ -60,6 +60,21 @@ describe("SearchEventsUseCase", () => {
         });
     });
 
+    it("도구 이름과 건너뛸 수를 색인 질의에 싣는다", async () => {
+        const { useCase, calls, memoCalls } = makeUseCase();
+
+        await useCase.execute({ userId: "u1", q: "버그", toolName: "Bash", offset: 40 });
+
+        expect(calls[0]).toEqual({
+            userId: "u1",
+            limit: DEFAULT_SEARCH_LIMIT,
+            q: "버그",
+            toolName: "Bash",
+            offset: 40,
+        });
+        expect(memoCalls[0]?.["offset"]).toBe(40);
+    });
+
     it("eventId 있는 이벤트 메모를 hasEvent true로 함께 조회해 결과에 접는다", async () => {
         const memoHit: MemoSearchHit = { hitType: "memo", id: "m1", taskId: "t1", eventId: "e1", author: "agent", body: "메모" };
         const { useCase, memoCalls } = makeUseCase({ memoHits: [memoHit] });

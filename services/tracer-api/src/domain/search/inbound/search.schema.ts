@@ -12,7 +12,9 @@ export const eventSearchQuerySchema = z.object({
     lane: z.string().optional(),
     from: z.string().optional(),
     to: z.string().optional(),
+    toolName: z.string().optional(),
     limit: z.coerce.number().int().positive().optional(),
+    offset: z.coerce.number().int().nonnegative().optional(),
 });
 
 export type TaskSearchQuery = z.infer<typeof taskSearchQuerySchema>;
