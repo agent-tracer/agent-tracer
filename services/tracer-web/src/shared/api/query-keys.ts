@@ -72,6 +72,7 @@ export const monitorQueryKeys = {
     offset: number,
   ) => ["monitor", "jobs", "history", kind, status, limit, offset] as const,
   jobsHistoryPrefix: () => ["monitor", "jobs", "history"] as const,
+  agentUpstreams: () => ["monitor", "agent", "upstreams"] as const,
   job: (jobId: string) => ["monitor", "jobs", "detail", jobId] as const,
   jobSteps: (jobId: string) => ["monitor", "jobs", "steps", jobId] as const,
   daemonHealth: () => ["monitor", "daemon-health"] as const,

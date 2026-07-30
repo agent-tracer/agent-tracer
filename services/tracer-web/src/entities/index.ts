@@ -10,3 +10,4 @@ export * as user from "./user/index.js";
 export * as daemon from "./daemon/index.js";
 export * as taskCleanup from "./task-cleanup/index.js";
 export * as job from "./job/index.js";
+export * as agentUpstream from "./agent-upstream/index.js";
