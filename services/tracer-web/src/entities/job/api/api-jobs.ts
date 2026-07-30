@@ -7,9 +7,7 @@ import { toJobStatus } from "~tracer-web/entities/job/api/job.mapper.js";
 // ─── Jobs (통합 비동기 잡) ─────────────────────────────────────────────────
 
 export interface JobEnqueueResponse {
-  readonly jobId: string;
-  readonly status: JobStatus;
-  readonly createdAt: string;
+  readonly job: JobDto;
 }
 
 export interface EnqueueJobOptions {
