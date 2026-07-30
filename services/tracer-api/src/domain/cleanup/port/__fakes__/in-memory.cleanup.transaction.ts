@@ -17,9 +17,17 @@ export class InMemoryCleanupTaskReader implements CleanupTaskReaderPort {
         for (const task of tasks) this.rows.set(task.id, task);
     }
 
-    findById(id: string): Promise<TaskEntity | null> {
+    findById(userId: string, id: string): Promise<TaskEntity | null> {
         const row = this.rows.get(id);
-        return Promise.resolve(row === undefined ? null : cloneRow(row));
+        return Promise.resolve(row === undefined || row.userId !== userId ? null : cloneRow(row));
+    }
+
+    findByIds(userId: string, ids: readonly string[]): Promise<TaskEntity[]> {
+        const rows = ids
+            .map((id) => this.rows.get(id))
+            .filter((row): row is TaskEntity => row !== undefined && row.userId === userId)
+            .map(cloneRow);
+        return Promise.resolve(rows);
     }
 }
 

@@ -1,4 +1,8 @@
-import type { TaskCleanupSuggestionStatus } from "@agent-tracer/kernel";
+import {
+    CLEANUP_SUGGESTION_STATUS,
+    type TaskCleanupSuggestionKind,
+    type TaskCleanupSuggestionStatus,
+} from "@agent-tracer/kernel";
 import type { TaskCleanupSuggestionEntity } from "@agent-tracer/tracer-model";
 import type { CleanupSuggestionRepositoryPort } from "~tracer-api/domain/cleanup/port/cleanup.suggestion.repository.port.js";
 import { cloneRow } from "./clone-row.js";
@@ -32,6 +36,19 @@ export class InMemoryCleanupSuggestionRepository implements CleanupSuggestionRep
         const rows = this.all()
             .filter((row) => row.userId === userId && row.status === status)
             .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())
+            .map(cloneRow);
+        return Promise.resolve(rows);
+    }
+
+    findPendingByUserTaskIds(
+        userId: string,
+        taskIds: readonly string[],
+        kind: TaskCleanupSuggestionKind,
+    ): Promise<TaskCleanupSuggestionEntity[]> {
+        const wanted = new Set(taskIds.map((taskId) => `${taskId} ${kind}`));
+        const rows = this.all()
+            .filter((row) => row.userId === userId && wanted.has(`${row.taskId} ${row.kind}`))
+            .filter((row) => row.status === CLEANUP_SUGGESTION_STATUS.pending)
             .map(cloneRow);
         return Promise.resolve(rows);
     }

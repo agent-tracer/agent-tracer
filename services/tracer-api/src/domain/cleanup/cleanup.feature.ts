@@ -1,6 +1,7 @@
 import { TaskCleanupSuggestionRepository, TransactionRunner } from "@agent-tracer/tracer-model";
 import { SystemClock } from "@agent-tracer/platform";
 import { CleanupUlidGenerator } from "~tracer-api/domain/cleanup/adapter/cleanup.ulid.generator.js";
+import { CreateCleanupSuggestionsUseCase } from "~tracer-api/domain/cleanup/application/command/create.cleanup.suggestions.usecase.js";
 import { AcceptCleanupSuggestionUseCase } from "~tracer-api/domain/cleanup/application/command/accept.cleanup.suggestion.usecase.js";
 import { DismissCleanupSuggestionUseCase } from "~tracer-api/domain/cleanup/application/command/dismiss.cleanup.suggestion.usecase.js";
 import { ListCleanupSuggestionsUseCase } from "~tracer-api/domain/cleanup/application/query/list.cleanup.suggestions.usecase.js";
@@ -15,6 +16,7 @@ export const cleanupFeature = {
     controllers: [CleanupController],
     providers: [
         AcceptCleanupSuggestionUseCase,
+        CreateCleanupSuggestionsUseCase,
         DismissCleanupSuggestionUseCase,
         ListCleanupSuggestionsUseCase,
         { provide: CLOCK, useClass: SystemClock },
