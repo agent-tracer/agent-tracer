@@ -8,6 +8,7 @@ import {
 import { SystemClock } from "@agent-tracer/platform";
 import { RecipeUlidGenerator } from "~tracer-api/domain/recipe/adapter/recipe.ulid.generator.js";
 import { AcceptRecipeUseCase } from "~tracer-api/domain/recipe/application/command/accept.recipe.usecase.js";
+import { CreateRecipesUseCase } from "~tracer-api/domain/recipe/application/command/create.recipes.usecase.js";
 import { DeleteRecipeUseCase } from "~tracer-api/domain/recipe/application/command/delete.recipe.usecase.js";
 import { DismissRecipeUseCase } from "~tracer-api/domain/recipe/application/command/dismiss.recipe.usecase.js";
 import { EditRecipeUseCase } from "~tracer-api/domain/recipe/application/command/edit.recipe.usecase.js";
@@ -38,6 +39,7 @@ export const recipeFeature: { readonly controllers: readonly Type[]; readonly pr
         SearchRecipesUseCase,
         ReportRecipeOutcomeUseCase,
         ListRecipesUseCase,
+        CreateRecipesUseCase,
         OpenSearchRecipeSearch,
         { provide: CLOCK, useClass: SystemClock },
         { provide: RECIPE_ID_GENERATOR, useClass: RecipeUlidGenerator },

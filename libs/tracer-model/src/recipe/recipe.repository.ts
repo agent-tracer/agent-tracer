@@ -15,6 +15,14 @@ export class RecipeRepository {
         return this.repo.find({ where: { userId, status, deletedAt: IsNull() }, order: { updatedAt: "DESC" } });
     }
 
+    /** 같은 실행이 낸 한 벌이며 만들어진 순서를 그대로 준다. */
+    async findBySourceJobId(userId: string, sourceJobId: string): Promise<RecipeEntity[]> {
+        return this.repo.find({
+            where: { userId, sourceJobId, deletedAt: IsNull() },
+            order: { createdAt: "ASC", id: "ASC" },
+        });
+    }
+
     async findByUser(userId: string): Promise<RecipeEntity[]> {
         return this.repo.find({ where: { userId, deletedAt: IsNull() }, order: { updatedAt: "DESC" } });
     }

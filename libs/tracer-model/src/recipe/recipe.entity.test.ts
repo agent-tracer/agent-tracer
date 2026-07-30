@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { RECIPE_STATUS } from "@agent-tracer/kernel";
+import { RECIPE_EDITOR, RECIPE_STATUS } from "@agent-tracer/kernel";
 import { RecipeEntity } from "./recipe.entity.js";
 import { type RecipeCandidateInput } from "./recipe.types.js";
 import { InvariantViolationError } from "../error/invariant.error.js";
@@ -10,6 +10,8 @@ function makeInput(overrides: Partial<RecipeCandidateInput> = {}): RecipeCandida
     return {
         id: "r1",
         userId: "u1",
+        author: RECIPE_EDITOR.agent,
+        rev: 1,
         title: "제목",
         intent: "intent",
         description: "설명",
@@ -48,6 +50,24 @@ describe("RecipeEntity", () => {
             expect(recipe.corrections).toHaveLength(1);
             expect(recipe.pitfalls).toHaveLength(1);
             expect(recipe.governingRules).toEqual(["rule-1"]);
+        });
+
+        it("사람이 만든 후보는 사람이 고친 것으로 표시한다", () => {
+            const recipe = RecipeEntity.candidate(makeInput({ author: RECIPE_EDITOR.user }), NOW);
+            expect(recipe.userEdited).toBe(true);
+            expect(recipe.lastEditedBy).toBe(RECIPE_EDITOR.user);
+        });
+
+        it("에이전트가 만든 후보는 사람이 고치지 않은 것으로 표시한다", () => {
+            const recipe = RecipeEntity.candidate(makeInput(), NOW);
+            expect(recipe.userEdited).toBe(false);
+            expect(recipe.lastEditedBy).toBe(RECIPE_EDITOR.agent);
+        });
+
+        it("개정으로 이어진 후보는 주어진 판을 그대로 갖는다", () => {
+            const recipe = RecipeEntity.candidate(makeInput({ rev: 4, parentRecipeId: "r0" }), NOW);
+            expect(recipe.rev).toBe(4);
+            expect(recipe.parentRecipeId).toBe("r0");
         });
     });
 

@@ -7,5 +7,6 @@ export const RECIPE_REPOSITORY = Symbol("RecipeRepository");
 export interface RecipeRepositoryPort {
     findById(id: string): Promise<RecipeEntity | null>;
     findByStatus(userId: string, status: RecipeStatus): Promise<RecipeEntity[]>;
+    findBySourceJobId(userId: string, sourceJobId: string): Promise<RecipeEntity[]>;
     upsert(recipe: RecipeEntity): Promise<void>;
 }

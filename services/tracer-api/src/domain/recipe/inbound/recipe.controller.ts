@@ -1,5 +1,7 @@
-import { Body, Controller, Delete, Get, Headers, HttpCode, HttpStatus, NotFoundException, Param, Patch, Post, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Headers, HttpCode, HttpStatus, NotFoundException, Param, Patch, Post, Query, Res } from "@nestjs/common";
+import type { Response } from "express";
 import { MONITOR_USER_HEADER } from "@agent-tracer/kernel";
+import { CreateRecipesUseCase } from "~tracer-api/domain/recipe/application/command/create.recipes.usecase.js";
 import { ListRecipesUseCase } from "~tracer-api/domain/recipe/application/query/list.recipes.usecase.js";
 import { GetRecipeUseCase } from "~tracer-api/domain/recipe/application/query/get.recipe.usecase.js";
 import { AcceptRecipeUseCase } from "~tracer-api/domain/recipe/application/command/accept.recipe.usecase.js";
@@ -22,10 +24,12 @@ import {
     type OutcomeBody,
     type SearchQuery,
 } from "./recipe.schema.js";
+import { createBodySchema, type CreateBody } from "./recipe.create.schema.js";
 
 @Controller("api/v1")
 export class RecipeController {
     constructor(
+        private readonly createRecipes: CreateRecipesUseCase,
         private readonly listRecipes: ListRecipesUseCase,
         private readonly getRecipe: GetRecipeUseCase,
         private readonly acceptRecipe: AcceptRecipeUseCase,
@@ -45,6 +49,23 @@ export class RecipeController {
         return this.listRecipes.execute(resolveUserId(user), query.status);
     }
 
+    @Post("recipes")
+    @HttpCode(HttpStatus.CREATED)
+    async create(
+        @Headers(MONITOR_USER_HEADER) user: string | undefined,
+        @Body(new SchemaValidationPipe(createBodySchema)) body: CreateBody,
+        @Res({ passthrough: true }) response: Response,
+    ) {
+        const result = await this.createRecipes.execute({
+            userId: resolveUserId(user),
+            author: body.author,
+            drafts: body.recipes,
+            ...(body.sourceJobId !== undefined && body.sourceJobId !== null ? { sourceJobId: body.sourceJobId } : {}),
+        });
+        // 같은 실행이 낸 한 벌을 그대로 내는 응답은 새로 만든 것과 구분한다.
+        if (result.replayed) response.statusCode = HttpStatus.OK;
+        return { recipes: result.recipes };
+    }
 
     @Get("recipes/search")
     async search(

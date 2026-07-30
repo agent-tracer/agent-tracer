@@ -35,4 +35,6 @@ export const RECIPE_EDITOR = {
     user: "user",
 } as const;
 
-export type RecipeEditor = (typeof RECIPE_EDITOR)[keyof typeof RECIPE_EDITOR];
+export const RECIPE_EDITORS = [RECIPE_EDITOR.agent, RECIPE_EDITOR.user] as const;
+
+export type RecipeEditor = (typeof RECIPE_EDITORS)[number];
