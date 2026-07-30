@@ -10,6 +10,8 @@ import {
   useDismissCleanupSuggestionMutation,
 } from "~tracer-web/entities/task-cleanup/api/mutations.js";
 import { useEnqueueJob } from "~tracer-web/entities/job/api/mutations.js";
+import { AgentBackendSelect } from "~tracer-web/features/agent-backend/AgentBackendSelect.js";
+import { useAgentBackendChoice } from "~tracer-web/features/agent-backend/use-agent-backend-choice.js";
 import { useJobStatus } from "~tracer-web/entities/job/api/queries.js";
 import { useTaskCleanupSuggestionsQuery } from "~tracer-web/entities/task-cleanup/api/queries.js";
 import { useTasksQuery } from "~tracer-web/entities/task/api/list-queries.js";
@@ -34,7 +36,11 @@ export function TaskCleanupModal({ open, onClose }: TaskCleanupModalProps) {
   });
   const suggestions = useTaskCleanupSuggestionsQuery("pending");
   const tasksQuery = useTasksQuery("all");
-  const enqueueMutation = useEnqueueJob<TaskCleanupJobInput>(JOB_KIND.taskCleanup);
+  const backend = useAgentBackendChoice();
+  const enqueueMutation = useEnqueueJob<TaskCleanupJobInput>(
+    JOB_KIND.taskCleanup,
+    backend.value,
+  );
   const nowMs = useNowMs(5_000);
 
   const taskTitleById = useMemo(() => {
@@ -92,6 +98,12 @@ export function TaskCleanupModal({ open, onClose }: TaskCleanupModalProps) {
             >
               {isScanning ? "Scanning…" : "Scan tasks"}
             </button>
+            <AgentBackendSelect
+              value={backend.value}
+              onChange={backend.select}
+              disabled={isScanning || enqueueMutation.isPending}
+              className="min-w-[154px]"
+            />
           </div>
           <span className="font-mono text-[11px] text-ink-tertiary">
             {job

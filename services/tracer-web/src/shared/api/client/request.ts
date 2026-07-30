@@ -1,4 +1,4 @@
-import { getAgentBackend } from "~tracer-web/shared/api/agent-backend.js";
+import { getDefaultAgentBackend } from "~tracer-web/shared/api/agent-backend.js";
 import { getMonitorApiBaseUrl } from "~tracer-web/shared/api/monitor-endpoints.js";
 import { getUserId } from "~tracer-web/shared/api/user-identity.js";
 
@@ -9,6 +9,8 @@ const DEFAULT_REQUEST_TIMEOUT_MS = 30_000;
 export interface RequestOptions {
   readonly signal?: AbortSignal;
   readonly timeoutMs?: number;
+  /** 이 요청만 보낼 상류이며 지목하지 않으면 선언의 첫 상류로 간다. */
+  readonly backend?: string;
 }
 
 export function createRequestSignal(options?: RequestOptions): {
@@ -53,8 +55,8 @@ export function createRequestSignal(options?: RequestOptions): {
 }
 
 /** 고른 상류는 게이트웨이가 읽는 값이라 에이전트 접두사 아래 요청에만 실린다. */
-function routeToAgentBackend(pathname: string): string {
-  const backend = getAgentBackend();
+function routeToAgentBackend(pathname: string, options?: RequestOptions): string {
+  const backend = options?.backend ?? getDefaultAgentBackend();
   if (backend === null || !pathname.startsWith(AGENT_PREFIX)) return pathname;
   const separator = pathname.includes("?") ? "&" : "?";
   return `${pathname}${separator}backend=${encodeURIComponent(backend)}`;
@@ -78,7 +80,7 @@ export async function request(
   };
   try {
     return await fetch(
-      `${getMonitorApiBaseUrl()}${routeToAgentBackend(pathname)}`,
+      `${getMonitorApiBaseUrl()}${routeToAgentBackend(pathname, options)}`,
       requestInit,
     );
   } catch (error) {

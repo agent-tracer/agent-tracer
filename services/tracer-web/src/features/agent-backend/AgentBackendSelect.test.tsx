@@ -1,10 +1,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { AgentUpstreamCatalog } from "~tracer-web/entities/agent-upstream/model/agent-upstream.js";
 import { AgentBackendSelect } from "~tracer-web/features/agent-backend/AgentBackendSelect.js";
-import { getAgentBackend, setAgentBackend } from "~tracer-web/shared/api/agent-backend.js";
-import { TooltipProvider } from "~tracer-web/shared/ui/index.js";
 
 const catalogState: { data: AgentUpstreamCatalog | undefined } = { data: undefined };
 
@@ -12,23 +9,9 @@ vi.mock("~tracer-web/entities/agent-upstream/api/queries.js", () => ({
   useAgentUpstreamsQuery: () => ({ data: catalogState.data }),
 }));
 
-function renderSelect(client: QueryClient = new QueryClient()) {
-  render(
-    <QueryClientProvider client={client}>
-      <TooltipProvider>
-        <AgentBackendSelect />
-      </TooltipProvider>
-    </QueryClientProvider>,
-  );
+function queryControl(): HTMLSelectElement | null {
+  return screen.queryByRole<HTMLSelectElement>("combobox", { name: "Agent backend" });
 }
-
-function queryControl(): HTMLElement | null {
-  return screen.queryByRole("combobox", { name: "Agent backend" });
-}
-
-beforeEach(() => {
-  setAgentBackend(null);
-});
 
 afterEach(() => {
   cleanup();
@@ -36,55 +19,32 @@ afterEach(() => {
 });
 
 describe("AgentBackendSelect", () => {
-  it("상류가 하나면 선택을 보이지 않는다", () => {
+  it("상류가 하나면 보이지 않는다", () => {
     catalogState.data = { upstreams: [{ name: "ts" }] };
 
-    renderSelect();
+    render(<AgentBackendSelect value={null} onChange={vi.fn()} />);
 
     expect(queryControl()).toBeNull();
   });
 
-  it("에이전트가 배포에 없으면 선택을 보이지 않는다", () => {
+  it("에이전트가 배포에 없으면 보이지 않는다", () => {
     catalogState.data = { upstreams: [] };
 
-    renderSelect();
+    render(<AgentBackendSelect value={null} onChange={vi.fn()} />);
 
     expect(queryControl()).toBeNull();
   });
 
-  it("목록이 오기 전에는 저장된 선택을 지우지 않는다", () => {
-    setAgentBackend("python");
-    catalogState.data = undefined;
-
-    renderSelect();
+  it("목록이 오기 전에는 보이지 않는다", () => {
+    render(<AgentBackendSelect value={null} onChange={vi.fn()} />);
 
     expect(queryControl()).toBeNull();
-    expect(getAgentBackend()).toBe("python");
-  });
-
-  it("새로 연 화면이 첫 상류를 고른 채로 선다", () => {
-    catalogState.data = { upstreams: [{ name: "ts" }, { name: "python" }] };
-
-    renderSelect();
-
-    expect(getAgentBackend()).toBe("ts");
-    expect((queryControl() as HTMLSelectElement).value).toBe("ts");
-  });
-
-  it("저장된 선택을 그대로 이어서 보인다", () => {
-    setAgentBackend("python");
-    catalogState.data = { upstreams: [{ name: "ts" }, { name: "python" }] };
-
-    renderSelect();
-
-    expect(getAgentBackend()).toBe("python");
-    expect((queryControl() as HTMLSelectElement).value).toBe("python");
   });
 
   it("선언된 이름만 고를 수 있게 낸다", () => {
     catalogState.data = { upstreams: [{ name: "ts" }, { name: "python" }] };
 
-    renderSelect();
+    render(<AgentBackendSelect value="ts" onChange={vi.fn()} />);
 
     expect(
       [...(queryControl() as HTMLSelectElement).querySelectorAll("option")].map(
@@ -93,51 +53,21 @@ describe("AgentBackendSelect", () => {
     ).toEqual(["ts", "python"]);
   });
 
-  it("무엇을 고르는 것인지 이름을 함께 보인다", () => {
+  it("고른 이름을 부르는 자리에 넘긴다", () => {
     catalogState.data = { upstreams: [{ name: "ts" }, { name: "python" }] };
+    const onChange = vi.fn();
 
-    renderSelect();
-
-    expect(screen.getByText("Agent")).toBeInTheDocument();
-  });
-
-  it("고른 상류를 요청 층에 넘긴다", () => {
-    catalogState.data = { upstreams: [{ name: "ts" }, { name: "python" }] };
-
-    renderSelect();
+    render(<AgentBackendSelect value="ts" onChange={onChange} />);
     fireEvent.change(queryControl() as HTMLSelectElement, { target: { value: "python" } });
 
-    expect(getAgentBackend()).toBe("python");
+    expect(onChange).toHaveBeenCalledWith("python");
   });
 
-  it("축을 바꿔도 열려 있던 대화를 버리지 않고 다시 읽기만 한다", () => {
-    catalogState.data = { upstreams: [{ name: "ts" }, { name: "python" }] };
-    const client = new QueryClient();
-    const conversation = ["monitor", "chat", "messages", "thread-1"];
-    client.setQueryData(conversation, { messages: ["안녕"] });
-
-    renderSelect(client);
-    fireEvent.change(queryControl() as HTMLSelectElement, { target: { value: "python" } });
-
-    expect(client.getQueryData(conversation)).toEqual({ messages: ["안녕"] });
-    expect(client.getQueryState(conversation)?.isInvalidated).toBe(true);
-  });
-
-  it("상류가 하나로 줄면 남아 있던 선택을 버린다", () => {
-    setAgentBackend("python");
-    catalogState.data = { upstreams: [{ name: "ts" }] };
-
-    renderSelect();
-
-    expect(getAgentBackend()).toBeNull();
-  });
-
-  it("선언에서 사라진 선택을 첫 상류로 되돌린다", () => {
-    setAgentBackend("rust");
+  it("자리가 잠겨 있으면 고르지 못한다", () => {
     catalogState.data = { upstreams: [{ name: "ts" }, { name: "python" }] };
 
-    renderSelect();
+    render(<AgentBackendSelect value="ts" onChange={vi.fn()} disabled />);
 
-    expect(getAgentBackend()).toBe("ts");
+    expect(queryControl()?.disabled).toBe(true);
   });
 });

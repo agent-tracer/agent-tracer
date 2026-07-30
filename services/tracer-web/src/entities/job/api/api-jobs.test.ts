@@ -30,11 +30,15 @@ describe("enqueueJob", () => {
 
     await enqueueJob(JOB_KIND.recipeScan, { filters: {} }, { idempotencyKey: "scan-click-1" });
 
-    expect(mockPostJson).toHaveBeenCalledWith("/api/agent/jobs", {
-      kind: JOB_KIND.recipeScan,
-      input: { filters: {} },
-      idempotencyKey: "scan-click-1",
-    });
+    expect(mockPostJson).toHaveBeenCalledWith(
+      "/api/agent/jobs",
+      {
+        kind: JOB_KIND.recipeScan,
+        input: { filters: {} },
+        idempotencyKey: "scan-click-1",
+      },
+      undefined,
+    );
   });
 
   it("선택 필드 없이 잡을 접수한다", async () => {
@@ -42,10 +46,26 @@ describe("enqueueJob", () => {
 
     await enqueueJob(JOB_KIND.recipeScan, { taskId: "task-1" });
 
-    expect(mockPostJson).toHaveBeenCalledWith("/api/agent/jobs", {
-      kind: JOB_KIND.recipeScan,
-      input: { taskId: "task-1" },
-    });
+    expect(mockPostJson).toHaveBeenCalledWith(
+      "/api/agent/jobs",
+      {
+        kind: JOB_KIND.recipeScan,
+        input: { taskId: "task-1" },
+      },
+      undefined,
+    );
+  });
+
+  it("부르는 자리가 고른 상류를 접수 요청에 싣는다", async () => {
+    mockPostJson.mockResolvedValue({ job: { id: "job-1", status: "pending" } });
+
+    await enqueueJob(JOB_KIND.recipeScan, { taskId: "task-1" }, { backend: "python" });
+
+    expect(mockPostJson).toHaveBeenCalledWith(
+      "/api/agent/jobs",
+      { kind: JOB_KIND.recipeScan, input: { taskId: "task-1" } },
+      { backend: "python" },
+    );
   });
 });
 

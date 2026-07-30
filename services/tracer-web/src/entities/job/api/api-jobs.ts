@@ -15,6 +15,8 @@ export interface JobEnqueueResponse {
 
 export interface EnqueueJobOptions {
   readonly idempotencyKey?: string;
+  /** 이 접수를 받을 상류이며 부르는 자리가 고른다. */
+  readonly backend?: string;
 }
 
 export function enqueueJob<TInput>(
@@ -22,11 +24,15 @@ export function enqueueJob<TInput>(
   input: TInput,
   options: EnqueueJobOptions = {},
 ): Promise<JobEnqueueResponse> {
-  return postJson<JobEnqueueResponse>(JOBS, {
-    kind,
-    input,
-    ...(options.idempotencyKey !== undefined ? { idempotencyKey: options.idempotencyKey } : {}),
-  });
+  return postJson<JobEnqueueResponse>(
+    JOBS,
+    {
+      kind,
+      input,
+      ...(options.idempotencyKey !== undefined ? { idempotencyKey: options.idempotencyKey } : {}),
+    },
+    options.backend !== undefined ? { backend: options.backend } : undefined,
+  );
 }
 
 export function fetchJob(jobId: string): Promise<{ readonly job: JobDto }> {
