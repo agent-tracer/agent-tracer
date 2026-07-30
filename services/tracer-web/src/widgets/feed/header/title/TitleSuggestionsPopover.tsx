@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import type { TitleSuggestion } from "~tracer-web/entities/job/model/title-suggestion.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
 import { AnchoredPopover, GuidanceText } from "~tracer-web/shared/ui/index.js";
+import { AgentBackendSelect } from "~tracer-web/features/agent-backend/AgentBackendSelect.js";
 import { cn } from "~tracer-web/shared/ui/lib/cn.js";
 
 interface TitleSuggestionsPopoverProps {
@@ -10,6 +11,8 @@ interface TitleSuggestionsPopoverProps {
   readonly error: string | null;
   readonly suggestions: readonly TitleSuggestion[];
   readonly currentTitle: string;
+  readonly agentBackend: string | null;
+  readonly onAgentBackendChange: (backend: string) => void;
   readonly onSuggest: () => void;
   readonly onApply: (title: string) => void;
   readonly onClose: () => void;
@@ -22,6 +25,8 @@ export function TitleSuggestionsPopover({
   error,
   suggestions,
   currentTitle,
+  agentBackend,
+  onAgentBackendChange,
   onSuggest,
   onApply,
   onClose,
@@ -59,6 +64,12 @@ export function TitleSuggestionsPopover({
         </button>
       </div>
       <div className="mb-2 flex min-w-0 items-center gap-2">
+        <AgentBackendSelect
+          value={agentBackend}
+          onChange={onAgentBackendChange}
+          disabled={loading}
+          className="min-w-0 flex-1 text-[11.5px]"
+        />
         <button
           type="button"
           onClick={onSuggest}

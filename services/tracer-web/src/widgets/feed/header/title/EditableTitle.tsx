@@ -94,6 +94,8 @@ export function EditableTitle({ task }: EditableTitleProps) {
           error={suggestions.error}
           suggestions={suggestions.suggestions}
           currentTitle={suggestions.currentTitle}
+          agentBackend={suggestions.agentBackend}
+          onAgentBackendChange={suggestions.onAgentBackendChange}
           onSuggest={suggestions.suggest}
           onApply={suggestions.apply}
           onClose={suggestions.close}

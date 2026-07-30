@@ -10,7 +10,6 @@ import {
   TagIcon,
   Tooltip,
 } from "~tracer-web/shared/ui/index.js";
-import { AgentBackendSelect } from "~tracer-web/features/agent-backend/AgentBackendSelect.js";
 import { useRecipesQuery } from "~tracer-web/entities/recipe/api/queries.js";
 import { useRulesQuery } from "~tracer-web/entities/rule/api/queries.js";
 import { useMemosQuery } from "~tracer-web/entities/memo/api/queries.js";
@@ -26,8 +25,6 @@ export function TopActions() {
       <RulesButton />
       <TagsButton />
       <MemosButton />
-      {/* 고른 축은 바로 오른쪽 세 화면이 부르는 에이전트 창구에만 걸린다. */}
-      <AgentBackendSelect />
       <ChatButton />
       <JobsButton />
       <EvaluationButton />

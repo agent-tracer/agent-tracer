@@ -5,7 +5,7 @@ import type { JobKind } from "~tracer-web/entities/job/model/job.js";
 import { cancelJob, enqueueJob } from "~tracer-web/entities/job/api/api-jobs.js";
 import { monitorQueryKeys } from "~tracer-web/shared/api/query-keys.js";
 
-export function useEnqueueJob<TInput>(kind: JobKind) {
+export function useEnqueueJob<TInput>(kind: JobKind, backend?: string | null) {
   const queryClient = useQueryClient();
   const idempotencyKeysRef = useRef(new Map<string, { key: string; inFlight: number }>());
   return useMutation({
@@ -13,7 +13,10 @@ export function useEnqueueJob<TInput>(kind: JobKind) {
       const signature = createJobSubmissionSignature(kind, input);
       const idempotencyKey = acquireIdempotencyKey(idempotencyKeysRef.current, kind, signature);
       try {
-        return await enqueueJob(kind, input, { idempotencyKey });
+        return await enqueueJob(kind, input, {
+          idempotencyKey,
+          ...(backend ? { backend } : {}),
+        });
       } finally {
         releaseIdempotencyKey(idempotencyKeysRef.current, signature, idempotencyKey);
       }

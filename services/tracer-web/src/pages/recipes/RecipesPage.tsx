@@ -6,6 +6,7 @@ import { useEnqueueJob } from "~tracer-web/entities/job/api/mutations.js";
 import { useJobStatus } from "~tracer-web/entities/job/api/queries.js";
 import { useRecipesQuery } from "~tracer-web/entities/recipe/api/queries.js";
 import { useScanAnchorTasksQuery } from "~tracer-web/entities/task/api/list-queries.js";
+import { useAgentBackendChoice } from "~tracer-web/features/agent-backend/use-agent-backend-choice.js";
 import { monitorQueryKeys } from "~tracer-web/shared/api/query-keys.js";
 import { ScanPanel } from "~tracer-web/widgets/recipes/scan/ScanPanel.js";
 import { RecipeSectionTabs, type RecipeSectionTab } from "~tracer-web/widgets/recipes/RecipeSectionTabs.js";
@@ -26,7 +27,8 @@ export function RecipesPage() {
   const archive = useRecipesQuery("all");
   const [includeArchivedTasks, setIncludeArchivedTasks] = useState(false);
   const anchorTasks = useScanAnchorTasksQuery(includeArchivedTasks);
-  const enqueue = useEnqueueJob<RecipeScanJobInput>(JOB_KIND.recipeScan);
+  const backend = useAgentBackendChoice();
+  const enqueue = useEnqueueJob<RecipeScanJobInput>(JOB_KIND.recipeScan, backend.value);
 
   const taskTitleById = useMemo(() => {
     const m = new Map<string, string>();
@@ -61,6 +63,8 @@ export function RecipesPage() {
         includeArchivedTasks={includeArchivedTasks}
         onIncludeArchivedTasksChange={setIncludeArchivedTasks}
         onScan={(input) => enqueue.mutate(input)}
+        agentBackend={backend.value}
+        onAgentBackendChange={backend.select}
         scanError={enqueue.isError ? readErrorMessage(enqueue.error) : null}
       />
       <RecipeSectionTabs

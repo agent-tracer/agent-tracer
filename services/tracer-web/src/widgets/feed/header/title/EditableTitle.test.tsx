@@ -25,6 +25,10 @@ vi.mock("~tracer-web/entities/task/api/edit-mutations.js", () => ({
   useUpdateTaskMutation: () => updateMutation,
 }));
 
+vi.mock("~tracer-web/entities/agent-upstream/api/queries.js", () => ({
+  useAgentUpstreamsQuery: () => ({ data: { upstreams: [] } }),
+}));
+
 vi.mock("~tracer-web/entities/job/api/queries.js", () => ({
   useJobStatus: () => ({ data: jobStatusState.data }),
 }));

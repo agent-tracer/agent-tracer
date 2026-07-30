@@ -20,6 +20,7 @@ import {
   useSyncSelectionFromRoute,
   useThemeAttrSync,
 } from "~tracer-web/shared/store/index.js";
+import { useDefaultAgentBackend } from "~tracer-web/features/agent-backend/use-default-agent-backend.js";
 import { Toaster } from "~tracer-web/widgets/notifications/Toaster.js";
 import { useJobToasts } from "~tracer-web/widgets/notifications/useJobToasts.js";
 import { CompactAppLayout } from "~tracer-web/app/layout/CompactAppLayout.js";
@@ -32,6 +33,7 @@ export function AppShell() {
   useSyncSelectionFromRoute();
   useThemeAttrSync();
   useKeyboardShortcuts();
+  useDefaultAgentBackend();
 
   const selectedTaskId = useSelectedTaskId();
   const viewport = useViewport();

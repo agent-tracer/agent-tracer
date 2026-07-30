@@ -3,7 +3,7 @@ import {
   clearUserIdentity,
   setUserIdentity,
 } from "~tracer-web/shared/api/user-identity.js";
-import { setAgentBackend } from "~tracer-web/shared/api/agent-backend.js";
+import { setDefaultAgentBackend } from "~tracer-web/shared/api/agent-backend.js";
 import { request } from "~tracer-web/shared/api/client/request.js";
 
 const fetchMock = vi.fn<typeof fetch>();
@@ -12,7 +12,7 @@ beforeEach(() => {
   fetchMock.mockReset();
   vi.stubGlobal("fetch", fetchMock);
   clearUserIdentity();
-  setAgentBackend(null);
+  setDefaultAgentBackend(null);
 });
 
 describe("request", () => {
@@ -29,8 +29,8 @@ describe("request", () => {
     expect(new Headers(init?.headers).get("x-monitor-user")).toBe("user-1");
   });
 
-  it("고른 상류를 에이전트 접두사 아래 요청에만 싣는다", async () => {
-    setAgentBackend("python");
+  it("축을 지목하지 않은 요청이 선언의 첫 상류로 간다", async () => {
+    setDefaultAgentBackend("python");
     fetchMock.mockResolvedValue(new Response(null, { status: 204 }));
 
     await request("/api/agent/jobs", undefined, { timeoutMs: 0 });
@@ -43,11 +43,23 @@ describe("request", () => {
     expect(urls[2]).toMatch(/\/api\/v1\/tasks$/);
   });
 
-  it("고른 상류가 없으면 파라미터를 싣지 않는다", async () => {
+  it("상류가 하나 이하이면 파라미터를 싣지 않는다", async () => {
     fetchMock.mockResolvedValue(new Response(null, { status: 204 }));
 
     await request("/api/agent/jobs", undefined, { timeoutMs: 0 });
 
     expect(fetchMock.mock.calls[0]?.[0] as string).toMatch(/\/api\/agent\/jobs$/);
+  });
+
+  it("부르는 자리가 지목한 축이 기본 축을 대신한다", async () => {
+    setDefaultAgentBackend("ts");
+    fetchMock.mockResolvedValue(new Response(null, { status: 204 }));
+
+    await request("/api/agent/chat/threads/t-1/messages", undefined, {
+      timeoutMs: 0,
+      backend: "python",
+    });
+
+    expect(fetchMock.mock.calls[0]?.[0] as string).toMatch(/messages\?backend=python$/);
   });
 });

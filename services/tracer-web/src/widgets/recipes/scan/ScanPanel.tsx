@@ -5,6 +5,7 @@ import { Button, GuidanceText, Input } from "~tracer-web/shared/ui/index.js";
 import type { RecipeScanJobInput } from "~tracer-web/entities/job/model/recipe-scan.js";
 import type { MonitoringTask } from "~tracer-web/entities/task/model/task.js";
 import type { TaskId } from "~tracer-web/shared/identity.js";
+import { AgentBackendSelect } from "~tracer-web/features/agent-backend/AgentBackendSelect.js";
 import { TaskPicker } from "~tracer-web/widgets/recipes/scan/TaskPicker.js";
 
 interface LatestJob {
@@ -25,6 +26,8 @@ interface ScanPanelProps {
   readonly onIncludeArchivedTasksChange: (include: boolean) => void;
   readonly onScan: (input: RecipeScanJobInput) => void;
   readonly scanError: string | null;
+  readonly agentBackend: string | null;
+  readonly onAgentBackendChange: (backend: string) => void;
 }
 
 /** 태스크 범위를 선택해 레시피 스캔을 시작한다. */
@@ -38,6 +41,8 @@ export function ScanPanel({
   onIncludeArchivedTasksChange,
   onScan,
   scanError,
+  agentBackend,
+  onAgentBackendChange,
 }: ScanPanelProps) {
   const guidance = useGuidance();
   // 앵커는 항상 사용자가 명시적으로 고른다.
@@ -81,6 +86,15 @@ export function ScanPanel({
           className="w-full min-w-0 flex-1 sm:min-w-[260px]"
           disabled={isScanning}
         />
+        <div className="flex w-full min-w-0 items-center gap-1.5 sm:w-auto">
+          <span className="shrink-0 text-[11px] text-ink-muted uppercase tracking-[0.06em]">Backend</span>
+          <AgentBackendSelect
+            value={agentBackend}
+            onChange={onAgentBackendChange}
+            disabled={isScanning}
+            className="min-w-0 flex-1 sm:min-w-[154px]"
+          />
+        </div>
         <Button
           variant="primary"
           disabled={isScanning || selectedTaskId === null}
