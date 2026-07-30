@@ -2,7 +2,7 @@ import { loadRemote, registerRemotes } from "@module-federation/runtime";
 import type { RouteObject } from "react-router-dom";
 
 // 리모트 진입점은 배포마다 고정된 경로이며 없으면 프록시도 없어 자연스럽게 404다.
-const AGENT_REMOTE_ENTRY = "/remote/agent/remoteEntry.js";
+const AGENT_REMOTE_ENTRY = "/agent/remoteEntry.js";
 
 interface AgentRoutesModule {
   readonly default: readonly RouteObject[];
