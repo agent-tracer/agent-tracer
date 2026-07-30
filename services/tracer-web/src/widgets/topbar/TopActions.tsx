@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   ActivityIcon,
@@ -15,6 +16,8 @@ import { useRulesQuery } from "~tracer-web/entities/rule/api/queries.js";
 import { useMemosQuery } from "~tracer-web/entities/memo/api/queries.js";
 import { useTagsQuery } from "~tracer-web/entities/tag/api/queries.js";
 import { ThemeToggle } from "~tracer-web/widgets/topbar/ThemeToggle.js";
+import { hasAgentPath } from "~tracer-web/entities/agent-surface/model/agent-surface.js";
+import { useAgentSurface } from "~tracer-web/entities/agent-surface/model/AgentSurfaceProvider.js";
 import { cn } from "~tracer-web/shared/ui/lib/cn.js";
 
 /** 오른쪽 액션 영역. */
@@ -25,9 +28,14 @@ export function TopActions() {
       <RulesButton />
       <TagsButton />
       <MemosButton />
-      <ChatButton />
-      <JobsButton />
-      <EvaluationButton />
+      <AgentButton path="/chat" label="Chat" tooltip="Chat with the agent" icon={<ChatIcon />} />
+      <AgentButton path="/jobs" label="Jobs" tooltip="Agent jobs" icon={<ActivityIcon />} />
+      <AgentButton
+        path="/evaluation"
+        label="Evaluate"
+        tooltip="Evaluation workspace"
+        icon={<SparkleIcon spinning={false} />}
+      />
       <SettingsButton />
       <span aria-hidden className="w-px h-[18px] bg-hair" />
       <ThemeToggle />
@@ -35,70 +43,36 @@ export function TopActions() {
   );
 }
 
-function EvaluationButton() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const active = location.pathname === "/evaluation";
-  return (
-    <Tooltip content="Evaluation workspace" side="bottom">
-      <button
-        type="button"
-        onClick={() => void navigate("/evaluation")}
-        aria-label="Evaluation workspace"
-        aria-current={active ? "page" : undefined}
-        className={cn(
-          "h-7 px-2.5 inline-flex items-center gap-1.5 rounded-sm hover:bg-s1 transition-colors",
-          active ? "text-ink bg-s1" : "text-ink-muted bg-transparent",
-        )}
-      >
-        <SparkleIcon spinning={false} />
-        <span className="text-xs font-medium tracking-[-0.05px]">Evaluate</span>
-      </button>
-    </Tooltip>
-  );
+interface AgentButtonProps {
+  readonly path: string;
+  readonly label: string;
+  readonly tooltip: string;
+  readonly icon: ReactNode;
 }
 
-function ChatButton() {
+/** 에이전트 화면으로 가는 자리이며 그 라우트가 셸에 얹혔을 때만 보인다. */
+function AgentButton({ path, label, tooltip, icon }: AgentButtonProps) {
+  const surface = useAgentSurface();
   const navigate = useNavigate();
   const location = useLocation();
-  const active = location.pathname === "/chat";
-  return (
-    <Tooltip content="Chat with the agent" side="bottom">
-      <button
-        type="button"
-        onClick={() => void navigate("/chat")}
-        aria-label="Chat with the agent"
-        aria-current={active ? "page" : undefined}
-        className={cn(
-          "h-7 px-2.5 inline-flex items-center gap-1.5 rounded-sm hover:bg-s1 transition-colors",
-          active ? "text-ink bg-s1" : "text-ink-muted bg-transparent",
-        )}
-      >
-        <ChatIcon />
-        <span className="text-xs font-medium tracking-[-0.05px]">Chat</span>
-      </button>
-    </Tooltip>
-  );
-}
+  const active = location.pathname === path;
 
-function JobsButton() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const active = location.pathname === "/jobs";
+  if (!hasAgentPath(surface, path)) return null;
+
   return (
-    <Tooltip content="Agent jobs" side="bottom">
+    <Tooltip content={tooltip} side="bottom">
       <button
         type="button"
-        onClick={() => void navigate("/jobs")}
-        aria-label="Agent jobs"
+        onClick={() => void navigate(path)}
+        aria-label={tooltip}
         aria-current={active ? "page" : undefined}
         className={cn(
           "h-7 px-2.5 inline-flex items-center gap-1.5 rounded-sm hover:bg-s1 transition-colors",
           active ? "text-ink bg-s1" : "text-ink-muted bg-transparent",
         )}
       >
-        <ActivityIcon />
-        <span className="text-xs font-medium tracking-[-0.05px]">Jobs</span>
+        {icon}
+        <span className="text-xs font-medium tracking-[-0.05px]">{label}</span>
       </button>
     </Tooltip>
   );
