@@ -3,7 +3,7 @@ export const AI_JOB_STEP_ROLE = {
     user: "user",
     assistant: "assistant",
     tool: "tool",
-    graph: "graph",
+    orchestration: "orchestration",
 } as const;
 
 export type AiJobStepRole = (typeof AI_JOB_STEP_ROLE)[keyof typeof AI_JOB_STEP_ROLE];
@@ -13,7 +13,7 @@ export const AI_JOB_STEP_ROLES = [
     AI_JOB_STEP_ROLE.user,
     AI_JOB_STEP_ROLE.assistant,
     AI_JOB_STEP_ROLE.tool,
-    AI_JOB_STEP_ROLE.graph,
+    AI_JOB_STEP_ROLE.orchestration,
 ] as const satisfies readonly AiJobStepRole[];
 
 export const AI_JOB_STEP_EVENT_KIND = {
