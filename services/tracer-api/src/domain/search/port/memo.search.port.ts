@@ -6,6 +6,8 @@ export interface MemoSearchQuery {
     readonly q?: string;
     readonly taskId?: string;
     readonly limit: number;
+    /** 앞에서 건너뛸 적중 수다. */
+    readonly offset?: number;
     readonly hasEvent: boolean;
 }
 

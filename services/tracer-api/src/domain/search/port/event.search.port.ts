@@ -9,7 +9,10 @@ export interface EventSearchQuery {
     readonly lane?: string;
     readonly from?: string;
     readonly to?: string;
+    readonly toolName?: string;
     readonly limit: number;
+    /** 앞에서 건너뛸 적중 수이며 같은 조건을 여러 장으로 나눠 읽을 때 쓴다. */
+    readonly offset?: number;
 }
 
 /** 이벤트 검색 결과의 애플리케이션 표현이다. */

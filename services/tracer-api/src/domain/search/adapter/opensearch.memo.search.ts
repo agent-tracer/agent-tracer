@@ -25,7 +25,12 @@ export class OpenSearchMemoSearch implements MemoSearchPort {
 
         const response = await this.client.search({
             index: MEMOS_INDEX,
-            body: { size: query.limit, sort: [{ updatedAt: "desc" }], query: { bool: { must, filter } } },
+            body: {
+                size: query.limit,
+                ...(query.offset !== undefined ? { from: query.offset } : {}),
+                sort: [{ updatedAt: "desc" }],
+                query: { bool: { must, filter } },
+            },
         });
         const body = response.body as unknown as SearchResponseBody;
         return body.hits.hits.map((hit) => toMemoHit(hit._id, hit._source ?? {}));

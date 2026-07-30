@@ -20,6 +20,7 @@ export class OpenSearchEventSearch implements EventSearchPort {
         if (query.taskId !== undefined) filter.push({ term: { taskId: query.taskId } });
         if (query.kind !== undefined) filter.push({ term: { kind: query.kind } });
         if (query.lane !== undefined) filter.push({ term: { lane: query.lane } });
+        if (query.toolName !== undefined) filter.push({ term: { toolName: query.toolName } });
         if (query.from !== undefined || query.to !== undefined) {
             filter.push({
                 range: {
@@ -36,7 +37,12 @@ export class OpenSearchEventSearch implements EventSearchPort {
 
         const response = await this.client.search({
             index: EVENTS_INDEX,
-            body: { size: query.limit, sort: [{ occurredAt: "desc" }], query: { bool: { must, filter } } },
+            body: {
+                size: query.limit,
+                ...(query.offset !== undefined ? { from: query.offset } : {}),
+                sort: [{ occurredAt: "desc" }],
+                query: { bool: { must, filter } },
+            },
         });
         const body = response.body as unknown as SearchResponseBody;
         return body.hits.hits.map((hit) => toEventHit(hit._id, hit._source ?? {}));
