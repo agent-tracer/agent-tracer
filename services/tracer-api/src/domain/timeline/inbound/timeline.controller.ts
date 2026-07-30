@@ -25,6 +25,7 @@ export class TimelineController {
             taskId,
             ...(query.cursor !== undefined ? { cursor: query.cursor } : {}),
             ...(query.limit !== undefined ? { limit: query.limit } : {}),
+            ...(query.order !== undefined ? { order: query.order } : {}),
         });
         if (result === null) throw new NotFoundException("Task not found");
         return result;
