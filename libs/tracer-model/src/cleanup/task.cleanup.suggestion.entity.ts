@@ -6,6 +6,22 @@ import {
 } from "@agent-tracer/kernel";
 import { InvariantViolationError } from "../error/invariant.error.js";
 
+export interface TaskCleanupSuggestionPendingInput {
+    readonly id: string;
+    readonly userId: string;
+    readonly jobId: string;
+    readonly taskId: string;
+    readonly kind: TaskCleanupSuggestionKind;
+    readonly rationale: string;
+    readonly observedLastEventAt: Date | null;
+}
+
+export interface TaskCleanupSuggestionRestateInput {
+    readonly jobId: string;
+    readonly rationale: string;
+    readonly observedLastEventAt: Date | null;
+}
+
 @Entity({ name: "task_cleanup_suggestions" })
 @Index("cleanup_user_status", ["userId", "status", "createdAt"])
 @Index("cleanup_pending_task_kind_unique", ["userId", "taskId", "kind"], {
@@ -53,6 +69,32 @@ export class TaskCleanupSuggestionEntity {
     // 그 뒤로 새 활동을 겪었는지 비교하는 기준값이다.
     @Column({ name: "observed_last_event_at", type: "timestamptz", nullable: true })
     observedLastEventAt!: Date | null;
+
+    static pending(input: TaskCleanupSuggestionPendingInput, now: Date): TaskCleanupSuggestionEntity {
+        const row = new TaskCleanupSuggestionEntity();
+        row.id = input.id;
+        row.userId = input.userId;
+        row.jobId = input.jobId;
+        row.taskId = input.taskId;
+        row.kind = input.kind;
+        row.currentValue = null;
+        row.proposedValue = null;
+        row.rationale = input.rationale;
+        row.status = CLEANUP_SUGGESTION_STATUS.pending;
+        row.error = null;
+        row.createdAt = now;
+        row.resolvedAt = null;
+        row.observedLastEventAt = input.observedLastEventAt;
+        return row;
+    }
+
+    /** 같은 태스크와 종류의 대기 행은 하나뿐이므로 새 근거와 새 관측 시각을 그 행에 겹쳐 적는다. */
+    restate(input: TaskCleanupSuggestionRestateInput): void {
+        if (this.status !== CLEANUP_SUGGESTION_STATUS.pending) throw new InvariantViolationError("cleanup.not-pending");
+        this.jobId = input.jobId;
+        this.rationale = input.rationale;
+        this.observedLastEventAt = input.observedLastEventAt;
+    }
 
     isOwnedBy(userId: string): boolean {
         return this.userId === userId;

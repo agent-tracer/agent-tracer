@@ -1,17 +1,19 @@
-import { Controller, Get, Headers, HttpCode, HttpStatus, Param, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, Headers, HttpCode, HttpStatus, Param, Post, Query } from "@nestjs/common";
 import { MONITOR_USER_HEADER } from "@agent-tracer/kernel";
+import { CreateCleanupSuggestionsUseCase } from "~tracer-api/domain/cleanup/application/command/create.cleanup.suggestions.usecase.js";
 import { ListCleanupSuggestionsUseCase } from "~tracer-api/domain/cleanup/application/query/list.cleanup.suggestions.usecase.js";
 import { AcceptCleanupSuggestionUseCase } from "~tracer-api/domain/cleanup/application/command/accept.cleanup.suggestion.usecase.js";
 import { DismissCleanupSuggestionUseCase } from "~tracer-api/domain/cleanup/application/command/dismiss.cleanup.suggestion.usecase.js";
 import { SchemaValidationPipe } from "~tracer-api/support/schema.validation.pipe.js";
 import { pathParamPipe } from "~tracer-api/support/path-param.pipe.js";
 import { resolveUserId } from "~tracer-api/support/request-user.js";
-import { listQuerySchema, type ListQuery } from "./cleanup.schema.js";
+import { createBodySchema, listQuerySchema, type CreateBody, type ListQuery } from "./cleanup.schema.js";
 
-/** 태스크 정리 제안의 조회·수락·기각 HTTP 계약을 제공한다. */
+/** 태스크 정리 제안의 생성·조회·수락·기각 HTTP 계약을 제공한다. */
 @Controller("api/v1/task-cleanup")
 export class CleanupController {
     constructor(
+        private readonly createSuggestions: CreateCleanupSuggestionsUseCase,
         private readonly listSuggestions: ListCleanupSuggestionsUseCase,
         private readonly acceptSuggestion: AcceptCleanupSuggestionUseCase,
         private readonly dismissSuggestion: DismissCleanupSuggestionUseCase,
@@ -23,6 +25,19 @@ export class CleanupController {
         @Query(new SchemaValidationPipe(listQuerySchema)) query: ListQuery,
     ) {
         return this.listSuggestions.execute(resolveUserId(user), query.status);
+    }
+
+    @Post("suggestions")
+    @HttpCode(HttpStatus.CREATED)
+    async create(
+        @Headers(MONITOR_USER_HEADER) user: string | undefined,
+        @Body(new SchemaValidationPipe(createBodySchema)) body: CreateBody,
+    ) {
+        return this.createSuggestions.execute({
+            userId: resolveUserId(user),
+            drafts: body.suggestions,
+            ...(body.jobId !== undefined && body.jobId !== null ? { jobId: body.jobId } : {}),
+        });
     }
 
     @Post("suggestions/:id/accept")

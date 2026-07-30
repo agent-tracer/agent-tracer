@@ -3,9 +3,10 @@ import type { CleanupSuggestionRepositoryPort } from "~tracer-api/domain/cleanup
 
 export const CLEANUP_TRANSACTION = Symbol("CleanupTransaction");
 
-/** 정리 제안 수락이 소유권을 확인할 때 쓰는 태스크 읽기 포트다. */
+/** 정리 제안이 소유권과 마지막 활동 시각을 확인할 때 쓰는 태스크 읽기 포트다. */
 export interface CleanupTaskReaderPort {
-    findById(id: string): Promise<TaskEntity | null>;
+    findById(userId: string, id: string): Promise<TaskEntity | null>;
+    findByIds(userId: string, ids: readonly string[]): Promise<TaskEntity[]>;
 }
 
 /** 수락 결과를 사용자 표시 상태에 반영하는 포트다. */

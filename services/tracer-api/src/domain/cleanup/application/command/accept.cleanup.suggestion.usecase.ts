@@ -44,7 +44,7 @@ export class AcceptCleanupSuggestionUseCase {
 
         if (suggestion.isAccepted()) return suggestion;
 
-        const task = await tx.tasks.findById(suggestion.taskId);
+        const task = await tx.tasks.findById(userId, suggestion.taskId);
         if (task !== null && task.hasActivitySince(suggestion.observedLastEventAt)) {
             throw new InvariantViolationError("cleanup.stale");
         }

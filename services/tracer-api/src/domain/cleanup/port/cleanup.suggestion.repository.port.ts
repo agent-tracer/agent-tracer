@@ -1,4 +1,4 @@
-import type { TaskCleanupSuggestionStatus } from "@agent-tracer/kernel";
+import type { TaskCleanupSuggestionKind, TaskCleanupSuggestionStatus } from "@agent-tracer/kernel";
 import type { TaskCleanupSuggestionEntity } from "@agent-tracer/tracer-model";
 
 export const CLEANUP_SUGGESTION_REPOSITORY = Symbol("CleanupSuggestionRepository");
@@ -7,5 +7,10 @@ export const CLEANUP_SUGGESTION_REPOSITORY = Symbol("CleanupSuggestionRepository
 export interface CleanupSuggestionRepositoryPort {
     findById(id: string): Promise<TaskCleanupSuggestionEntity | null>;
     findByUserStatus(userId: string, status: TaskCleanupSuggestionStatus): Promise<TaskCleanupSuggestionEntity[]>;
+    findPendingByUserTaskIds(
+        userId: string,
+        taskIds: readonly string[],
+        kind: TaskCleanupSuggestionKind,
+    ): Promise<TaskCleanupSuggestionEntity[]>;
     upsert(suggestion: TaskCleanupSuggestionEntity): Promise<void>;
 }
