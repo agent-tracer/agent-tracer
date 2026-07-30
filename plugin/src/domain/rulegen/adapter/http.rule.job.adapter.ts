@@ -15,6 +15,9 @@ const HELD_LEASE: RuleJobLeaseState = {leaseHeld: true, canceled: false};
 const REPORT_MAX_ATTEMPTS = 3;
 const REPORT_BACKOFF_MS = 500;
 
+// 잡은 에이전트 서비스가 소유하므로 게이트웨이의 에이전트 접두사 아래로 부른다.
+const AGENT_JOBS = "/api/agent/jobs";
+
 interface JobListEnvelope {
     readonly data?: {readonly items?: readonly PendingRuleJob[]};
 }
@@ -48,7 +51,7 @@ export class HttpRuleJobAdapter implements RuleJobPort {
     }
 
     async pendingJobs(): Promise<readonly PendingRuleJob[]> {
-        const url = `${this.baseUrl}/api/v1/jobs?kind=${encodeURIComponent(JOB_KIND.ruleGeneration)}&status=${encodeURIComponent(JOB_STATUS.pending)}`;
+        const url = `${this.baseUrl}${AGENT_JOBS}?kind=${encodeURIComponent(JOB_KIND.ruleGeneration)}&status=${encodeURIComponent(JOB_STATUS.pending)}`;
         const fetched = await getJson<JobListEnvelope>(url, this.headers);
         return fetched.kind === "found" ? (fetched.value.data?.items ?? []) : [];
     }
@@ -108,14 +111,14 @@ export class HttpRuleJobAdapter implements RuleJobPort {
     }
 
     async hasActiveJob(taskId: string): Promise<boolean> {
-        const url = `${this.baseUrl}/api/v1/jobs/latest?kind=${encodeURIComponent(JOB_KIND.ruleGeneration)}&taskId=${encodeURIComponent(taskId)}`;
+        const url = `${this.baseUrl}${AGENT_JOBS}/latest?kind=${encodeURIComponent(JOB_KIND.ruleGeneration)}&taskId=${encodeURIComponent(taskId)}`;
         const fetched = await getJson<LatestJobEnvelope>(url, this.headers);
         const status = fetched.kind === "found" ? fetched.value.data?.job?.status : undefined;
         return status !== undefined && ACTIVE_STATUSES.has(status);
     }
 
     async enqueue(taskId: string, anchorEventId: string, maxRules: number): Promise<boolean> {
-        const response = await postJson(`${this.baseUrl}/api/v1/jobs`, this.headers, {
+        const response = await postJson(`${this.baseUrl}${AGENT_JOBS}`, this.headers, {
             kind: JOB_KIND.ruleGeneration,
             input: {
                 taskId,
@@ -129,7 +132,7 @@ export class HttpRuleJobAdapter implements RuleJobPort {
     }
 
     private jobUrl(jobId: string, action: string): string {
-        return `${this.baseUrl}/api/v1/jobs/${encodeURIComponent(jobId)}/${action}`;
+        return `${this.baseUrl}${AGENT_JOBS}/${encodeURIComponent(jobId)}/${action}`;
     }
 }
 

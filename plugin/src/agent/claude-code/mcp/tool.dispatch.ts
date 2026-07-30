@@ -27,6 +27,7 @@ import {
     onRecipeMarkCleared,
     onRecipeOpened,
     onRecipeOutcomeReported,
+    onRecipeScanAvailabilityRequested,
     onRecipeScanRequested,
     onRecipeSearchRequested,
 } from "~plugin/domain/recipe/inbound/recipe.hook.js";
@@ -42,16 +43,23 @@ import type {McpToolSpec} from "~plugin/support/mcp.tool.js";
 const MCP_RECIPE_SCAN_PROMPT = "/recipe";
 const UNKNOWN_SESSION = "unknown_session";
 
-/** MCP tools/list가 광고하는 도구 전부다. */
-export const MCP_TOOLS: readonly McpToolSpec[] = [
+/** MCP tools/list가 배포와 무관하게 늘 광고하는 도구다. */
+const ALWAYS_AVAILABLE_TOOLS: readonly McpToolSpec[] = [
     GET_RECIPE_TOOL,
     SEARCH_RECIPES_TOOL,
     REPORT_RECIPE_OUTCOME_TOOL,
-    REQUEST_RECIPE_SCAN_TOOL,
     SET_TASK_TITLE_TOOL,
     CREATE_MEMO_TOOL,
     SEARCH_MEMOS_TOOL,
 ];
+
+/** tools/list가 이번 호출에서 실제로 광고할 도구를 정하며, 잡 접수 창구가 없는 배포에서는 request_recipe_scan을 뺀다. */
+export async function resolveAvailableTools(): Promise<readonly McpToolSpec[]> {
+    const scanAvailable = await onRecipeScanAvailabilityRequested(mcpRuntime.recipe);
+    return scanAvailable
+        ? [...ALWAYS_AVAILABLE_TOOLS, REQUEST_RECIPE_SCAN_TOOL]
+        : ALWAYS_AVAILABLE_TOOLS;
+}
 
 export interface ToolCallResult {
     readonly text: string;
@@ -138,6 +146,10 @@ export async function callTool(name: string, args: unknown): Promise<ToolCallRes
                 : {text: `Recipe no longer exists: ${parsed.recipeId}`, isError: true};
         }
         case REQUEST_RECIPE_SCAN_TOOL.name: {
+            // tools/list가 이 도구를 이미 감췄어야 하지만, 캐시된 목록으로 부를 수 있어 한 번 더 확인한다.
+            if (!(await onRecipeScanAvailabilityRequested(mcpRuntime.recipe))) {
+                return {text: "Recipe scanning is not available in this deployment.", isError: false};
+            }
             const target = resolveTarget();
             if (target === undefined) return {text: `Scan not queued (${UNKNOWN_SESSION}).`, isError: true};
             const queued = await onRecipeScanRequested(mcpRuntime.recipe, {
