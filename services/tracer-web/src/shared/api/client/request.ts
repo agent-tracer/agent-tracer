@@ -1,5 +1,8 @@
+import { getAgentBackend } from "~tracer-web/shared/api/agent-backend.js";
 import { getMonitorApiBaseUrl } from "~tracer-web/shared/api/monitor-endpoints.js";
 import { getUserId } from "~tracer-web/shared/api/user-identity.js";
+
+const AGENT_PREFIX = "/api/agent/";
 
 const DEFAULT_REQUEST_TIMEOUT_MS = 30_000;
 
@@ -49,6 +52,14 @@ export function createRequestSignal(options?: RequestOptions): {
   };
 }
 
+/** 고른 상류는 게이트웨이가 읽는 값이라 에이전트 접두사 아래 요청에만 실린다. */
+function routeToAgentBackend(pathname: string): string {
+  const backend = getAgentBackend();
+  if (backend === null || !pathname.startsWith(AGENT_PREFIX)) return pathname;
+  const separator = pathname.includes("?") ? "&" : "?";
+  return `${pathname}${separator}backend=${encodeURIComponent(backend)}`;
+}
+
 /** 공통 신원·쿠키·취소 규약을 적용해 모니터 HTTP 요청을 보낸다. */
 export async function request(
   pathname: string,
@@ -66,7 +77,10 @@ export async function request(
     ...(signal ? { signal } : {}),
   };
   try {
-    return await fetch(`${getMonitorApiBaseUrl()}${pathname}`, requestInit);
+    return await fetch(
+      `${getMonitorApiBaseUrl()}${routeToAgentBackend(pathname)}`,
+      requestInit,
+    );
   } catch (error) {
     if (
       signal?.aborted &&
