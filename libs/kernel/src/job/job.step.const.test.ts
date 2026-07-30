@@ -36,7 +36,7 @@ describe("AiJobStep 계약", () => {
             {
                 seq: 2,
                 attempt: 2,
-                role: AI_JOB_STEP_ROLE.graph,
+                role: AI_JOB_STEP_ROLE.orchestration,
                 content: "증거 충분성 판정을 마쳤다.",
                 truncated: false,
                 toolCalls: [],
