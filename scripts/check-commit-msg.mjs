@@ -17,6 +17,9 @@ const STRUCTURED_BODY_PATTERN = /^(?<prefix>[A-Za-z][A-Za-z-]*):/;
 const MAX_TITLE_LENGTH = 60;
 const MAX_BODY_LINES = 4;
 
+// 플러그인 릴리스는 버전 파일만 올리므로 제목이 그 버전 하나를 갖는다.
+const RELEASE_SUBJECT_PATTERN = /^\[RELEASE\] (0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
+
 // 저장소가 어떻게 만들어졌는지가 아니라 무엇이 되었는지를 쓰게 한다.
 const TRACE_WORDS = Object.freeze({
   "기존": "지금의 이름과 구조로 쓴다",
@@ -65,6 +68,10 @@ export function checkCommitMessage(message) {
 
   if (subject.startsWith("Merge ") || subject.startsWith("Revert ")) return [];
 
+  if (subject.startsWith("[RELEASE]")) {
+    return checkReleaseMessage(subject, lines.slice(1));
+  }
+
   const errors = [];
   const match = subject.match(HEADER_PATTERN);
   if (!match) {
@@ -100,6 +107,23 @@ export function checkCommitMessage(message) {
   }
 
   errors.push(...checkBody(lines.slice(1)));
+  return errors;
+}
+
+function checkReleaseMessage(subject, bodyLines) {
+  const errors = [];
+
+  if (!RELEASE_SUBJECT_PATTERN.test(subject)) {
+    errors.push(`릴리스 제목은 "[RELEASE] X.Y.Z"로 쓴다: "${subject}"`);
+  }
+
+  const content = bodyLines
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith("#") && !COAUTHOR_TRAILER_PATTERN.test(line));
+  if (content.length > 0) {
+    errors.push("릴리스 커밋의 본문은 비어 있어야 한다");
+  }
+
   return errors;
 }
 
