@@ -1,0 +1,62 @@
+name: Plugin Release
+
+on:
+  push:
+    tags: ["plugin-v*.*.*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: 태그가 말하는 버전
+        id: tag
+        run: echo "version=${GITHUB_REF_NAME#plugin-v}" >> "$GITHUB_OUTPUT"
+
+      - name: 태그와 두 선언의 삼자 대조
+        run: node scripts/check-plugin-version.mjs --expected "${{ steps.tag.outputs.version }}"
+
+      - name: 플러그인 타입 검사
+        run: npm run lint:types --workspace @agent-tracer/plugin
+
+      - name: 플러그인 테스트
+        run: npm test --workspace @agent-tracer/plugin
+
+      - name: 플러그인 빌드
+        run: npm run build --workspace @agent-tracer/plugin
+
+      - name: 설치 산출물 조립
+        run: node scripts/package-plugin.mjs --expected "${{ steps.tag.outputs.version }}"
+
+      - name: 압축과 체크섬
+        id: archive
+        run: |
+          set -euo pipefail
+          name="agent-tracer-plugin-v${{ steps.tag.outputs.version }}"
+          tar -C build/plugin -czf "${name}.tar.gz" "$name"
+          sha256sum "${name}.tar.gz" > "${name}.sha256"
+          echo "name=${name}" >> "$GITHUB_OUTPUT"
+
+      - name: 릴리스 생성
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --notes "설치 산출물과 체크섬을 첨부한다." \
+            "${{ steps.archive.outputs.name }}.tar.gz" \
+            "${{ steps.archive.outputs.name }}.sha256"
