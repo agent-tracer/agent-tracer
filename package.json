@@ -13,6 +13,8 @@
     "gen:paths": "node scripts/gen-paths.mjs",
     "check:paths": "node scripts/gen-paths.mjs --check",
     "check:coauthors": "node scripts/check-coauthors.mjs",
+    "plugin:check-version": "node scripts/check-plugin-version.mjs",
+    "plugin:package": "node scripts/package-plugin.mjs",
     "migrate": "node scripts/migrate.mjs",
     "lint": "npm run lint:format && npm run lint:types && npm run lint:structure && npm run lint:deps",
     "lint:format": "eslint .",
