@@ -9,16 +9,17 @@ const SEMVER_PATTERN = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
-// 릴리스 버전의 정본은 설치본이 읽는 매니페스트이고 workspace 선언이 그것을 따른다.
+// 릴리스 버전의 정본은 설치본이 읽는 매니페스트이고 나머지 둘이 그것을 따른다.
 const SOURCES = Object.freeze([
-  { label: "plugin/.claude-plugin/plugin.json", file: "plugin/.claude-plugin/plugin.json", canonical: true },
-  { label: "plugin/package.json", file: "plugin/package.json", canonical: false },
+  { file: "plugin/.claude-plugin/plugin.json", at: ["version"], canonical: true },
+  { file: "plugin/package.json", at: ["version"], canonical: false },
+  { file: ".claude-plugin/marketplace.json", at: ["metadata", "version"], canonical: false },
 ]);
 
-function readVersion(relativePath) {
-  const absolute = path.join(repoRoot, relativePath);
-  const parsed = JSON.parse(fs.readFileSync(absolute, "utf8"));
-  return typeof parsed.version === "string" ? parsed.version : "";
+function readVersion({ file, at }) {
+  const parsed = JSON.parse(fs.readFileSync(path.join(repoRoot, file), "utf8"));
+  const value = at.reduce((node, key) => (node === undefined || node === null ? undefined : node[key]), parsed);
+  return typeof value === "string" ? value : "";
 }
 
 /** 두 선언과 기대값을 대조해 위반 목록을 낸다. */
@@ -61,7 +62,7 @@ function parseExpected(argv) {
 }
 
 function main() {
-  const versions = SOURCES.map((source) => ({ ...source, version: readVersion(source.file) }));
+  const versions = SOURCES.map((source) => ({ ...source, label: source.file, version: readVersion(source) }));
   const errors = checkPluginVersion(versions, parseExpected(process.argv.slice(2)));
 
   for (const { label, version } of versions) {
