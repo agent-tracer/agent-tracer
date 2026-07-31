@@ -38,6 +38,17 @@ jobs:
       - name: 플러그인 빌드
         run: npm run build --workspace @agent-tracer/plugin
 
+      # 설치본은 저장소를 클론해 만들어지므로 태그에 실린 번들이 곧 사용자가 실행하는 코드다.
+      - name: 태그의 번들이 빌드 결과와 같은지 검사
+        run: |
+          set -euo pipefail
+          drift=$(git status --porcelain -- plugin/dist)
+          if [ -n "$drift" ]; then
+            echo "::error::태그에 실린 번들이 지금 빌드한 결과와 다르다"
+            echo "$drift"
+            exit 1
+          fi
+
       - name: 설치 산출물 조립
         run: node scripts/package-plugin.mjs --expected "${{ steps.tag.outputs.version }}"
 
