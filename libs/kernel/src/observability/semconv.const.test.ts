@@ -37,13 +37,10 @@ describe("AGENT_TRACER_ATTR", () => {
         expect(AGENT_TRACER_ATTR.jobId).toBe("agent_tracer.job.id");
     });
 
-    it("실행·실험·프롬프트 상관키를 백엔드 공통 이름으로 고정한다", () => {
+    it("실행과 프롬프트 상관키를 백엔드 공통 이름으로 고정한다", () => {
         expect({
             executionId: AGENT_TRACER_ATTR.executionId,
             attemptId: AGENT_TRACER_ATTR.attemptId,
-            experimentId: AGENT_TRACER_ATTR.experimentId,
-            exampleId: AGENT_TRACER_ATTR.exampleId,
-            variantId: AGENT_TRACER_ATTR.variantId,
             modelCallId: AGENT_TRACER_ATTR.modelCallId,
             promptVersion: AGENT_TRACER_ATTR.promptVersion,
             promptHash: AGENT_TRACER_ATTR.promptHash,
@@ -51,9 +48,6 @@ describe("AGENT_TRACER_ATTR", () => {
         }).toEqual({
             executionId: "agent_tracer.execution.id",
             attemptId: "agent_tracer.attempt.id",
-            experimentId: "agent_tracer.experiment.id",
-            exampleId: "agent_tracer.example.id",
-            variantId: "agent_tracer.variant.id",
             modelCallId: "agent_tracer.model_call.id",
             promptVersion: "agent_tracer.prompt.version",
             promptHash: "agent_tracer.prompt.hash",
