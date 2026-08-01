@@ -19,16 +19,16 @@ import {
     type RulegenToolSpec,
 } from "~plugin/domain/rulegen/model/rulegen.tool.model.js";
 
-interface NumberContract {
-    readonly default: number;
-    readonly min: number;
-    readonly max: number;
+interface ArgContract {
+    readonly type: string;
+    readonly required?: boolean;
+    readonly default?: number;
+    readonly min?: number;
+    readonly max?: number;
 }
 
 interface ToolContract {
-    readonly required: string[];
-    readonly optional: string[];
-    readonly numbers?: Readonly<Record<string, NumberContract>>;
+    readonly args: Readonly<Record<string, ArgContract>>;
     readonly responseFields: string[];
 }
 
@@ -62,12 +62,19 @@ interface RuleGenerationToolContract {
 }
 
 // 두 백엔드가 같은 파일을 읽어야 한쪽만 바뀌는 드리프트가 남지 않는다.
-const CONTRACT = (JSON.parse(
+const CONTRACT = JSON.parse(
     readFileSync(
-        new URL("../../../../../contract/agent/rule-generation/spec.json", import.meta.url),
+        new URL("../../../../../contract/agent/rule-generation/tool.json", import.meta.url),
         "utf8",
     ),
-) as {readonly tools: RuleGenerationToolContract}).tools;
+) as RuleGenerationToolContract;
+
+function contractArgNames(tool: ToolContract): {readonly required: string[]; readonly optional: string[]} {
+    const required: string[] = [];
+    const optional: string[] = [];
+    for (const [name, arg] of Object.entries(tool.args)) (arg.required === true ? required : optional).push(name);
+    return {required, optional};
+}
 
 const SPEC = buildRuleGenerationSpec({
     jobId: "job-1",
@@ -126,7 +133,7 @@ describe("rule-generation 도구 계약", () => {
 
     it("도구마다 필수와 선택 인자가 골든 계약과 같다", () => {
         for (const spec of RULEGEN_TOOL_SPECS) {
-            const contract = CONTRACT.tools[spec.name]!;
+            const contract = contractArgNames(CONTRACT.tools[spec.name]!);
             const {required, optional} = partitionFields(spec);
 
             expect(new Set(required)).toEqual(new Set(contract.required));
@@ -135,14 +142,16 @@ describe("rule-generation 도구 계약", () => {
     });
 
     it("이벤트 상한의 기본값과 상하한이 골든 계약과 같다", () => {
-        const bound = CONTRACT.tools["get_task_events"]!.numbers!["limit"]!;
+        const bound = CONTRACT.tools["get_task_events"]!.args["limit"]!;
+        const min = bound.min!;
+        const max = bound.max!;
 
         expect(RULEGEN_EVENT_LIMIT.fallback).toBe(bound.default);
-        expect(RULEGEN_EVENT_LIMIT.min).toBe(bound.min);
-        expect(RULEGEN_EVENT_LIMIT.max).toBe(bound.max);
+        expect(RULEGEN_EVENT_LIMIT.min).toBe(min);
+        expect(RULEGEN_EVENT_LIMIT.max).toBe(max);
         expect(resolveEventLimit(undefined)).toBe(bound.default);
-        expect(resolveEventLimit(bound.min - 1)).toBe(bound.min);
-        expect(resolveEventLimit(bound.max + 1)).toBe(bound.max);
+        expect(resolveEventLimit(min - 1)).toBe(min);
+        expect(resolveEventLimit(max + 1)).toBe(max);
     });
 
     it("도구 응답이 모델이 인용할 식별자를 담는다", () => {
