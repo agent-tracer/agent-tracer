@@ -7,7 +7,6 @@ import {
   ChecklistIcon,
   GearIcon,
   NoteIcon,
-  SparkleIcon,
   TagIcon,
   Tooltip,
 } from "~tracer-web/shared/ui/index.js";
@@ -30,12 +29,6 @@ export function TopActions() {
       <MemosButton />
       <AgentButton path="/chat" label="Chat" tooltip="Chat with the agent" icon={<ChatIcon />} />
       <AgentButton path="/jobs" label="Jobs" tooltip="Agent jobs" icon={<ActivityIcon />} />
-      <AgentButton
-        path="/evaluation"
-        label="Evaluate"
-        tooltip="Evaluation workspace"
-        icon={<SparkleIcon spinning={false} />}
-      />
       <SettingsButton />
       <span aria-hidden className="w-px h-[18px] bg-hair" />
       <ThemeToggle />

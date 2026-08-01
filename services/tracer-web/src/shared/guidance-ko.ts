@@ -11,7 +11,6 @@ import {
 import { KO_MEMOS } from "~tracer-web/shared/guidance-ko/memos.js";
 import { KO_TAGS } from "~tracer-web/shared/guidance-ko/tags.js";
 import { KO_CHAT } from "~tracer-web/shared/guidance-ko/chat.js";
-import { KO_EVALUATION } from "~tracer-web/shared/guidance-ko/evaluation.js";
 import type { GuidanceCatalog } from "~tracer-web/shared/guidance-en.js";
 
 export const KO_GUIDANCE = defineGuidanceCatalog({
@@ -28,5 +27,4 @@ export const KO_GUIDANCE = defineGuidanceCatalog({
   memos: KO_MEMOS,
   tags: KO_TAGS,
   chat: KO_CHAT,
-  evaluation: KO_EVALUATION,
 } satisfies GuidanceCatalog);
