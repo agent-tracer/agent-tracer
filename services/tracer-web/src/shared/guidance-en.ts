@@ -11,7 +11,6 @@ import {
 import { EN_MEMOS } from "~tracer-web/shared/guidance-en/memos.js";
 import { EN_TAGS } from "~tracer-web/shared/guidance-en/tags.js";
 import { EN_CHAT } from "~tracer-web/shared/guidance-en/chat.js";
-import { EN_EVALUATION } from "~tracer-web/shared/guidance-en/evaluation.js";
 
 export const EN_GUIDANCE = defineGuidanceCatalog({
   common: EN_COMMON,
@@ -27,7 +26,6 @@ export const EN_GUIDANCE = defineGuidanceCatalog({
   memos: EN_MEMOS,
   tags: EN_TAGS,
   chat: EN_CHAT,
-  evaluation: EN_EVALUATION,
 });
 
 export type GuidanceCatalog = typeof EN_GUIDANCE;

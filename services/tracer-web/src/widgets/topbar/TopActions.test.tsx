@@ -24,7 +24,6 @@ const AGENT_ROUTES = [
   { path: "chat" },
   { path: "chat/:threadId" },
   { path: "jobs" },
-  { path: "evaluation" },
 ];
 
 function renderWithRoutes(routes: { path: string }[]) {
@@ -42,7 +41,7 @@ function renderWithRoutes(routes: { path: string }[]) {
 }
 
 function agentLabels(): (string | null)[] {
-  return ["Chat with the agent", "Agent jobs", "Evaluation workspace"].map(
+  return ["Chat with the agent", "Agent jobs"].map(
     (name) => screen.queryByRole("button", { name })?.textContent ?? null,
   );
 }
@@ -53,19 +52,19 @@ describe("TopActions", () => {
   it("에이전트 라우트가 얹히면 그 화면으로 가는 단추를 낸다", () => {
     renderWithRoutes(AGENT_ROUTES);
 
-    expect(agentLabels()).toEqual(["Chat", "Jobs", "Evaluate"]);
+    expect(agentLabels()).toEqual(["Chat", "Jobs"]);
   });
 
   it("에이전트가 배포에 없으면 그 화면으로 가는 단추를 내지 않는다", () => {
     renderWithRoutes([]);
 
-    expect(agentLabels()).toEqual([null, null, null]);
+    expect(agentLabels()).toEqual([null, null]);
   });
 
   it("얹히지 않은 라우트의 단추만 내지 않는다", () => {
     renderWithRoutes([{ path: "chat" }]);
 
-    expect(agentLabels()).toEqual(["Chat", null, null]);
+    expect(agentLabels()).toEqual(["Chat", null]);
   });
 
   it("에이전트가 배포에 없어도 추적 화면으로 가는 단추는 낸다", () => {
