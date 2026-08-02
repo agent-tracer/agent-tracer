@@ -42,4 +42,58 @@ describe("RecordTodoUsecase", () => {
         expect(metadata["todoState"]).toBe("cancelled");
         expect(metadata["autoReconciled"]).toBe(true);
     });
+
+    it("TaskCreate와 TaskUpdate를 taskId로 누적해 같은 원장에 남긴다", async () => {
+        const sink = new InMemoryEventSink();
+        const snapshots = new InMemoryTodoSnapshot();
+        const usecase = new RecordTodoUsecase(sink, snapshots, new SequentialIdGenerator(), new FixedClock(NOW), "claude-plugin");
+
+        await usecase.execute(
+            {
+                toolName: "TaskCreate",
+                toolInput: {subject: "테스트 실행", description: "vitest 를 돌린다"},
+                toolResponse: {task: {id: "task-abc", subject: "테스트 실행"}},
+            },
+            TARGET,
+            "cc-1",
+        );
+        await usecase.execute(
+            {
+                toolName: "TaskUpdate",
+                toolInput: {taskId: "task-abc", status: "in_progress"},
+            },
+            TARGET,
+            "cc-1",
+        );
+        await usecase.execute(
+            {
+                toolName: "TaskUpdate",
+                toolInput: {taskId: "task-abc", status: "completed"},
+            },
+            TARGET,
+            "cc-1",
+        );
+
+        expect(sink.events).toHaveLength(3);
+        const todoIds = sink.events.map((event) => (event.payload["metadata"] as Record<string, unknown>)["todoId"]);
+        expect(new Set(todoIds)).toEqual(new Set(["task-abc"]));
+        const states = sink.events.map((event) => (event.payload["metadata"] as Record<string, unknown>)["todoState"]);
+        expect(states).toEqual(["added", "in_progress", "completed"]);
+    });
+
+    it("TaskUpdate의 deleted 상태를 취소로 남긴다", async () => {
+        const sink = new InMemoryEventSink();
+        const snapshots = new InMemoryTodoSnapshot();
+        const usecase = new RecordTodoUsecase(sink, snapshots, new SequentialIdGenerator(), new FixedClock(NOW), "claude-plugin");
+
+        await usecase.execute(
+            {toolName: "TaskUpdate", toolInput: {taskId: "task-xyz", status: "deleted"}},
+            TARGET,
+            "cc-1",
+        );
+
+        const metadata = sink.events[0]?.payload["metadata"] as Record<string, unknown>;
+        expect(metadata["todoState"]).toBe("cancelled");
+        expect(metadata["todoId"]).toBe("task-xyz");
+    });
 });
