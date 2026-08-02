@@ -9,6 +9,7 @@ import {
 } from "~tracer-web/entities/job/api/api-jobs.js";
 import type { TaskId } from "~tracer-web/shared/identity.js";
 import { monitorQueryKeys } from "~tracer-web/shared/api/query-keys.js";
+import { useAgentBackendSettled } from "~tracer-web/shared/api/agent-backend.js";
 
 // 종류별 최신 잡 상태를 폴링한다.
 export function useJobStatus<T extends { readonly status: JobStatus }>(
@@ -37,7 +38,9 @@ export interface JobHistoryFilters {
 export function useJobsHistoryQuery(filters: JobHistoryFilters = {}): UseQueryResult<JobListDto> {
   const limit = filters.limit ?? 50;
   const offset = filters.offset ?? 0;
+  const settled = useAgentBackendSettled();
   return useQuery({
+    enabled: settled,
     queryKey: monitorQueryKeys.jobsHistory(
       filters.kind ?? "all",
       filters.status ?? "all",
