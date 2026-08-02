@@ -13,6 +13,7 @@ import {
     type ToolCall,
 } from "~plugin/domain/ingest/model/tool.call.model.js";
 import type {TodoLoggedMetadata} from "~plugin/domain/ingest/model/tool.metadata.model.js";
+import {isRecord} from "~plugin/support/json.js";
 import {stableTodoId} from "~plugin/support/hash.js";
 import {toTrimmedString} from "~plugin/support/text.js";
 
@@ -119,19 +120,32 @@ function shapeTodoWrite(call: ToolCall, previous: readonly PersistedTodo[]): Sha
 }
 
 function shapeTaskTool(call: ToolCall): readonly ShapedToolEvent[] {
-    const taskId = firstString(call.toolInput, ["task_id", "taskId", "id"]);
-    const title = firstString(call.toolInput, ["task_subject", "subject", "title", "content"]) || taskId;
-    if (!title) return [];
-    const status = firstString(call.toolInput, ["status"])
-        || (call.toolName === "TaskCreate" ? "pending" : "in_progress");
-    const priority = firstString(call.toolInput, ["priority"]) || "medium";
-    return [todoEvent(
-        call,
-        taskId || stableTodoId(title, priority),
-        title,
-        STATUS_MAP[status] ?? "added",
-        {priority, status},
-    )];
+    if (call.toolName === "TaskCreate") return shapeTaskCreate(call);
+    return shapeTaskUpdate(call);
+}
+
+/** TaskCreateInput 은 subject 만 갖고 taskId 는 SDK 가 TaskCreateOutput.task.id 로 되돌린다. */
+function shapeTaskCreate(call: ToolCall): readonly ShapedToolEvent[] {
+    const subject = firstString(call.toolInput, ["subject"]);
+    if (!subject) return [];
+    const taskId = taskIdOfResponse(call.toolResponse) || stableTodoId(subject, "medium");
+    return [todoEvent(call, taskId, subject, "added", {priority: "medium", status: "pending"})];
+}
+
+/** TaskUpdateInput 의 status 는 pending·in_progress·completed·deleted 를 갖는다. */
+function shapeTaskUpdate(call: ToolCall): readonly ShapedToolEvent[] {
+    const taskId = firstString(call.toolInput, ["taskId"]);
+    if (!taskId) return [];
+    const subject = firstString(call.toolInput, ["subject"]) || taskId;
+    const status = firstString(call.toolInput, ["status"]) || "in_progress";
+    const todoState = status === "deleted" ? "cancelled" : (STATUS_MAP[status] ?? "in_progress");
+    return [todoEvent(call, taskId, subject, todoState, {priority: "medium", status})];
+}
+
+function taskIdOfResponse(toolResponse: unknown): string {
+    if (!isRecord(toolResponse)) return "";
+    const task = toolResponse["task"];
+    return isRecord(task) ? toTrimmedString(task["id"]) : "";
 }
 
 function todoEvent(

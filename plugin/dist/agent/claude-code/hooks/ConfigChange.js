@@ -1327,18 +1327,27 @@ function shapeTodoWrite(call, previous) {
   return { events, snapshot: current };
 }
 function shapeTaskTool(call) {
-  const taskId = firstString(call.toolInput, ["task_id", "taskId", "id"]);
-  const title = firstString(call.toolInput, ["task_subject", "subject", "title", "content"]) || taskId;
-  if (!title) return [];
-  const status = firstString(call.toolInput, ["status"]) || (call.toolName === "TaskCreate" ? "pending" : "in_progress");
-  const priority = firstString(call.toolInput, ["priority"]) || "medium";
-  return [todoEvent(
-    call,
-    taskId || stableTodoId(title, priority),
-    title,
-    STATUS_MAP[status] ?? "added",
-    { priority, status }
-  )];
+  if (call.toolName === "TaskCreate") return shapeTaskCreate(call);
+  return shapeTaskUpdate(call);
+}
+function shapeTaskCreate(call) {
+  const subject = firstString(call.toolInput, ["subject"]);
+  if (!subject) return [];
+  const taskId = taskIdOfResponse(call.toolResponse) || stableTodoId(subject, "medium");
+  return [todoEvent(call, taskId, subject, "added", { priority: "medium", status: "pending" })];
+}
+function shapeTaskUpdate(call) {
+  const taskId = firstString(call.toolInput, ["taskId"]);
+  if (!taskId) return [];
+  const subject = firstString(call.toolInput, ["subject"]) || taskId;
+  const status = firstString(call.toolInput, ["status"]) || "in_progress";
+  const todoState = status === "deleted" ? "cancelled" : STATUS_MAP[status] ?? "in_progress";
+  return [todoEvent(call, taskId, subject, todoState, { priority: "medium", status })];
+}
+function taskIdOfResponse(toolResponse) {
+  if (!isRecord(toolResponse)) return "";
+  const task = toolResponse["task"];
+  return isRecord(task) ? toTrimmedString(task["id"]) : "";
 }
 function todoEvent(call, todoId, title, todoState, extras) {
   const metadata = {
