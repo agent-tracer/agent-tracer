@@ -4,7 +4,7 @@ import {
   setUserIdentity,
 } from "~tracer-web/shared/api/user-identity.js";
 import { setDefaultAgentBackend } from "~tracer-web/shared/api/agent-backend.js";
-import { request } from "~tracer-web/shared/api/client/request.js";
+import { request, routeToAgentBackend } from "~tracer-web/shared/api/client/request.js";
 
 const fetchMock = vi.fn<typeof fetch>();
 
@@ -61,5 +61,21 @@ describe("request", () => {
     });
 
     expect(fetchMock.mock.calls[0]?.[0] as string).toMatch(/messages\?backend=python$/);
+  });
+});
+
+describe("routeToAgentBackend", () => {
+  it("스트림처럼 요청 층을 거치지 않는 경로에도 같은 축을 싣는다", () => {
+    setDefaultAgentBackend("ts");
+
+    expect(routeToAgentBackend("/api/agent/chat/threads/t-1/executions/e-1/events")).toBe(
+      "/api/agent/chat/threads/t-1/executions/e-1/events?backend=ts",
+    );
+    expect(
+      routeToAgentBackend("/api/agent/chat/threads/t-1/executions/e-1/events", {
+        backend: "python",
+      }),
+    ).toBe("/api/agent/chat/threads/t-1/executions/e-1/events?backend=python");
+    expect(routeToAgentBackend("/api/v1/tasks")).toBe("/api/v1/tasks");
   });
 });

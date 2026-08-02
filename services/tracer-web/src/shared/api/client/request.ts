@@ -55,7 +55,7 @@ export function createRequestSignal(options?: RequestOptions): {
 }
 
 /** 고른 상류는 게이트웨이가 읽는 값이라 에이전트 접두사 아래 요청에만 실린다. */
-function routeToAgentBackend(pathname: string, options?: RequestOptions): string {
+export function routeToAgentBackend(pathname: string, options?: RequestOptions): string {
   const backend = options?.backend ?? getDefaultAgentBackend();
   if (backend === null || !pathname.startsWith(AGENT_PREFIX)) return pathname;
   const separator = pathname.includes("?") ? "&" : "?";
