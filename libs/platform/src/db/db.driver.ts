@@ -12,11 +12,6 @@ export function resolveDbDriver(env: NodeJS.ProcessEnv = process.env): DbDriver 
 // 데코레이터는 모듈 로드 시점에 한 번만 평가되므로 방언도 그때 굳힌다.
 const driver = resolveDbDriver();
 
-/** 현재 방언이 sqlite인지 알려준다. */
-export function isSqlite(): boolean {
-    return driver === SQLITE_PROFILE;
-}
-
 /** sqlite에는 jsonb가 없어 TypeORM이 직렬화를 대신하는 타입으로 내린다. */
 export function jsonColumnType(): "jsonb" | "simple-json" {
     return driver === SQLITE_PROFILE ? "simple-json" : "jsonb";
