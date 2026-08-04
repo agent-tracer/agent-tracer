@@ -17,6 +17,7 @@ import { INGEST_EVENT_LOG } from "~ingest-api/domain/ingest/port/ingest.event.lo
 import { LEDGER_EVENT_STORE } from "~ingest-api/domain/ingest/port/ledger.event.store.port.js";
 import { StructuredIngestEventLogAdapter } from "~ingest-api/domain/ingest/adapter/structured.ingest.event.log.adapter.js";
 import { TypeOrmLedgerEventStoreAdapter } from "~ingest-api/domain/ingest/adapter/typeorm.ledger.event.store.adapter.js";
+import { SqliteLedgerEventStoreAdapter } from "~ingest-api/domain/ingest/adapter/sqlite.ledger.event.store.adapter.js";
 import { HealthController } from "~ingest-api/domain/health/inbound/health.controller.js";
 import { CheckReadinessUseCase } from "~ingest-api/domain/health/application/check.readiness.usecase.js";
 import { READINESS_PROBE } from "~ingest-api/domain/health/port/readiness.probe.port.js";
@@ -30,13 +31,17 @@ type LedgerDataSource = ReturnType<typeof createDataSource>;
 @Module({})
 export class IngestApiModule {
     static forRoot(dataSource: LedgerDataSource): DynamicModule {
+        // 원장 저장 방식은 연결이 말하는 방언을 따르므로 조립 근원이 따로 받지 않는다.
+        const ledgerStore = dataSource.options.type === "better-sqlite3"
+            ? SqliteLedgerEventStoreAdapter
+            : TypeOrmLedgerEventStoreAdapter;
         return {
             module: IngestApiModule,
             controllers: [IngestController, HealthController],
             providers: [
                 { provide: EVENT_DATA_SOURCE, useValue: dataSource },
-                TypeOrmLedgerEventStoreAdapter,
-                { provide: LEDGER_EVENT_STORE, useExisting: TypeOrmLedgerEventStoreAdapter },
+                ledgerStore,
+                { provide: LEDGER_EVENT_STORE, useExisting: ledgerStore },
                 DataSourceReadinessProbeAdapter,
                 { provide: READINESS_PROBE, useExisting: DataSourceReadinessProbeAdapter },
                 StructuredIngestEventLogAdapter,
