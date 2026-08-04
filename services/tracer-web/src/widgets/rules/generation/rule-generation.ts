@@ -3,7 +3,7 @@ import { normalizeRuleGenerationIntent } from "@agent-tracer/kernel";
 interface CompletedRuleJob {
   readonly id: string;
   readonly status: string;
-  readonly rulesCreated: number;
+  readonly rules?: readonly unknown[];
 }
 
 // 잡 입력 스키마가 허용하는 상한과 같다.
@@ -24,7 +24,7 @@ export function isUnhandledCompletedRuleJob(
   return (
     job !== null &&
     job.status === "completed" &&
-    job.rulesCreated > 0 &&
+    (job.rules?.length ?? 0) > 0 &&
     job.id !== handledJobId
   );
 }
