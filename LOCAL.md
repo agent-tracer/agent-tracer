@@ -25,29 +25,39 @@ MONITOR_PROFILE=sqlite SWC_NODE_PROJECT=services/tracer-api/tsconfig.json \
   node --import @swc-node/register/esm-register services/tracer-api/src/local.main.ts
 ```
 
-`agent-tracer-stack`의 `local-main` 브랜치에는 이 둘을 함께 세우는 `node scripts/up.mjs --profile sqlite`가 있습니다.
+`compose/sqlite.yml`은 이 둘에 게이트웨이와 대시보드 화면을 더해 네 파드로 세웁니다. 게이트웨이의 상류 선언이 `tracer-api:3902`를 부르므로 합성에서는 조회 파드가 그 이름과 포트를 씁니다.
+
+```bash
+docker compose -f compose/sqlite.yml build
+LOCAL_DATA_DIR=~/.agent-tracer/local docker compose -p agent-tracer -f compose/sqlite.yml up -d --wait
+```
+
+`agent-tracer-stack`의 `local-main` 브랜치에는 이 합성을 세우는 `node scripts/up.mjs --profile sqlite`가 있습니다.
 
 | 환경변수 | 기본값 | 뜻 |
 | --- | --- | --- |
 | `MONITOR_PROFILE` | `local` | `sqlite`여야 이 프로파일이 섭니다 |
 | `MONITOR_LOCAL_DIR` | `~/.agent-tracer/local` | 두 데이터베이스 파일이 사는 자리 |
-| `MONITOR_LOCAL_PORT` | `3847` | 단일 진입점 |
+| `MONITOR_LOCAL_PORT` | `3847` | 단일 진입점. 합성에서는 게이트웨이가 이 포트를 갖고 조회 파드는 `3902`를 씁니다 |
+| `INGEST_UPSTREAM_URL` | `http://127.0.0.1:<수집 포트>` | 수집 창구가 다른 호스트에 설 때의 주소 |
 
 ## 지켜야 하는 것
 
 - **방언은 엔티티 데코레이터가 평가될 때 굳습니다.** `MONITOR_PROFILE`을 YAML에만 적으면 컬럼 타입이 Postgres로 남습니다. 환경변수로 넘깁니다.
 - **원장과 조회 모델은 서로 다른 파일입니다.** `ledger.sqlite`와 `tracer.sqlite`를 한 연결에서 섞지 않습니다.
 - **스키마는 엔티티 선언이 세웁니다.** 파티션과 `pg_partman`과 퍼블리케이션이 sqlite에 없어 마이그레이션을 쓰지 않으므로, 엔티티를 바꾸면 로컬 파일에 드리프트가 조용히 반영됩니다.
-- **플러그인은 수집과 조회를 한 주소로 부릅니다.** `local.main.ts`가 `3847`에서 받고 `/ingest/`만 수집 창구로 넘기므로 플러그인 설정을 바꾸지 않습니다.
+- **플러그인은 수집과 조회를 한 주소로 부릅니다.** 직접 실행하면 `local.main.ts`가 `3847`에서 받고 `/ingest/`만 수집 창구로 넘깁니다. 합성에서는 게이트웨이가 같은 자리를 갖습니다. 어느 쪽이든 플러그인 설정을 바꾸지 않습니다.
+- **sqlite 드라이버는 이 Node 판의 사전 빌드가 없습니다.** 이미지는 의존성 설치 단계에서 컴파일하며 런타임 이미지에 툴체인은 남지 않습니다.
 
 ## 없는 것
 
 필요하면 `compose/base.yml`이나 `agent-tracer-stack`의 `tracer` 프로파일을 씁니다.
 
 - 전문 검색 — `/api/v1/search/*`가 빈 결과를 냅니다
-- 추적 대시보드 화면 — HTTP API와 WebSocket만 열립니다
 - CDC와 재투영 — 조회 모델은 원장을 `seq` 커서로 따라 읽어 세웁니다
 - OTLP 내보내기와 에이전트 상류
+
+`local.main.ts`를 직접 실행하면 대시보드 화면도 서지 않습니다. 화면은 정적 자산을 세우는 별도 파드가 갖고 있어 합성으로 띄울 때만 열립니다.
 
 ## 인프라로 옮기기
 

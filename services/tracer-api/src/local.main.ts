@@ -31,6 +31,11 @@ const BODY_LIMIT = "8mb";
 const LEDGER_POLL_INTERVAL_MS = 300;
 // 플러그인은 수집과 조회를 한 주소로 부르므로 로컬도 게이트웨이가 쓰던 포트 하나로 받는다.
 const DEFAULT_ENTRY_PORT = 3847;
+
+/** 수집 창구가 다른 호스트에 서는 구성에서는 그 주소를 받아야 한다. */
+function ingestUpstream(port: number): string {
+    return process.env["INGEST_UPSTREAM_URL"] ?? `http://127.0.0.1:${port}`;
+}
 const OUTBOX_DRAIN_INTERVAL_MS = 5_000;
 
 /** 브로커가 없는 로컬 프로파일에서 조회 창구의 준비 계약을 유지하려는 관리자 창구다. */
@@ -70,7 +75,7 @@ async function bootstrap(): Promise<void> {
     app.use(helmet());
     app.enableCors({ origin: true, credentials: true });
     app.useBodyParser("json", { limit: BODY_LIMIT });
-    app.use(createIngestProxy(`http://127.0.0.1:${config.ingestApi.port}`));
+    app.use(createIngestProxy(ingestUpstream(config.ingestApi.port)));
     gateway.attach(app.getHttpServer());
 
     // 투영은 조회 창구와 같은 프로세스에 살면서 컨테이너만 따로 갖는다.
@@ -100,7 +105,7 @@ async function bootstrap(): Promise<void> {
         msg: "process.lifecycle.started",
         host,
         port,
-        ingestUpstreamPort: config.ingestApi.port,
+        ingestUpstream: ingestUpstream(config.ingestApi.port),
         driver: "sqlite",
         tracerDbFile: config.tracerDb.file,
         eventDbFile: config.eventDb.file,

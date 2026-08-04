@@ -1,0 +1,56 @@
+name: agent-tracer
+
+# 브로커도 조회 데이터베이스도 없는 로컬 합성이며 두 파드가 호스트의 같은 디렉터리를 나눠 갖는다.
+x-sqlite-env: &sqlite-env
+  MONITOR_PROFILE: sqlite
+  MONITOR_LOCAL_DIR: /data
+  MONITOR_LISTEN_HOST: 0.0.0.0
+  INGEST_API_PORT: "3901"
+
+services:
+  # 원장을 적는 쪽이며 스키마도 이 파드가 세운다.
+  ingest-api:
+    image: agent-tracer/ingest-api
+    build: { context: .., dockerfile: Dockerfile, target: ingest-api }
+    environment: *sqlite-env
+    volumes: ["${LOCAL_DATA_DIR:-./local-data}:/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://127.0.0.1:3901/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+      start_interval: 1s
+
+  # 조회 창구와 투영을 한 프로세스에 세우며 게이트웨이가 부르는 이름과 포트를 그대로 쓴다.
+  tracer-api:
+    image: agent-tracer/tracer-local
+    build: { context: .., dockerfile: Dockerfile, target: tracer-local }
+    environment:
+      <<: *sqlite-env
+      MONITOR_LOCAL_PORT: "3902"
+      INGEST_UPSTREAM_URL: http://ingest-api:3901
+    volumes: ["${LOCAL_DATA_DIR:-./local-data}:/data"]
+    depends_on:
+      ingest-api: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://127.0.0.1:3902/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+      start_interval: 1s
+
+  tracer-web:
+    image: agent-tracer/web
+    build: { context: .., dockerfile: Dockerfile, target: web }
+
+  # 에이전트 상류 선언이 없으므로 /api/agent/* 는 501 이고 /agent/* 화면은 서지 않는다.
+  gateway:
+    image: agent-tracer/gateway
+    build: { context: .., dockerfile: Dockerfile, target: gateway }
+    ports: ["127.0.0.1:3847:3847"]
+    depends_on:
+      ingest-api: { condition: service_healthy }
+      tracer-api: { condition: service_healthy }
+      tracer-web: { condition: service_started }

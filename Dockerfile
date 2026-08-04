@@ -15,11 +15,14 @@ COPY services/tracer-api/package.json services/tracer-api/
 COPY services/tracer-web/package.json services/tracer-web/
 COPY plugin/package.json plugin/
 
-# 의존성이 모두 사전 빌드된 네이티브 바이너리라 gcc 빌드툴이 필요 없다.
-
 # ---- 의존성 설치 1회: 전체(dev 포함)를 한 번만 깐다 ----
 # 대시보드 정적 자산 빌드가 vite 등 devDependencies를 요구하므로 전체를 설치한다.
+# sqlite 드라이버는 이 Node 판의 사전 빌드가 없어 여기서 컴파일하며, 툴체인은 이 단계에만 남고
+# 런타임 이미지는 산출된 node_modules 만 가져간다.
 FROM deps-base AS deps
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends python3 make g++ \
+ && rm -rf /var/lib/apt/lists/*
 RUN --mount=type=cache,target=/root/.npm npm ci --include=dev
 
 # ---- 프로덕션 node_modules 산출: dev 툴체인을 제거한다 ----
@@ -58,6 +61,12 @@ FROM runtime-deps AS tracer-api
 ENV SWC_NODE_PROJECT=services/tracer-api/tsconfig.json
 EXPOSE 3902
 CMD ["node", "--import", "file:///app/scripts/register-otel.mjs", "--import", "@swc-node/register/esm-register", "services/tracer-api/src/api.main.ts"]
+
+# ---- tracer-local: 조회 창구와 투영을 한 프로세스에 세우는 로컬 실행 ----
+FROM runtime-deps AS tracer-local
+ENV SWC_NODE_PROJECT=services/tracer-api/tsconfig.json
+EXPOSE 3847
+CMD ["node", "--import", "@swc-node/register/esm-register", "services/tracer-api/src/local.main.ts"]
 
 # ---- 대시보드 정적 자산 빌드 ----
 FROM build-deps AS web-builder
