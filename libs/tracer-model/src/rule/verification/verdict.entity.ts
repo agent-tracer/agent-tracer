@@ -1,4 +1,5 @@
 import { Column, Entity, Index, PrimaryColumn } from "typeorm";
+import { jsonColumnDefault, jsonColumnType, timestampColumnType } from "@agent-tracer/platform";
 import {
     VERDICT_STATUS,
     concludeAtTaskEnd,
@@ -31,10 +32,10 @@ export class VerdictEntity {
     @Column({ name: "nudge_count", type: "integer", default: 0 })
     nudgeCount!: number;
 
-    @Column({ type: "jsonb", default: {} })
+    @Column({ type: jsonColumnType(), default: jsonColumnDefault({}) })
     evidence!: VerdictEvidence;
 
-    @Column({ name: "evaluated_at", type: "timestamptz" })
+    @Column({ name: "evaluated_at", type: timestampColumnType() })
     evaluatedAt!: Date;
 
     /** 이 판정을 마지막으로 전진시킨 창의 최대 이벤트 seq다. */

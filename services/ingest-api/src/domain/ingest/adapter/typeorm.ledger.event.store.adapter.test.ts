@@ -16,6 +16,8 @@ function event(id: string, occurredAt: string): LedgerEventRecord {
         spanId: `span-${id}`,
         parentSpanId: null,
         payload: { title: "event" },
+        turnId: null,
+        parentId: null,
     };
 }
 

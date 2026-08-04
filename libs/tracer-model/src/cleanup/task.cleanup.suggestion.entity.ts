@@ -1,4 +1,5 @@
 import { Column, Entity, Index, PrimaryColumn } from "typeorm";
+import { timestampColumnType } from "@agent-tracer/platform";
 import {
     CLEANUP_SUGGESTION_STATUS,
     type TaskCleanupSuggestionKind,
@@ -59,15 +60,15 @@ export class TaskCleanupSuggestionEntity {
     @Column({ type: "text", nullable: true })
     error!: string | null;
 
-    @Column({ name: "created_at", type: "timestamptz" })
+    @Column({ name: "created_at", type: timestampColumnType() })
     createdAt!: Date;
 
-    @Column({ name: "resolved_at", type: "timestamptz", nullable: true })
+    @Column({ name: "resolved_at", type: timestampColumnType(), nullable: true })
     resolvedAt!: Date | null;
 
     // 제안을 만들 때 서버가 관찰한 대상 태스크의 마지막 이벤트 시각이며, 수락 시점에 태스크가
     // 그 뒤로 새 활동을 겪었는지 비교하는 기준값이다.
-    @Column({ name: "observed_last_event_at", type: "timestamptz", nullable: true })
+    @Column({ name: "observed_last_event_at", type: timestampColumnType(), nullable: true })
     observedLastEventAt!: Date | null;
 
     static pending(input: TaskCleanupSuggestionPendingInput, now: Date): TaskCleanupSuggestionEntity {

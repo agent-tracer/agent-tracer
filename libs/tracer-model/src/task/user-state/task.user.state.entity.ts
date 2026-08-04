@@ -1,4 +1,5 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
+import { timestampColumnType } from "@agent-tracer/platform";
 import { InvariantViolationError } from "~tracer-model/error/invariant.error.js";
 
 @Entity({ name: "task_user_state" })
@@ -9,13 +10,13 @@ export class TaskUserStateEntity {
     @PrimaryColumn({ name: "user_id", type: "text" })
     userId!: string;
 
-    @Column({ name: "archived_at", type: "timestamptz", nullable: true })
+    @Column({ name: "archived_at", type: timestampColumnType(), nullable: true })
     archivedAt!: Date | null;
 
-    @Column({ name: "hidden_at", type: "timestamptz", nullable: true })
+    @Column({ name: "hidden_at", type: timestampColumnType(), nullable: true })
     hiddenAt!: Date | null;
 
-    @Column({ name: "updated_at", type: "timestamptz" })
+    @Column({ name: "updated_at", type: timestampColumnType() })
     updatedAt!: Date;
 
     archive(now: Date): void {

@@ -13,6 +13,7 @@ export * from "./auth/auth.token.js";
 export * from "./auth/execution.scope.token.js";
 export * from "./auth/cookie.js";
 export * from "./auth/rate.limiter.js";
+export * from "./db/db.driver.js";
 export * from "./db/datasource.factory.js";
 export * from "./db/schema.version.guard.js";
 export * from "./db/schema.version.assert.js";

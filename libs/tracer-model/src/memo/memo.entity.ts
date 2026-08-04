@@ -1,4 +1,5 @@
 import { Column, Entity, Index, PrimaryColumn } from "typeorm";
+import { timestampColumnType } from "@agent-tracer/platform";
 import { MEMO_AUTHOR, type MemoAuthor } from "@agent-tracer/kernel";
 
 export interface MemoCreateInput {
@@ -42,13 +43,13 @@ export class MemoEntity {
     @Column({ type: "integer", default: 1 })
     rev!: number;
 
-    @Column({ name: "created_at", type: "timestamptz" })
+    @Column({ name: "created_at", type: timestampColumnType() })
     createdAt!: Date;
 
-    @Column({ name: "updated_at", type: "timestamptz" })
+    @Column({ name: "updated_at", type: timestampColumnType() })
     updatedAt!: Date;
 
-    @Column({ name: "deleted_at", type: "timestamptz", nullable: true })
+    @Column({ name: "deleted_at", type: timestampColumnType(), nullable: true })
     deletedAt!: Date | null;
 
     static create(input: MemoCreateInput): MemoEntity {

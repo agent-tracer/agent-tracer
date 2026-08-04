@@ -1,4 +1,18 @@
+import os from "node:os";
+import path from "node:path";
+import { resolveDbDriver } from "../db/db.driver.js";
 import { applicationConfigSchema, type ApplicationConfig } from "./application.config.schema.js";
+
+type Profile = ApplicationConfig["profile"];
+
+/** sqlite 프로파일이 데이터베이스 파일을 두는 기본 디렉터리다. */
+function sqliteDir(env: NodeJS.ProcessEnv): string {
+    return env["MONITOR_LOCAL_DIR"] ?? path.join(os.homedir(), ".agent-tracer", "local");
+}
+
+function sqliteFile(env: NodeJS.ProcessEnv, name: string): string {
+    return path.join(sqliteDir(env), name);
+}
 
 function section(source: Record<string, unknown>, key: string): Record<string, unknown> {
     const value = source[key];
@@ -25,6 +39,7 @@ export function mergeApplicationConfig(
     const ingestApi = section(merged, "ingestApi");
     const tracerApi = section(merged, "tracerApi");
     const projector = section(merged, "projector");
+    const driver = resolveDbDriver(env);
     const user = env["POSTGRES_USER"] ?? "monitor";
     const password = env["POSTGRES_PASSWORD"] ?? "monitor";
     const brokersEnv = env["KAFKA_BROKERS"];
@@ -32,14 +47,16 @@ export function mergeApplicationConfig(
         ? brokersEnv.split(",").map((broker) => broker.trim()).filter(Boolean)
         : ((kafka["brokers"] as string[] | undefined) ?? ["localhost:19092"]);
     return applicationConfigSchema.parse({
-        profile: (env["MONITOR_PROFILE"] as "local" | "prd" | undefined)
-            ?? (merged["profile"] as "local" | "prd" | undefined)
+        profile: (env["MONITOR_PROFILE"] as Profile | undefined)
+            ?? (merged["profile"] as Profile | undefined)
             ?? "local",
         ingestApi: { port: envInt(env, "INGEST_API_PORT", (ingestApi["port"] as number | undefined) ?? 3901) },
         tracerApi: { port: envInt(env, "TRACER_API_PORT", (tracerApi["port"] as number | undefined) ?? 3902) },
         projector: { port: envInt(env, "PROJECTOR_PORT", (projector["port"] as number | undefined) ?? 3903) },
         listenHost: env["MONITOR_LISTEN_HOST"] ?? (merged["listenHost"] as string | undefined) ?? "127.0.0.1",
         eventDb: {
+            driver,
+            file: env["EVENT_DB_FILE"] ?? sqliteFile(env, "ledger.sqlite"),
             host: env["EVENT_DB_HOST"] ?? (eventDb["host"] as string | undefined) ?? "127.0.0.1",
             port: envInt(env, "EVENT_DB_PORT", (eventDb["port"] as number | undefined) ?? 5432),
             username: user,
@@ -47,6 +64,8 @@ export function mergeApplicationConfig(
             database: (eventDb["database"] as string | undefined) ?? "runtime",
         },
         tracerDb: {
+            driver,
+            file: env["TRACER_DB_FILE"] ?? sqliteFile(env, "tracer.sqlite"),
             host: env["TRACER_DB_HOST"] ?? (tracerDb["host"] as string | undefined) ?? "127.0.0.1",
             port: envInt(env, "TRACER_DB_PORT", (tracerDb["port"] as number | undefined) ?? 5433),
             username: user,
