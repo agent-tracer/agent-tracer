@@ -35832,6 +35832,15 @@ var HELD_LEASE = { leaseHeld: true, canceled: false };
 var REPORT_MAX_ATTEMPTS = 3;
 var REPORT_BACKOFF_MS = 500;
 var AGENT_JOBS2 = "/api/agent/jobs";
+function resultBody(report) {
+  return {
+    rules: report.proposals,
+    ...report.skipped.length > 0 ? { skipped: report.skipped } : {}
+  };
+}
+function failureBody(failure) {
+  return { message: failure.error };
+}
 var HttpRuleJobAdapter = class {
   constructor(baseUrl, headers, leaseOwner) {
     this.baseUrl = baseUrl;
@@ -35874,7 +35883,7 @@ var HttpRuleJobAdapter = class {
   async reportResult(jobId, report) {
     for (let attempt = 1; attempt <= REPORT_MAX_ATTEMPTS; attempt += 1) {
       try {
-        const response = await postJson(this.jobUrl(jobId, "results"), this.leaseHeaders, report);
+        const response = await postJson(this.jobUrl(jobId, "results"), this.leaseHeaders, resultBody(report));
         if (response.ok) return true;
         throw new Error(`HTTP ${response.status}`);
       } catch (error2) {
@@ -35888,7 +35897,7 @@ var HttpRuleJobAdapter = class {
     return false;
   }
   async fail(jobId, failure) {
-    await postJson(this.jobUrl(jobId, "fail"), this.leaseHeaders, failure);
+    await postJson(this.jobUrl(jobId, "fail"), this.leaseHeaders, failureBody(failure));
   }
   async release(jobId) {
     await postJson(this.jobUrl(jobId, "release"), this.leaseHeaders, {});
@@ -36590,7 +36599,7 @@ var RunRuleJobUsecase = class {
         return;
       }
       const screened = this.screen(first.candidates, ledger);
-      const { outcome: outcome3, proposals } = screened.errors.length === 0 ? { outcome: first, proposals: screened.proposals } : await this.repair(spec, toolset, signal, ledger, first, screened.errors);
+      const { outcome: outcome3, proposals, skipped } = screened.errors.length === 0 ? { outcome: first, proposals: screened.proposals, skipped: [] } : await this.repair(spec, toolset, signal, ledger, first, screened.errors);
       if (isRulegenCanceled(signal.reason)) return;
       if (outcome3.error !== null) {
         await this.jobs.fail(request.jobId, this.failure(spec, startedAt2, outcome3, outcome3.error));
@@ -36598,6 +36607,7 @@ var RunRuleJobUsecase = class {
       }
       const report = {
         proposals: proposals.slice(0, spec.maxRules),
+        skipped,
         modelUsed: spec.model,
         durationMs: this.clock.now() - startedAt2,
         costUsd: outcome3.costUsd,
@@ -36624,12 +36634,14 @@ var RunRuleJobUsecase = class {
     };
     const second = await this.generator.generate(repairSpec, toolset, signal);
     const outcome3 = mergeRuleGenerationOutcomes(first, second);
-    if (isRulegenCanceled(signal.reason) || outcome3.error !== null) return { outcome: outcome3, proposals: [] };
+    if (isRulegenCanceled(signal.reason) || outcome3.error !== null) {
+      return { outcome: outcome3, proposals: [], skipped: [] };
+    }
     const screened = this.screen(outcome3.candidates, ledger);
     for (const error2 of screened.errors) {
       process.stderr.write(ruleGenLogLine(`dropped proposal after repair: ${error2}`));
     }
-    return { outcome: outcome3, proposals: screened.proposals };
+    return { outcome: outcome3, proposals: screened.proposals, skipped: screened.errors };
   }
   screen(candidates, ledger) {
     const { accepted, rejected } = validateRuleProposals(candidates);

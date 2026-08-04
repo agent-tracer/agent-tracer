@@ -5,6 +5,7 @@ import type {RuleGenerationReport} from "~plugin/domain/rulegen/model/rule.job.m
 const BASE_URL = "http://127.0.0.1:3847";
 const REPORT: RuleGenerationReport = {
     proposals: [],
+    skipped: [],
     modelUsed: "claude",
     durationMs: 10,
     costUsd: 0.1,

@@ -63,8 +63,8 @@ export class RunRuleJobUsecase {
             }
 
             const screened = this.screen(first.candidates, ledger);
-            const {outcome, proposals} = screened.errors.length === 0
-                ? {outcome: first, proposals: screened.proposals}
+            const {outcome, proposals, skipped} = screened.errors.length === 0
+                ? {outcome: first, proposals: screened.proposals, skipped: []}
                 : await this.repair(spec, toolset, signal, ledger, first, screened.errors);
             if (isRulegenCanceled(signal.reason)) return;
             if (outcome.error !== null) {
@@ -74,6 +74,7 @@ export class RunRuleJobUsecase {
 
             const report: RuleGenerationReport = {
                 proposals: proposals.slice(0, spec.maxRules),
+                skipped,
                 modelUsed: spec.model,
                 durationMs: this.clock.now() - startedAt,
                 costUsd: outcome.costUsd,
@@ -101,20 +102,26 @@ export class RunRuleJobUsecase {
         ledger: RulegenProvenanceLedger,
         first: RuleGenerationOutcome,
         errors: readonly string[],
-    ): Promise<{readonly outcome: RuleGenerationOutcome; readonly proposals: readonly RuleProposalPayload[]}> {
+    ): Promise<{
+        readonly outcome: RuleGenerationOutcome;
+        readonly proposals: readonly RuleProposalPayload[];
+        readonly skipped: readonly string[];
+    }> {
         const repairSpec: RuleGenerationSpec = {
             ...spec,
             userPrompt: buildRulegenRepairPrompt(spec.userPrompt, {rules: first.candidates}, errors),
         };
         const second = await this.generator.generate(repairSpec, toolset, signal);
         const outcome = mergeRuleGenerationOutcomes(first, second);
-        if (isRulegenCanceled(signal.reason) || outcome.error !== null) return {outcome, proposals: []};
+        if (isRulegenCanceled(signal.reason) || outcome.error !== null) {
+            return {outcome, proposals: [], skipped: []};
+        }
 
         const screened = this.screen(outcome.candidates, ledger);
         for (const error of screened.errors) {
             process.stderr.write(ruleGenLogLine(`dropped proposal after repair: ${error}`));
         }
-        return {outcome, proposals: screened.proposals};
+        return {outcome, proposals: screened.proposals, skipped: screened.errors};
     }
 
     private screen(candidates: readonly unknown[], ledger: RulegenProvenanceLedger): ScreenedProposals {

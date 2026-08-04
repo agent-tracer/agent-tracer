@@ -79,6 +79,8 @@ export function mergeRuleGenerationOutcomes(
 /** 서버에 보고하는 규칙 생성 결과다. */
 export interface RuleGenerationReport {
     readonly proposals: readonly RuleProposalPayload[];
+    /** 근거가 서지 않아 버린 제안의 사유이며 계약의 skipped 자리에 실린다. */
+    readonly skipped: readonly string[];
     readonly modelUsed: string;
     readonly durationMs: number;
     readonly costUsd: number | null;
