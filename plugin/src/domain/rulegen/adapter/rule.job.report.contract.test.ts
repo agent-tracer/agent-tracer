@@ -63,7 +63,26 @@ afterEach(() => {
     vi.unstubAllGlobals();
 });
 
+/** 계약이 관측에 요구하는 칸의 이름이다. */
+function observationFields(): string[] {
+    const block = /\n {4}RuleJobUsage:\n((?: {6}.*\n| *\n)*)/.exec(SPEC);
+    const properties = /\n {6}properties:\n((?: {8}.*\n| *\n)*)/.exec(block![1]!);
+    return [...properties![1]!.matchAll(/^ {8}(\w+):/gm)].map((found) => found[1]!);
+}
+
 describe("실행기가 창구에 싣는 본문", () => {
+    it("두 창구가 관측을 계약이 적은 칸으로 싣는다", async () => {
+        for (const send of [
+            (adapter: HttpRuleJobAdapter) => adapter.reportResult("job-1", REPORT),
+            (adapter: HttpRuleJobAdapter) => adapter.fail("job-1", FAILURE),
+        ]) {
+            const body = await sentBody(send);
+
+            expect(Object.keys(body["usage"] as object)).toEqual(observationFields());
+            expect(body["steps"]).toEqual([]);
+        }
+    });
+
     it("산출 보고가 계약이 요구하는 칸을 싣고 모르는 칸을 싣지 않는다", async () => {
         const body = await sentBody((adapter) => adapter.reportResult("job-1", REPORT));
 

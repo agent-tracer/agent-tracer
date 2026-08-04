@@ -34735,10 +34735,10 @@ function observe(event) {
   return null;
 }
 function observedCalls(observations) {
-  return observations.flatMap((observation) => observation.kind === "call" ? [observation.call] : []);
+  return observations.flatMap((observation2) => observation2.kind === "call" ? [observation2.call] : []);
 }
 function unclassifiedEventIds(observations) {
-  return observations.flatMap((observation) => observation.kind === "opaque" ? [observation.eventId] : []);
+  return observations.flatMap((observation2) => observation2.kind === "opaque" ? [observation2.eventId] : []);
 }
 
 // ../libs/kernel/src/rule/evaluation/rule.pattern.ts
@@ -34895,7 +34895,7 @@ function ruleWindow(events, rule) {
   const identified = events.filter((event) => event.id !== void 0);
   const sliced = sliceFromAnchor(identified, rule.anchorEventId);
   if (sliced === null) return { observations: [], covered: false };
-  const observations = sliced.map((event) => observe(event)).filter((observation) => observation !== null);
+  const observations = sliced.map((event) => observe(event)).filter((observation2) => observation2 !== null);
   return { observations, covered: true };
 }
 
@@ -35832,14 +35832,28 @@ var HELD_LEASE = { leaseHeld: true, canceled: false };
 var REPORT_MAX_ATTEMPTS = 3;
 var REPORT_BACKOFF_MS = 500;
 var AGENT_JOBS2 = "/api/agent/jobs";
+function observation(outcome3) {
+  return {
+    model: outcome3.modelUsed,
+    durationMs: outcome3.durationMs,
+    costUsd: outcome3.costUsd,
+    numTurns: outcome3.numTurns,
+    inputTokens: outcome3.usage?.inputTokens ?? null,
+    outputTokens: outcome3.usage?.outputTokens ?? null,
+    cacheReadTokens: outcome3.usage?.cacheReadTokens ?? null,
+    cacheCreationTokens: outcome3.usage?.cacheCreationTokens ?? null
+  };
+}
 function resultBody(report) {
   return {
     rules: report.proposals,
-    ...report.skipped.length > 0 ? { skipped: report.skipped } : {}
+    ...report.skipped.length > 0 ? { skipped: report.skipped } : {},
+    usage: observation(report),
+    steps: report.steps
   };
 }
 function failureBody(failure) {
-  return { message: failure.error };
+  return { message: failure.error, usage: observation(failure), steps: failure.steps };
 }
 var HttpRuleJobAdapter = class {
   constructor(baseUrl, headers, leaseOwner) {
