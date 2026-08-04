@@ -10,8 +10,8 @@ import { TaskPicker } from "~tracer-web/widgets/recipes/scan/TaskPicker.js";
 
 interface LatestJob {
   readonly status: string;
-  readonly candidatesCreated: number;
-  readonly sourceTaskId?: TaskId;
+  readonly recipes: readonly unknown[];
+  readonly taskId?: TaskId;
   readonly completedAt: string | null;
   readonly error: string | null;
 }
@@ -115,9 +115,9 @@ export function ScanPanel({
             {latestJob.status === "completed" && (
               <>
                 {" "}
-                · {latestJob.candidatesCreated} candidate
-                {latestJob.candidatesCreated === 1 ? "" : "s"}
-                {latestJob.sourceTaskId ? ` · ${latestJob.sourceTaskId.slice(0, 8)}` : ""}
+                · {latestJob.recipes.length} candidate
+                {latestJob.recipes.length === 1 ? "" : "s"}
+                {latestJob.taskId ? ` · ${latestJob.taskId.slice(0, 8)}` : ""}
               </>
             )}
           </span>

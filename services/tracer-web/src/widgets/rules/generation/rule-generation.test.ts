@@ -9,23 +9,23 @@ import {
 
 describe("isUnhandledCompletedRuleJob", () => {
   it("완료되고 규칙을 만든 새 잡이면 반영 대상이다", () => {
-    const job = { id: "j1", status: "completed", rulesCreated: 3 };
+    const job = { id: "j1", status: "completed", rules: [{ id: "r1" }, { id: "r2" }, { id: "r3" }] };
     expect(isUnhandledCompletedRuleJob(job, null)).toBe(true);
   });
 
   it("같은 개수로 재생성해도 잡 id가 다르면 다시 반영한다", () => {
-    const job = { id: "j2", status: "completed", rulesCreated: 3 };
+    const job = { id: "j2", status: "completed", rules: [{ id: "r1" }, { id: "r2" }, { id: "r3" }] };
     expect(isUnhandledCompletedRuleJob(job, "j1")).toBe(true);
   });
 
   it("이미 반영한 잡은 다시 반영하지 않는다", () => {
-    const job = { id: "j1", status: "completed", rulesCreated: 3 };
+    const job = { id: "j1", status: "completed", rules: [{ id: "r1" }, { id: "r2" }, { id: "r3" }] };
     expect(isUnhandledCompletedRuleJob(job, "j1")).toBe(false);
   });
 
   it("완료 전이거나 만든 규칙이 없으면 반영하지 않는다", () => {
-    expect(isUnhandledCompletedRuleJob({ id: "j1", status: "running", rulesCreated: 0 }, null)).toBe(false);
-    expect(isUnhandledCompletedRuleJob({ id: "j1", status: "completed", rulesCreated: 0 }, null)).toBe(false);
+    expect(isUnhandledCompletedRuleJob({ id: "j1", status: "running", rules: [] }, null)).toBe(false);
+    expect(isUnhandledCompletedRuleJob({ id: "j1", status: "completed", rules: [] }, null)).toBe(false);
     expect(isUnhandledCompletedRuleJob(null, null)).toBe(false);
   });
 });
@@ -66,7 +66,7 @@ describe("parseMaxRulesPerTask", () => {
 describe("readDiscardSummary", () => {
   it("중복으로 버려진 제안 수를 요약한다", () => {
     const summary = readDiscardSummary({
-      rulesCreated: 0,
+      rules: [],
       proposalsDiscarded: [
         { name: "규칙 A", reason: "duplicate" },
         { name: "규칙 B", reason: "duplicate" },
@@ -78,7 +78,7 @@ describe("readDiscardSummary", () => {
 
   it("스키마를 어긴 제안과 중복을 함께 요약한다", () => {
     const summary = readDiscardSummary({
-      rulesCreated: 0,
+      rules: [],
       proposalsDiscarded: [{ name: "규칙 A", reason: "duplicate" }],
       proposalsRejected: [{ index: 1, reason: "expect가 없다" }],
     });
