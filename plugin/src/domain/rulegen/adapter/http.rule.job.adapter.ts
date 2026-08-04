@@ -38,6 +38,19 @@ interface LeaseEnvelope {
     readonly data?: RuleJobLeaseState;
 }
 
+/** 산출 창구는 계약이 적은 규칙과 버린 사유만 받으므로 실행 관측은 이 왕복에 싣지 않는다. */
+function resultBody(report: RuleGenerationReport): Record<string, unknown> {
+    return {
+        rules: report.proposals,
+        ...(report.skipped.length > 0 ? {skipped: report.skipped} : {}),
+    };
+}
+
+/** 실패 창구는 계약이 적은 사유만 받는다. */
+function failureBody(failure: RuleGenerationFailure): Record<string, unknown> {
+    return {message: failure.error};
+}
+
 /** 규칙 생성 잡의 수명주기를 서버 잡 API로 왕복한다. */
 export class HttpRuleJobAdapter implements RuleJobPort {
     private readonly leaseHeaders: Record<string, string>;
@@ -88,7 +101,7 @@ export class HttpRuleJobAdapter implements RuleJobPort {
     async reportResult(jobId: string, report: RuleGenerationReport): Promise<boolean> {
         for (let attempt = 1; attempt <= REPORT_MAX_ATTEMPTS; attempt += 1) {
             try {
-                const response = await postJson(this.jobUrl(jobId, "results"), this.leaseHeaders, report);
+                const response = await postJson(this.jobUrl(jobId, "results"), this.leaseHeaders, resultBody(report));
                 if (response.ok) return true;
                 throw new Error(`HTTP ${response.status}`);
             } catch (error) {
@@ -103,7 +116,7 @@ export class HttpRuleJobAdapter implements RuleJobPort {
     }
 
     async fail(jobId: string, failure: RuleGenerationFailure): Promise<void> {
-        await postJson(this.jobUrl(jobId, "fail"), this.leaseHeaders, failure);
+        await postJson(this.jobUrl(jobId, "fail"), this.leaseHeaders, failureBody(failure));
     }
 
     async release(jobId: string): Promise<void> {
