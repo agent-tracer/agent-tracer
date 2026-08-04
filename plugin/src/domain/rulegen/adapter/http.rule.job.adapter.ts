@@ -5,6 +5,7 @@ import type {
     PendingRuleJob,
     RuleGenerationFailure,
     RuleGenerationReport,
+    RuleGenerationUsage,
     RuleJobLeaseState,
 } from "~plugin/domain/rulegen/model/rule.job.model.js";
 import {ruleGenLogLine} from "~plugin/domain/rulegen/model/rulegen.log.model.js";
@@ -38,17 +39,39 @@ interface LeaseEnvelope {
     readonly data?: RuleJobLeaseState;
 }
 
-/** 산출 창구는 계약이 적은 규칙과 버린 사유만 받으므로 실행 관측은 이 왕복에 싣지 않는다. */
+/** 이 왕복이 관측의 유일한 통로이므로 잰 것을 계약이 적은 칸에 실어 원장까지 보낸다. */
+function observation(outcome: {
+    readonly modelUsed: string | null;
+    readonly durationMs: number | null;
+    readonly costUsd: number | null;
+    readonly numTurns: number | null;
+    readonly usage?: RuleGenerationUsage;
+}): Record<string, unknown> {
+    return {
+        model: outcome.modelUsed,
+        durationMs: outcome.durationMs,
+        costUsd: outcome.costUsd,
+        numTurns: outcome.numTurns,
+        inputTokens: outcome.usage?.inputTokens ?? null,
+        outputTokens: outcome.usage?.outputTokens ?? null,
+        cacheReadTokens: outcome.usage?.cacheReadTokens ?? null,
+        cacheCreationTokens: outcome.usage?.cacheCreationTokens ?? null,
+    };
+}
+
+/** 산출 창구는 계약이 적은 규칙과 버린 사유와 이 실행의 관측을 받는다. */
 function resultBody(report: RuleGenerationReport): Record<string, unknown> {
     return {
         rules: report.proposals,
         ...(report.skipped.length > 0 ? {skipped: report.skipped} : {}),
+        usage: observation(report),
+        steps: report.steps,
     };
 }
 
-/** 실패 창구는 계약이 적은 사유만 받는다. */
+/** 실패 창구는 사유와 그때까지 태운 관측을 받으며 실패해도 비용은 사용자가 낸 것이다. */
 function failureBody(failure: RuleGenerationFailure): Record<string, unknown> {
-    return {message: failure.error};
+    return {message: failure.error, usage: observation(failure), steps: failure.steps};
 }
 
 /** 규칙 생성 잡의 수명주기를 서버 잡 API로 왕복한다. */
