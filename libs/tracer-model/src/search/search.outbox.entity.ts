@@ -1,4 +1,5 @@
 import { Column, Entity, Index, PrimaryColumn } from "typeorm";
+import { timestampColumnType } from "@agent-tracer/platform";
 import { SEARCH_OUTBOX_TARGET, type SearchOutboxTarget } from "./search.outbox.const.js";
 
 export interface SearchOutboxEnqueueInput {
@@ -31,7 +32,7 @@ export class SearchOutboxEntity {
     @Column({ name: "last_error", type: "text", nullable: true })
     lastError!: string | null;
 
-    @Column({ name: "created_at", type: "timestamptz" })
+    @Column({ name: "created_at", type: timestampColumnType() })
     createdAt!: Date;
 
     static enqueue(input: SearchOutboxEnqueueInput): SearchOutboxEntity {

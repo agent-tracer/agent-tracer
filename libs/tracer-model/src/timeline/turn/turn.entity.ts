@@ -1,4 +1,5 @@
 import { Column, Entity, Index, PrimaryColumn } from "typeorm";
+import { timestampColumnType } from "@agent-tracer/platform";
 import { TURN_STATUS, type TurnStatus } from "./turn.const.js";
 
 @Entity({ name: "turns" })
@@ -23,10 +24,10 @@ export class TurnEntity {
     @Column({ type: "text" })
     status!: TurnStatus;
 
-    @Column({ name: "started_at", type: "timestamptz" })
+    @Column({ name: "started_at", type: timestampColumnType() })
     startedAt!: Date;
 
-    @Column({ name: "ended_at", type: "timestamptz", nullable: true })
+    @Column({ name: "ended_at", type: timestampColumnType(), nullable: true })
     endedAt!: Date | null;
 
     @Column({ name: "asked_text", type: "text", nullable: true })

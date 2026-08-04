@@ -1,4 +1,5 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
+import { jsonColumnDefault, jsonColumnType, timestampColumnType } from "@agent-tracer/platform";
 
 // 사용자별 로컬 데몬 자기 건강 최신 스냅샷 1행이며 userId가 자연키다.
 @Entity({ name: "daemon_health" })
@@ -12,7 +13,7 @@ export class DaemonHealthEntity {
     @Column({ name: "dead_letter_count", type: "integer" })
     deadLetterCount!: number;
 
-    @Column({ name: "last_dead_reasons", type: "jsonb", default: [] })
+    @Column({ name: "last_dead_reasons", type: jsonColumnType(), default: jsonColumnDefault([]) })
     lastDeadReasons!: string[];
 
     @Column({ name: "swallowed_errors", type: "integer" })
@@ -21,10 +22,10 @@ export class DaemonHealthEntity {
     @Column({ name: "daemon_version", type: "text" })
     daemonVersion!: string;
 
-    @Column({ name: "retry_status_since", type: "timestamptz", nullable: true })
+    @Column({ name: "retry_status_since", type: timestampColumnType(), nullable: true })
     retryStatusSince!: Date | null;
 
-    @Column({ name: "reported_at", type: "timestamptz" })
+    @Column({ name: "reported_at", type: timestampColumnType() })
     reportedAt!: Date;
 
     static fromReport(

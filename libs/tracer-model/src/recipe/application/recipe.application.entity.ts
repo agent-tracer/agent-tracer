@@ -1,4 +1,5 @@
 import { Column, Entity, Index, PrimaryColumn } from "typeorm";
+import { timestampColumnType } from "@agent-tracer/platform";
 import type { RecipeInjectedVia, RecipeOutcome } from "@agent-tracer/kernel";
 
 @Entity({ name: "recipe_applications" })
@@ -34,7 +35,7 @@ export class RecipeApplicationEntity {
     @Column({ name: "anchor_seq", type: "bigint", nullable: true })
     anchorSeq!: string | null;
 
-    @Column({ name: "created_at", type: "timestamptz" })
+    @Column({ name: "created_at", type: timestampColumnType() })
     createdAt!: Date;
 
     /** 에이전트가 스스로 보고하는 성과이며 사용량과 함께 레시피 성과를 재는 신호다. */

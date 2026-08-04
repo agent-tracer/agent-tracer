@@ -17,4 +17,7 @@ export interface LedgerEventRecord {
     readonly spanId: string;
     readonly parentSpanId: string | null;
     readonly payload: Record<string, unknown>;
+    /** 트레이스 식별자로 접히기 전의 원본 상관 식별자이며 로컬 원장만 그대로 보관한다. */
+    readonly turnId: string | null;
+    readonly parentId: string | null;
 }

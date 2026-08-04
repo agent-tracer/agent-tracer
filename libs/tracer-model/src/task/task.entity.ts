@@ -1,4 +1,5 @@
 import { Column, Entity, Index, PrimaryColumn } from "typeorm";
+import { timestampColumnType } from "@agent-tracer/platform";
 import {
     AUTO_TITLE_RANK,
     COMPLETED_TASK_STATUS,
@@ -59,16 +60,16 @@ export class TaskEntity {
     @Column({ name: "background_of_task_id", type: "text", nullable: true })
     backgroundOfTaskId!: string | null;
 
-    @Column({ name: "created_at", type: "timestamptz" })
+    @Column({ name: "created_at", type: timestampColumnType() })
     createdAt!: Date;
 
-    @Column({ name: "updated_at", type: "timestamptz" })
+    @Column({ name: "updated_at", type: timestampColumnType() })
     updatedAt!: Date;
 
-    @Column({ name: "last_session_started_at", type: "timestamptz", nullable: true })
+    @Column({ name: "last_session_started_at", type: timestampColumnType(), nullable: true })
     lastSessionStartedAt!: Date | null;
 
-    @Column({ name: "last_event_at", type: "timestamptz", nullable: true })
+    @Column({ name: "last_event_at", type: timestampColumnType(), nullable: true })
     lastEventAt!: Date | null;
 
     @Column({ name: "last_applied_seq", type: "bigint", nullable: true })

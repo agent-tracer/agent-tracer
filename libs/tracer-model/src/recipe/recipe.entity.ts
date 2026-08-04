@@ -1,4 +1,5 @@
 import { Column, Entity, Index, PrimaryColumn } from "typeorm";
+import { jsonColumnDefault, jsonColumnType, timestampColumnType } from "@agent-tracer/platform";
 import {
     RECIPE_EDITOR,
     RECIPE_STATUS,
@@ -41,22 +42,22 @@ export class RecipeEntity {
     @Column({ type: "text", default: "" })
     request!: string;
 
-    @Column({ type: "jsonb", default: [] })
+    @Column({ type: jsonColumnType(), default: jsonColumnDefault([]) })
     corrections!: unknown[];
 
-    @Column({ type: "jsonb", default: [] })
+    @Column({ type: jsonColumnType(), default: jsonColumnDefault([]) })
     pitfalls!: unknown[];
 
-    @Column({ name: "governing_rules", type: "jsonb", default: [] })
+    @Column({ name: "governing_rules", type: jsonColumnType(), default: jsonColumnDefault([]) })
     governingRules!: string[];
 
-    @Column({ type: "jsonb", default: [] })
+    @Column({ type: jsonColumnType(), default: jsonColumnDefault([]) })
     steps!: unknown[];
 
-    @Column({ name: "touched_files", type: "jsonb", default: [] })
+    @Column({ name: "touched_files", type: jsonColumnType(), default: jsonColumnDefault([]) })
     touchedFiles!: unknown[];
 
-    @Column({ name: "contributing_slices", type: "jsonb", default: [] })
+    @Column({ name: "contributing_slices", type: jsonColumnType(), default: jsonColumnDefault([]) })
     contributingSlices!: unknown[];
 
     @Column({ type: "text", nullable: true })
@@ -83,16 +84,16 @@ export class RecipeEntity {
     @Column({ type: "text", nullable: true })
     error!: string | null;
 
-    @Column({ name: "created_at", type: "timestamptz" })
+    @Column({ name: "created_at", type: timestampColumnType() })
     createdAt!: Date;
 
-    @Column({ name: "updated_at", type: "timestamptz" })
+    @Column({ name: "updated_at", type: timestampColumnType() })
     updatedAt!: Date;
 
-    @Column({ name: "resolved_at", type: "timestamptz", nullable: true })
+    @Column({ name: "resolved_at", type: timestampColumnType(), nullable: true })
     resolvedAt!: Date | null;
 
-    @Column({ name: "deleted_at", type: "timestamptz", nullable: true })
+    @Column({ name: "deleted_at", type: timestampColumnType(), nullable: true })
     deletedAt!: Date | null;
 
     static candidate(input: RecipeCandidateInput, now: Date): RecipeEntity {

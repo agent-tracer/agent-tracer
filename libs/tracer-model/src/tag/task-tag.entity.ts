@@ -1,4 +1,5 @@
 import { Column, Entity, Index, PrimaryColumn } from "typeorm";
+import { timestampColumnType } from "@agent-tracer/platform";
 
 export interface TaskTagCreateInput {
     readonly id: string;
@@ -25,7 +26,7 @@ export class TaskTagEntity {
     @Column({ name: "tag_id", type: "text" })
     tagId!: string;
 
-    @Column({ name: "created_at", type: "timestamptz" })
+    @Column({ name: "created_at", type: timestampColumnType() })
     createdAt!: Date;
 
     static create(input: TaskTagCreateInput): TaskTagEntity {

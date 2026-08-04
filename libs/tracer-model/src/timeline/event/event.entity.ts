@@ -1,4 +1,5 @@
 import { Column, Entity, Index, PrimaryColumn } from "typeorm";
+import { jsonColumnDefault, jsonColumnType, timestampColumnType } from "@agent-tracer/platform";
 import { KIND, type EventKind, type EventLane } from "@agent-tracer/kernel";
 import { ASYNC_ACTION_STATUS, META } from "./event.const.js";
 
@@ -40,10 +41,10 @@ export class EventEntity {
     @Column({ name: "tool_name", type: "text", nullable: true })
     toolName!: string | null;
 
-    @Column({ name: "file_paths", type: "jsonb", default: [] })
+    @Column({ name: "file_paths", type: jsonColumnType(), default: jsonColumnDefault([]) })
     filePaths!: string[];
 
-    @Column({ type: "jsonb", default: {} })
+    @Column({ type: jsonColumnType(), default: jsonColumnDefault({}) })
     metadata!: Record<string, unknown>;
 
     // 원장에서 확정된 OTLP 식별자이며 읽기 모델은 그대로 실어 나른다.
@@ -56,7 +57,7 @@ export class EventEntity {
     @Column({ name: "parent_span_id", type: "text", nullable: true })
     parentSpanId!: string | null;
 
-    @Column({ name: "occurred_at", type: "timestamptz" })
+    @Column({ name: "occurred_at", type: timestampColumnType() })
     occurredAt!: Date;
 
     isUserMessage(): boolean {

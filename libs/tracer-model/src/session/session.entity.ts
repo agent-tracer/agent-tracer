@@ -1,4 +1,5 @@
 import { Column, Entity, Index, PrimaryColumn } from "typeorm";
+import { timestampColumnType } from "@agent-tracer/platform";
 import { SESSION_STATUS, type SessionStatus } from "../task/task.const.js";
 
 @Entity({ name: "sessions" })
@@ -25,10 +26,10 @@ export class SessionEntity {
     @Column({ type: "text", nullable: true })
     summary!: string | null;
 
-    @Column({ name: "started_at", type: "timestamptz" })
+    @Column({ name: "started_at", type: timestampColumnType() })
     startedAt!: Date;
 
-    @Column({ name: "ended_at", type: "timestamptz", nullable: true })
+    @Column({ name: "ended_at", type: timestampColumnType(), nullable: true })
     endedAt!: Date | null;
 
     end(summary: string | null, at: Date): void {

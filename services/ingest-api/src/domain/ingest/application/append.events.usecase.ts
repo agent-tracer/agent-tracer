@@ -54,6 +54,8 @@ export class AppendEventsUseCase {
             spanId: spanIdOf(event.id),
             parentSpanId: parentSpanIdOf(event),
             payload: event.payload,
+            turnId: event.turnId ?? null,
+            parentId: event.parentId ?? null,
         }));
         try {
             await this.ledger.appendAll(rows);

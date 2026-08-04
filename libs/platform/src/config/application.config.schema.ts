@@ -1,6 +1,10 @@
 import { z } from "zod";
 
 const dbSchema = z.object({
+    /** 이 연결이 말하는 방언이며 sqlite는 로컬 단독 실행 프로파일이 쓴다. */
+    driver: z.enum(["postgres", "sqlite"]).default("postgres"),
+    /** sqlite 방언에서만 의미가 있는 데이터베이스 파일 경로다. */
+    file: z.string().default(""),
     host: z.string().min(1),
     port: z.number().int().positive().max(65535),
     username: z.string().min(1),
@@ -9,7 +13,7 @@ const dbSchema = z.object({
 });
 
 export const applicationConfigSchema = z.object({
-    profile: z.enum(["local", "prd"]),
+    profile: z.enum(["local", "sqlite", "prd"]),
     ingestApi: z.object({ port: z.number().int().positive().max(65535) }),
     tracerApi: z.object({ port: z.number().int().positive().max(65535) }),
     projector: z.object({ port: z.number().int().positive().max(65535) }),

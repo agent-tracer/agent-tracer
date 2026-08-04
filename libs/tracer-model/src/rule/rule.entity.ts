@@ -1,4 +1,5 @@
 import { Column, Entity, Index, PrimaryColumn } from "typeorm";
+import { jsonColumnDefault, jsonColumnType, timestampColumnType } from "@agent-tracer/platform";
 import { InvariantViolationError } from "../error/invariant.error.js";
 import {
     RULE_REVIEW_STATE,
@@ -26,7 +27,7 @@ export class RuleEntity {
     @Column({ type: "text" })
     name!: string;
 
-    @Column({ type: "jsonb", default: {} })
+    @Column({ type: jsonColumnType(), default: jsonColumnDefault({}) })
     expectation!: RuleExpectation;
 
     @Column({ name: "task_id", type: "text" })
@@ -65,17 +66,17 @@ export class RuleEntity {
     anchorEventId!: string;
 
     // 모델이 인용한 사용자 턴 식별자 가운데 서버가 원장과 대조해 실재를 확인한 것만 담는다.
-    @Column({ name: "cited_turn_ids", type: "jsonb", default: [] })
+    @Column({ name: "cited_turn_ids", type: jsonColumnType(), default: jsonColumnDefault([]) })
     citedTurnIds!: string[];
 
     // 모델이 인용한 이벤트 식별자 가운데 서버가 원장과 대조해 실재를 확인한 것만 담는다.
-    @Column({ name: "cited_event_ids", type: "jsonb", default: [] })
+    @Column({ name: "cited_event_ids", type: jsonColumnType(), default: jsonColumnDefault([]) })
     citedEventIds!: string[];
 
-    @Column({ name: "created_at", type: "timestamptz" })
+    @Column({ name: "created_at", type: timestampColumnType() })
     createdAt!: Date;
 
-    @Column({ name: "deleted_at", type: "timestamptz", nullable: true })
+    @Column({ name: "deleted_at", type: timestampColumnType(), nullable: true })
     deletedAt!: Date | null;
 
     initializeProvenance(source: RuleSource): void {
