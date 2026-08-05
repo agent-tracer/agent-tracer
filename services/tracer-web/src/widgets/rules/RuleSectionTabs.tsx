@@ -48,7 +48,7 @@ export function RuleSectionTabs({
           {tab.key === "generations" && runningGenerations > 0 && (
             <span
               className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"
-              aria-label={`${runningGenerations}건 실행 중`}
+              aria-label={`${runningGenerations} in flight`}
             />
           )}
         </button>

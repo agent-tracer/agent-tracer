@@ -8,11 +8,14 @@ import {
   useRuleGenerationSettingsQuery,
   useSaveRuleGenerationSettingsMutation,
 } from "~tracer-web/entities/rule/api/rule-generation-queries.js";
-import { Button, Card, Field, Input, Select } from "~tracer-web/shared/ui/index.js";
+import { apiErrorMessage } from "~tracer-web/shared/api/api-error-message.js";
+import type { GuidanceMessage } from "~tracer-web/shared/guidance.js";
+import { useGuidance } from "~tracer-web/shared/store/index.js";
+import { Button, Card, Field, GuidanceText, Input, Select } from "~tracer-web/shared/ui/index.js";
 import { cn } from "~tracer-web/shared/ui/lib/cn.js";
 
 const LANGUAGE_LABEL: Readonly<Record<string, string>> = {
-  auto: "Auto — 요구가 쓰인 언어를 따른다",
+  auto: "Auto — follow the language of the request",
   ko: "Korean (한국어)",
   en: "English",
   ja: "Japanese (日本語)",
@@ -20,37 +23,53 @@ const LANGUAGE_LABEL: Readonly<Record<string, string>> = {
 };
 
 const EFFORT_LABEL: Readonly<Record<string, string>> = {
-  low: "low — 짧고 좁게",
+  low: "low — short and narrow",
   medium: "medium",
-  high: "high — 권장",
-  xhigh: "xhigh — 워크스페이스를 더 뒤진다",
-  max: "max — 가장 깊게, 가장 비싸게",
+  high: "high — recommended",
+  xhigh: "xhigh — searches more of the workspace",
+  max: "max — deepest and most expensive",
 };
+
+interface SettingFeedback {
+  readonly tone: "ok" | "err";
+  readonly message: GuidanceMessage;
+  /** 실패한 이유는 봉투의 코드가 고른 말로 뒤에 붙는다. */
+  readonly reason?: GuidanceMessage;
+}
 
 /** 로컬 실행기가 읽는 설정이며 에이전트 서비스가 없어도 산다. */
 export function RuleGenerationSettingsSection() {
+  const guidance = useGuidance();
   const settingsQuery = useRuleGenerationSettingsQuery();
   const save = useSaveRuleGenerationSettingsMutation();
   const [maxRulesDraft, setMaxRulesDraft] = useState("");
   const [modelDraft, setModelDraft] = useState("");
-  const [feedback, setFeedback] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<SettingFeedback | null>(null);
   const settings = settingsQuery.data;
 
   async function apply(patch: Parameters<typeof save.mutateAsync>[0], label: string) {
+    const messages = guidance.messages.settings;
     try {
       await save.mutateAsync(patch);
-      setFeedback(`${label}을 저장했다.`);
+      setFeedback({ tone: "ok", message: messages.settingSaved(label) });
     } catch (error) {
-      setFeedback(`${label} 저장이 실패했다: ${(error as Error).message}`);
+      setFeedback({
+        tone: "err",
+        message: messages.settingSaveFailed(label),
+        reason: apiErrorMessage(guidance.messages.common, error),
+      });
     }
   }
 
   return (
     <Card surface="canvas" className="py-5 px-6">
       <h2 className="text-[15px] font-semibold mb-1">Rule generation</h2>
-      <p className="text-ink-muted text-[12.5px] mb-5">
-        로컬 데몬이 규칙을 뽑을 때 쓰는 설정입니다. 에이전트 서비스와 무관하게 이 워크스페이스가 소유합니다.
-      </p>
+      <GuidanceText
+        as="p"
+        className="text-ink-muted text-[12.5px] mb-5"
+        locale={guidance.locale}
+        message={guidance.messages.settings.ruleGenerationSection}
+      />
 
       <Field label="Model">
         <div className="flex items-center gap-2">
@@ -63,14 +82,14 @@ export function RuleGenerationSettingsSection() {
           <Button
             variant="ghost"
             disabled={modelDraft.trim().length === 0 || save.isPending}
-            onClick={() => void apply({ model: modelDraft.trim() }, "모델").then(() => setModelDraft(""))}
+            onClick={() => void apply({ model: modelDraft.trim() }, "Model").then(() => setModelDraft(""))}
           >
             Save
           </Button>
           <Button
             variant="ghost"
             className="text-xs border-0 p-0 underline"
-            onClick={() => void apply({ model: null }, "모델")}
+            onClick={() => void apply({ model: null }, "Model")}
           >
             Reset
           </Button>
@@ -81,7 +100,7 @@ export function RuleGenerationSettingsSection() {
         <Select
           value={settings?.effort ?? "high"}
           disabled={save.isPending}
-          onChange={(e) => void apply({ effort: e.target.value }, "추론량")}
+          onChange={(e) => void apply({ effort: e.target.value }, "Effort")}
         >
           {RULE_GENERATION_EFFORTS.map((value) => (
             <option key={value} value={value}>
@@ -95,7 +114,7 @@ export function RuleGenerationSettingsSection() {
         <Select
           value={settings?.outputLanguage ?? "auto"}
           disabled={save.isPending}
-          onChange={(e) => void apply({ outputLanguage: e.target.value }, "출력 언어")}
+          onChange={(e) => void apply({ outputLanguage: e.target.value }, "Rule language")}
         >
           {RULE_GENERATION_LANGUAGES.map((value) => (
             <option key={value} value={value}>
@@ -120,7 +139,7 @@ export function RuleGenerationSettingsSection() {
             variant="ghost"
             disabled={maxRulesDraft.trim().length === 0 || save.isPending}
             onClick={() =>
-              void apply({ maxRulesPerTask: Number(maxRulesDraft) }, "규칙 상한").then(() =>
+              void apply({ maxRulesPerTask: Number(maxRulesDraft) }, "Max rules per request").then(() =>
                 setMaxRulesDraft(""),
               )
             }
@@ -131,8 +150,14 @@ export function RuleGenerationSettingsSection() {
       </Field>
 
       {feedback !== null && (
-        <p className={cn("mt-4 text-xs", feedback.includes("실패") ? "text-err" : "text-ink-muted")}>
-          {feedback}
+        <p className={cn("mt-4 text-xs", feedback.tone === "err" ? "text-err" : "text-ink-muted")}>
+          <GuidanceText locale={guidance.locale} message={feedback.message} />
+          {feedback.reason !== undefined && (
+            <>
+              {" "}
+              <GuidanceText locale={guidance.locale} message={feedback.reason} />
+            </>
+          )}
         </p>
       )}
     </Card>

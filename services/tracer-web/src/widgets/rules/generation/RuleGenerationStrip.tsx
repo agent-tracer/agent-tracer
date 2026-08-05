@@ -4,8 +4,10 @@ import {
   useDeleteRuleGenerationMutation,
 } from "~tracer-web/entities/rule/api/rule-generation-queries.js";
 import { formatRelativeShort } from "~tracer-web/shared/lib/formatting/time.js";
-import { Button, Card } from "~tracer-web/shared/ui/index.js";
+import { useGuidance } from "~tracer-web/shared/store/index.js";
+import { Button, Card, GuidanceText } from "~tracer-web/shared/ui/index.js";
 import { cn } from "~tracer-web/shared/ui/lib/cn.js";
+import { GenerationOutcomeText } from "~tracer-web/widgets/rules/generation/GenerationOutcomeText.js";
 import { readGenerationOutcome } from "~tracer-web/widgets/rules/generation/rule-generation-outcome.js";
 
 const TONE_CLASS: Readonly<Record<string, string>> = {
@@ -25,9 +27,10 @@ interface RuleGenerationStripProps {
 
 /** 규칙 생성 실행 하나가 지금 어디까지 왔는지와 무엇을 남겼는지를 한 줄로 보인다. */
 export function RuleGenerationStrip({ record, deletable = false, nowMs }: RuleGenerationStripProps) {
+  const guidance = useGuidance();
   const cancel = useCancelRuleGenerationMutation();
   const remove = useDeleteRuleGenerationMutation();
-  const outcome = readGenerationOutcome(record);
+  const outcome = readGenerationOutcome(record, guidance.messages.rules.generation);
   const active = record.status === "pending" || record.status === "running";
 
   return (
@@ -36,13 +39,17 @@ export function RuleGenerationStrip({ record, deletable = false, nowMs }: RuleGe
         className={cn("text-[12.5px] font-medium shrink-0", TONE_CLASS[outcome.tone] ?? "text-ink")}
         data-testid="generation-headline"
       >
-        {outcome.headline}
+        <GuidanceText locale={guidance.locale} message={outcome.headline} />
       </span>
       {outcome.detail !== null && (
-        <span className="text-[12px] text-ink-subtle truncate">{outcome.detail}</span>
+        <GenerationOutcomeText
+          locale={guidance.locale}
+          value={outcome.detail}
+          className="text-[12px] text-ink-subtle truncate"
+        />
       )}
       {record.intent !== null && (
-        <span className="text-[12px] text-ink-tertiary truncate">의도: {record.intent}</span>
+        <span className="text-[12px] text-ink-tertiary truncate">Intent: {record.intent}</span>
       )}
       <span className="ml-auto flex items-center gap-2 shrink-0">
         {nowMs !== undefined && (
@@ -52,7 +59,7 @@ export function RuleGenerationStrip({ record, deletable = false, nowMs }: RuleGe
         )}
         {record.createdRuleIds.length > 0 && (
           <span className="text-[11px] font-mono text-ink-tertiary">
-            {record.createdRuleIds.length}건
+            {record.createdRuleIds.length}
           </span>
         )}
         {active && (
@@ -61,17 +68,17 @@ export function RuleGenerationStrip({ record, deletable = false, nowMs }: RuleGe
             disabled={cancel.isPending}
             onClick={() => cancel.mutate(record.id)}
           >
-            멈추기
+            Stop
           </Button>
         )}
         {deletable && !active && (
           <Button
             variant="ghost"
-            aria-label="이 실행을 이력에서 지우기"
+            aria-label="Remove this run from the history"
             disabled={remove.isPending}
             onClick={() => remove.mutate(record.id)}
           >
-            지우기
+            Remove
           </Button>
         )}
       </span>

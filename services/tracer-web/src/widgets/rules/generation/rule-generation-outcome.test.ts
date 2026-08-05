@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { RuleGenerationRecord } from "~tracer-web/entities/rule/api/api-rule-generations.js";
 import type { TaskId } from "~tracer-web/shared/identity.js";
+import { EN_GUIDANCE } from "~tracer-web/shared/guidance-en.js";
+import { KO_GUIDANCE } from "~tracer-web/shared/guidance-ko.js";
+import { isGuidanceMessage } from "~tracer-web/shared/guidance.js";
 import { readGenerationOutcome } from "~tracer-web/widgets/rules/generation/rule-generation-outcome.js";
+
+const en = EN_GUIDANCE.rules.generation;
+const ko = KO_GUIDANCE.rules.generation;
 
 function record(overrides: Partial<RuleGenerationRecord> = {}): RuleGenerationRecord {
   return {
@@ -33,37 +39,56 @@ function record(overrides: Partial<RuleGenerationRecord> = {}): RuleGenerationRe
 
 describe("readGenerationOutcome", () => {
   it("만든 규칙 수와 잰 관측을 함께 보인다", () => {
-    const outcome = readGenerationOutcome(record({ createdRuleIds: ["r1", "r2"] }));
+    const outcome = readGenerationOutcome(record({ createdRuleIds: ["r1", "r2"] }), en);
 
     expect(outcome.tone).toBe("done");
-    expect(outcome.headline).toBe("규칙 2건을 만들었다");
-    expect(outcome.detail).toBe("claude-sonnet-5 · 30초 · 6턴 · $0.329");
+    expect(isGuidanceMessage(outcome.headline)).toBe(true);
+    expect(outcome.detail).toBe("claude-sonnet-5 · 30s · 6 turns · $0.329");
   });
 
   it("0건이면 왜 0건인지 말한다", () => {
-    const outcome = readGenerationOutcome(record());
+    const outcome = readGenerationOutcome(record(), en);
 
     expect(outcome.tone).toBe("empty");
-    expect(outcome.detail).toContain("검증할 의무를 찾지 못했다");
+    expect(outcome.headline).toBe(en.noneCreated);
+    expect(outcome.detail).toBe(en.noObligationFound);
   });
 
   it("근거가 서지 않아 버린 제안이 있으면 그것을 말한다", () => {
-    const outcome = readGenerationOutcome(record({ skipped: ["citedTurnIds가 비었다"] }));
+    const outcome = readGenerationOutcome(record({ skipped: ["citedTurnIds가 비었다"] }), en);
 
     expect(outcome.tone).toBe("empty");
-    expect(outcome.detail).toContain("1건을 버렸다");
+    expect(outcome.detail).not.toBe(en.noObligationFound);
+    expect(isGuidanceMessage(outcome.detail)).toBe(true);
   });
 
-  it("실패는 사유를 그대로 보인다", () => {
-    const outcome = readGenerationOutcome(record({ status: "failed", error: "실행기가 죽었다" }));
+  it("실패는 서버가 준 사유를 그대로 보인다", () => {
+    const outcome = readGenerationOutcome(
+      record({ status: "failed", error: "실행기가 죽었다" }),
+      en,
+    );
 
     expect(outcome.tone).toBe("failed");
+    expect(outcome.headline).toBe(en.failed);
     expect(outcome.detail).toBe("실행기가 죽었다");
   });
 
   it("도는 중과 멈춘 것을 가른다", () => {
-    expect(readGenerationOutcome(record({ status: "running" })).tone).toBe("running");
-    expect(readGenerationOutcome(record({ status: "pending" })).tone).toBe("running");
-    expect(readGenerationOutcome(record({ status: "canceled" })).tone).toBe("canceled");
+    expect(readGenerationOutcome(record({ status: "running" }), en).tone).toBe("running");
+    expect(readGenerationOutcome(record({ status: "pending" }), en).tone).toBe("running");
+    expect(readGenerationOutcome(record({ status: "canceled" }), en).tone).toBe("canceled");
+  });
+
+  it("고른 언어의 목록에서 같은 자리를 고른다", () => {
+    const outcome = readGenerationOutcome(record(), ko);
+
+    expect(outcome.headline).toBe(ko.noneCreated);
+    expect(outcome.headline).not.toBe(en.noneCreated);
+  });
+
+  it("잰 관측은 언어와 무관하게 같은 단위로 적는다", () => {
+    const koOutcome = readGenerationOutcome(record({ createdRuleIds: ["r1"] }), ko);
+
+    expect(koOutcome.detail).toBe("claude-sonnet-5 · 30s · 6 turns · $0.329");
   });
 });

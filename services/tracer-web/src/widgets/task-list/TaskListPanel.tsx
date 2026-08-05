@@ -1,6 +1,7 @@
 import { Fragment } from "react";
-import { ScrollArea } from "~tracer-web/shared/ui/index.js";
-import { useSidebarSearchQuery } from "~tracer-web/shared/store/index.js";
+import type { GuidanceLocale, GuidanceMessage } from "~tracer-web/shared/guidance.js";
+import { GuidanceText, ScrollArea } from "~tracer-web/shared/ui/index.js";
+import { useGuidance, useSidebarSearchQuery } from "~tracer-web/shared/store/index.js";
 import { useDebouncedValue } from "~tracer-web/shared/lib/hooks/use-debounced-value.js";
 import { cn } from "~tracer-web/shared/ui/lib/cn.js";
 import { TaskListHeader } from "~tracer-web/widgets/task-list/TaskListHeader.js";
@@ -15,6 +16,7 @@ import { useTaskList } from "~tracer-web/widgets/task-list/hooks/useTaskList.js"
 
 /** `/tasks/*` 라우트의 사이드바 루트. */
 export function TaskListPanel() {
+  const guidance = useGuidance();
   const {
     groups,
     counts,
@@ -49,9 +51,18 @@ export function TaskListPanel() {
         ) : (
           <div className="px-2 pt-1.5 pb-3.5">
             {isLoading && <Status label="Loading tasks…" />}
-            {isError && <Status label="Failed to load tasks." tone="err" />}
+            {isError && (
+              <Status
+                message={guidance.messages.tasks.listLoadError}
+                locale={guidance.locale}
+                tone="err"
+              />
+            )}
             {!isLoading && !isError && groups.length === 0 && (
-              <Status label="No tasks match the current filter." />
+              <Status
+                message={guidance.messages.tasks.filterEmpty}
+                locale={guidance.locale}
+              />
             )}
             {groups.map((group) => (
               <Fragment key={group.key}>
@@ -99,19 +110,22 @@ export function TaskListPanel() {
 
 function Status({
   label,
+  message,
+  locale,
   tone = "muted",
 }: {
-  label: string;
+  /** 불러오는 중 같은 조작 표시는 영어 한 낱말로 남는다. */
+  label?: string;
+  message?: GuidanceMessage;
+  locale?: GuidanceLocale;
   tone?: "muted" | "err";
 }) {
-  return (
-    <div
-      className={cn(
-        "px-3 py-4 text-center text-xs",
-        tone === "err" ? "text-err" : "text-ink-subtle",
-      )}
-    >
-      {label}
-    </div>
+  const className = cn(
+    "px-3 py-4 text-center text-xs",
+    tone === "err" ? "text-err" : "text-ink-subtle",
   );
+  if (message !== undefined && locale !== undefined) {
+    return <GuidanceText as="div" className={className} locale={locale} message={message} />;
+  }
+  return <div className={className}>{label}</div>;
 }

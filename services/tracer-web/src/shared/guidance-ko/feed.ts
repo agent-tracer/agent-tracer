@@ -68,4 +68,6 @@ export const KO_TASKS = {
       guidanceCode(runtime),
       "에서 수집됐습니다.",
     ),
+  listLoadError: createGuidanceMessage("태스크 목록을 불러오지 못했습니다."),
+  filterEmpty: createGuidanceMessage("지금 거른 조건에 맞는 태스크가 없습니다."),
 } as const;

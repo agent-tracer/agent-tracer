@@ -29,7 +29,7 @@ describe("RuleSectionTabs", () => {
       />,
     );
 
-    expect(screen.getByLabelText("1건 실행 중")).toBeInTheDocument();
+    expect(screen.getByLabelText("1 in flight")).toBeInTheDocument();
   });
 
   it("실행이 없으면 알림 점을 두지 않는다", () => {

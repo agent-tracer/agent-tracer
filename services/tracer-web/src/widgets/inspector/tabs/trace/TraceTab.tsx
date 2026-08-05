@@ -31,7 +31,12 @@ export function TraceTab() {
 
   if (!taskId) {
     return (
-      <EmptyView eyebrow="Trace" title="Select a task to view its trace." />
+      <EmptyView
+        eyebrow="Trace"
+        title="Select a task to view its trace."
+        description={guidance.messages.inspector.selectTaskForTrace}
+        locale={guidance.locale}
+      />
     );
   }
   if (isLoading) {

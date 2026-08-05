@@ -1,6 +1,7 @@
 import { cn } from "~tracer-web/shared/ui/lib/cn.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
 import { GuidanceText } from "~tracer-web/shared/ui/index.js";
+import { GenerationOutcomeText } from "~tracer-web/widgets/rules/generation/GenerationOutcomeText.js";
 import { readGenerationOutcome } from "~tracer-web/widgets/rules/generation/rule-generation-outcome.js";
 import type { RuleGenerationController } from "~tracer-web/widgets/rules/generation/useRuleGeneration.js";
 
@@ -28,14 +29,19 @@ export function RuleGenerationRunStatus({ controller }: RuleGenerationRunStatusP
     record,
     stop,
   } = controller;
-  const outcome = record === null ? null : readGenerationOutcome(record);
+  const outcome = record === null
+    ? null
+    : readGenerationOutcome(record, guidance.messages.rules.generation);
 
   return (
     <>
       {operationalBlockingReason && (
-        <p className="mt-2 mb-0 text-[11px] text-ink-tertiary">
-          {operationalBlockingReason}
-        </p>
+        <GuidanceText
+          as="p"
+          className="mt-2 mb-0 text-[11px] text-ink-tertiary"
+          locale={guidance.locale}
+          message={operationalBlockingReason}
+        />
       )}
       {incompleteTimelineStatus && (
         <p className="mt-2 mb-0 text-[11px] text-warn">
@@ -48,15 +54,20 @@ export function RuleGenerationRunStatus({ controller }: RuleGenerationRunStatusP
       )}
       {outcome !== null && (
         <p className={cn("mt-2 mb-0 text-[11px]", TONE_CLASS[outcome.tone] ?? "text-ink-tertiary")}>
-          {outcome.headline}
-          {outcome.detail !== null && ` · ${outcome.detail}`}
+          <GuidanceText locale={guidance.locale} message={outcome.headline} />
+          {outcome.detail !== null && (
+            <>
+              {" · "}
+              <GenerationOutcomeText locale={guidance.locale} value={outcome.detail} />
+            </>
+          )}
           {isInFlight && (
             <button
               type="button"
               onClick={() => void stop()}
               className="ml-2 underline cursor-pointer bg-transparent border-0 p-0 text-[11px] text-ink-tertiary"
             >
-              멈추기
+              Stop
             </button>
           )}
         </p>
@@ -66,7 +77,14 @@ export function RuleGenerationRunStatus({ controller }: RuleGenerationRunStatusP
           Intent: “{lastIntent}”
         </p>
       )}
-      {errorMessage && <p className="mt-2 mb-0 text-[11px] text-err">{errorMessage}</p>}
+      {errorMessage && (
+        <GuidanceText
+          as="p"
+          className="mt-2 mb-0 text-[11px] text-err"
+          locale={guidance.locale}
+          message={errorMessage}
+        />
+      )}
     </>
   );
 }

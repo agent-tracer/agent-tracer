@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { createUiStore, UiStoreProvider } from "~tracer-web/shared/store/index.js";
 import { TooltipProvider } from "~tracer-web/shared/ui/index.js";
 import { DaemonHealthSection } from "~tracer-web/widgets/settings/daemon/DaemonHealthSection.js";
 
@@ -18,9 +19,11 @@ function renderSection() {
   });
   return render(
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <DaemonHealthSection />
-      </TooltipProvider>
+      <UiStoreProvider store={createUiStore()}>
+        <TooltipProvider>
+          <DaemonHealthSection />
+        </TooltipProvider>
+      </UiStoreProvider>
     </QueryClientProvider>,
   );
 }

@@ -1,36 +1,43 @@
 import type { RuleGenerationRecord } from "~tracer-web/entities/rule/api/api-rule-generations.js";
+import type { GuidanceCatalog, GuidanceMessage } from "~tracer-web/shared/guidance.js";
+
+type GenerationMessages = GuidanceCatalog["rules"]["generation"];
 
 export interface RuleGenerationOutcomeLine {
   readonly tone: "running" | "done" | "empty" | "failed" | "canceled";
-  readonly headline: string;
-  readonly detail: string | null;
+  readonly headline: GuidanceMessage;
+  /** 서버가 준 사유와 잰 관측은 그대로 두고, 화면이 짓는 말만 목록에서 고른다. */
+  readonly detail: GuidanceMessage | string | null;
 }
 
 function observationDetail(record: RuleGenerationRecord): string | null {
   const parts: string[] = [];
   const {model, costUsd, durationMs, numTurns} = record.observation;
   if (model !== null) parts.push(model);
-  if (durationMs !== null) parts.push(`${Math.round(durationMs / 1000)}초`);
-  if (numTurns !== null) parts.push(`${numTurns}턴`);
+  if (durationMs !== null) parts.push(`${Math.round(durationMs / 1000)}s`);
+  if (numTurns !== null) parts.push(`${numTurns} turns`);
   if (costUsd !== null) parts.push(`$${costUsd.toFixed(3)}`);
   return parts.length > 0 ? parts.join(" · ") : null;
 }
 
 /** 성공도 0건도 실패도 화면에서 서로 구분되게 한 줄로 만든다. */
-export function readGenerationOutcome(record: RuleGenerationRecord): RuleGenerationOutcomeLine {
+export function readGenerationOutcome(
+  record: RuleGenerationRecord,
+  messages: GenerationMessages,
+): RuleGenerationOutcomeLine {
   if (record.status === "pending") {
-    return { tone: "running", headline: "규칙 생성을 기다리는 중", detail: null };
+    return { tone: "running", headline: messages.waitingToStart, detail: null };
   }
   if (record.status === "running") {
-    return { tone: "running", headline: "규칙을 뽑는 중", detail: null };
+    return { tone: "running", headline: messages.running, detail: null };
   }
   if (record.status === "canceled") {
-    return { tone: "canceled", headline: "규칙 생성을 멈췄다", detail: observationDetail(record) };
+    return { tone: "canceled", headline: messages.canceled, detail: observationDetail(record) };
   }
   if (record.status === "failed") {
     return {
       tone: "failed",
-      headline: "규칙 생성이 실패했다",
+      headline: messages.failed,
       detail: record.error ?? observationDetail(record),
     };
   }
@@ -39,15 +46,15 @@ export function readGenerationOutcome(record: RuleGenerationRecord): RuleGenerat
     const skipped = record.skipped.length;
     return {
       tone: "empty",
-      headline: "규칙을 만들지 않았다",
+      headline: messages.noneCreated,
       detail: skipped > 0
-        ? `근거가 서지 않아 ${skipped}건을 버렸다`
-        : "이 요구에서 검증할 의무를 찾지 못했다",
+        ? messages.skippedWithoutEvidence(skipped)
+        : messages.noObligationFound,
     };
   }
   return {
     tone: "done",
-    headline: `규칙 ${created}건을 만들었다`,
+    headline: messages.created(created),
     detail: observationDetail(record),
   };
 }
