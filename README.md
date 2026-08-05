@@ -112,6 +112,51 @@ curl http://127.0.0.1:3847/health/ready
 
 사용자 값은 수집과 조회 양쪽에 쓰입니다. 수집을 기본값이 아닌 신원으로 보내고 대시보드는 기본값으로 열면 같은 원장을 보고도 목록이 비어 보입니다.
 
+### 상태 표시줄
+
+설치는 훅과 함께 `plugin/hooks/hooks.json`의 `statusLine`도 등록합니다. Claude Code는 API 요청마다 이 스크립트를 부르고 stdout의 첫 줄만 렌더링합니다.
+
+```text
+[monitor] ctx 43% · 5h 18% · $1.234
+```
+
+차례로 컨텍스트 창 사용률, 5시간 한도 사용률, 누적 비용입니다. 페이로드에 오지 않은 값은 빠지고 셋 다 없으면 아무 줄도 내지 않습니다.
+
+이 스크립트는 표시만 하지 않습니다. 호출마다 `agent_tracer.context.snapshot`을 원장에 넣고, 대시보드의 컨텍스트·비용 궤적과 플러그인의 컨텍스트 압력 힌트는 이 이벤트만 읽습니다. 상태 표시줄을 내주면 표시줄만 비는 것이 아니라 그 수치가 통째로 빕니다.
+
+### 다른 상태 표시줄이 이미 있을 때
+
+상태 표시줄 자리는 하나이고 `~/.claude/settings.json`의 `statusLine`이 플러그인 선언을 이깁니다. 터미널 도구나 다른 플러그인이 그 자리를 이미 쓰고 있으면 설치가 성공한 채로 표시줄이 비고 스냅샷도 끊깁니다. 나머지 훅은 그대로 돌아 대시보드에는 태스크가 쌓이므로 이 상태는 설치 실패와 구분되지 않습니다.
+
+쓰던 것이 있으면 한 스크립트에 둘을 태웁니다. stdin은 한 번만 읽히므로 페이로드를 변수에 받아 각각에게 다시 먹이고, 화면에 낼 쪽만 stdout을 남깁니다.
+
+```sh
+#!/bin/sh
+payload=$(cat)
+[ -z "$payload" ] && exit 0
+
+# 쓰던 상태 표시줄. 화면은 아래에 양보한다.
+printf '%s' "$payload" | /bin/sh "$HOME/path/to/other-statusline.sh" >/dev/null 2>&1 || :
+
+# 설치본은 버전 디렉터리 아래에 있으므로 가장 높은 버전을 고른다.
+root="$HOME/.claude/plugins/cache/agent-tracer/agent-tracer-monitor"
+version=$(ls -1 "$root" 2>/dev/null | sort -t. -k1,1n -k2,2n -k3,3n | tail -n 1)
+[ -n "$version" ] && printf '%s' "$payload" | "$root/$version/bin/run-hook-claude.sh" StatusLine 2>/dev/null | head -n 1
+
+exit 0
+```
+
+그리고 `~/.claude/settings.json`이 이 스크립트를 부르게 합니다.
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "/bin/sh \"$HOME/.claude/statusline.sh\""
+  }
+}
+```
+
 ## 개발
 
 ```bash
