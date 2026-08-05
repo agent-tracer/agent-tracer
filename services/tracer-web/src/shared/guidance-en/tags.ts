@@ -23,4 +23,7 @@ export const EN_TAGS = {
   filterDescription: createGuidanceMessage(
     "Only tasks carrying every selected tag remain.",
   ),
+  nameRequired: createGuidanceMessage("Enter a tag name."),
+  colorFormat: createGuidanceMessage("Use a hex color such as #4f46e5."),
+  saveFailed: createGuidanceMessage("The tag could not be saved."),
 } as const;

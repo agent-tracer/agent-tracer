@@ -15,6 +15,8 @@ import { useAgentBackendChoice } from "~tracer-web/features/agent-backend/use-ag
 import { useJobStatus } from "~tracer-web/entities/job/api/queries.js";
 import { useTaskCleanupSuggestionsQuery } from "~tracer-web/entities/task-cleanup/api/queries.js";
 import { useTasksQuery } from "~tracer-web/entities/task/api/list-queries.js";
+import { apiErrorMessage } from "~tracer-web/shared/api/api-error-message.js";
+import type { GuidanceMessage } from "~tracer-web/shared/guidance.js";
 import { monitorQueryKeys } from "~tracer-web/shared/api/query-keys.js";
 import { JOB_KIND, isActiveJobStatus } from "~tracer-web/entities/job/model/job.js";
 import { GuidanceText, Modal } from "~tracer-web/shared/ui/index.js";
@@ -167,15 +169,16 @@ function SuggestionRow({
   readonly suggestion: CleanupSuggestion;
   readonly taskTitle: string;
 }) {
+  const guidance = useGuidance();
   const accept = useAcceptCleanupSuggestionMutation();
   const dismiss = useDismissCleanupSuggestionMutation();
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<GuidanceMessage | null>(null);
   const isBusy = accept.isPending || dismiss.isPending;
 
   const handleAccept = () => {
     setError(null);
     accept.mutate(suggestion.id, {
-      onError: (err: unknown) => setError(readErrorMessage(err)),
+      onError: (err: unknown) => setError(apiErrorMessage(guidance.messages.common, err)),
     });
   };
   const handleDismiss = () => {
@@ -194,7 +197,12 @@ function SuggestionRow({
         {suggestion.rationale}
       </p>
       {error && (
-        <p className="mt-1 mb-0 text-[11.5px] text-err [overflow-wrap:anywhere]">{error}</p>
+        <GuidanceText
+          as="p"
+          className="mt-1 mb-0 text-[11.5px] text-err [overflow-wrap:anywhere]"
+          locale={guidance.locale}
+          message={error}
+        />
       )}
       <div className="mt-2 flex gap-1.5 justify-end">
         <button
