@@ -23,4 +23,7 @@ export const KO_TAGS = {
   filterDescription: createGuidanceMessage(
     "선택한 태그를 모두 가진 태스크만 남깁니다.",
   ),
+  nameRequired: createGuidanceMessage("태그 이름을 입력하세요."),
+  colorFormat: createGuidanceMessage("#4f46e5처럼 16진수 색을 쓰세요."),
+  saveFailed: createGuidanceMessage("태그를 저장하지 못했습니다."),
 } as const;

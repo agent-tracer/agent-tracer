@@ -21,6 +21,20 @@ export const KO_COMMON = {
     idle: createGuidanceMessage("최근 활동이 기록되지 않았습니다."),
     canceled: createGuidanceMessage("잡이 완료되기 전에 중단됐습니다."),
   },
+  // 서버는 사유를 코드로만 말하므로 그 코드를 화면의 말로 옮기는 자리가 여기 하나다.
+  apiError: {
+    unauthorized: createGuidanceMessage("다시 로그인해야 계속할 수 있습니다."),
+    forbidden: createGuidanceMessage("이 계정으로는 할 수 없는 동작입니다."),
+    notFound: createGuidanceMessage("요청한 대상이 더 이상 없습니다."),
+    conflict: createGuidanceMessage("불러온 뒤 대상이 바뀌었습니다. 새로 고친 뒤 다시 시도하세요."),
+    badRequest: createGuidanceMessage("요청이 거절됐습니다. 값을 확인한 뒤 다시 시도하세요."),
+    validation: createGuidanceMessage("일부 값이 기대한 모양이 아닙니다."),
+    rateLimited: createGuidanceMessage("요청이 너무 잦습니다. 잠시 뒤 다시 시도하세요."),
+    serverError: createGuidanceMessage("모니터 서버가 요청을 처리하지 못했습니다."),
+    notImplemented: createGuidanceMessage("이 배포에는 그 요청에 답하는 서비스가 없습니다."),
+    unreachable: createGuidanceMessage("모니터 서버가 응답하지 않았습니다. 실행 중인지 확인하세요."),
+    unknown: createGuidanceMessage("요청을 처리하지 못했습니다."),
+  },
 } as const;
 
 export const KO_APP = {

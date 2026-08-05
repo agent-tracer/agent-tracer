@@ -5,6 +5,8 @@ import {
   getUserEmail,
   getUserId,
 } from "~tracer-web/shared/api/user-identity.js";
+import { apiErrorMessage } from "~tracer-web/shared/api/api-error-message.js";
+import type { GuidanceMessage } from "~tracer-web/shared/guidance.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
 import { Button, Card, Field, GuidanceText, Input, Modal } from "~tracer-web/shared/ui/index.js";
 import { HookSetupNote } from "~tracer-web/widgets/settings/identity/HookSetupNote.js";
@@ -19,7 +21,7 @@ export function IdentitySection() {
 
   const [draft, setDraft] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<GuidanceMessage | null>(null);
   const [resetOpen, setResetOpen] = useState(false);
 
   async function onboard() {
@@ -31,7 +33,7 @@ export function IdentitySection() {
       await onboardUser(trimmed);
       window.location.reload();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to set identity.");
+      setError(apiErrorMessage(guidance.messages.common, err));
       setSubmitting(false);
     }
   }
@@ -102,7 +104,14 @@ export function IdentitySection() {
             {submitting ? "Saving…" : isLocal ? "Set" : "Change"}
           </Button>
         </div>
-        {error && <p className="text-err text-xs mt-2">{error}</p>}
+        {error && (
+          <GuidanceText
+            as="p"
+            className="text-err text-xs mt-2"
+            locale={guidance.locale}
+            message={error}
+          />
+        )}
       </Field>
 
       {!isLocal && email && <HookSetupNote email={email} />}
