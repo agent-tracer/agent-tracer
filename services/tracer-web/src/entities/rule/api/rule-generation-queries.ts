@@ -3,6 +3,8 @@ import type { RuleGenerationSettingsDto } from "@agent-tracer/kernel";
 import type { TaskId } from "~tracer-web/shared/identity.js";
 import {
   cancelRuleGeneration,
+  clearRuleGenerations,
+  deleteRuleGeneration,
   fetchRuleGenerationSettings,
   fetchRuleGenerations,
   requestRuleGeneration,
@@ -42,6 +44,26 @@ export function useCancelRuleGenerationMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => cancelRuleGeneration(id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: monitorQueryKeys.ruleGenerations() });
+    },
+  });
+}
+
+export function useDeleteRuleGenerationMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteRuleGeneration(id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: monitorQueryKeys.ruleGenerations() });
+    },
+  });
+}
+
+export function useClearRuleGenerationsMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => clearRuleGenerations(),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: monitorQueryKeys.ruleGenerations() });
     },

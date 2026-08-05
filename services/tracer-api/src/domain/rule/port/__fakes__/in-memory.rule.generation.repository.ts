@@ -105,6 +105,23 @@ export class InMemoryRuleGenerationRepository implements RuleGenerationRepositor
         return true;
     }
 
+    async deleteTerminal(userId: string, id: string): Promise<boolean> {
+        const row = this.rows.get(id);
+        if (row === undefined || row.userId !== userId || ACTIVE.includes(row.status)) return false;
+        this.rows.delete(id);
+        return true;
+    }
+
+    async deleteAllTerminal(userId: string): Promise<number> {
+        let deleted = 0;
+        for (const row of this.all()) {
+            if (row.userId !== userId || ACTIVE.includes(row.status)) continue;
+            this.rows.delete(row.id);
+            deleted += 1;
+        }
+        return deleted;
+    }
+
     async reclaimExpired(now: Date): Promise<number> {
         let reclaimed = 0;
         for (const row of this.all()) {

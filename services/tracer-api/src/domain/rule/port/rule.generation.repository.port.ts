@@ -27,6 +27,10 @@ export interface RuleGenerationRepositoryPort {
     ): Promise<boolean>;
     release(id: string, owner: string): Promise<boolean>;
     cancel(userId: string, id: string, now: Date): Promise<boolean>;
+    /** 종료된 요청 하나를 이력에서 지운다. */
+    deleteTerminal(userId: string, id: string): Promise<boolean>;
+    /** 종료된 요청을 모두 지우고 지운 수를 돌려준다. */
+    deleteAllTerminal(userId: string): Promise<number>;
     /** 리스가 끊긴 채 남은 요청을 대기로 돌린다. */
     reclaimExpired(now: Date): Promise<number>;
 }

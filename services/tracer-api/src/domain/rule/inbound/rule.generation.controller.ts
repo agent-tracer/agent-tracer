@@ -2,6 +2,7 @@ import {
     BadRequestException,
     Body,
     Controller,
+    Delete,
     Get,
     Headers,
     HttpCode,
@@ -17,6 +18,7 @@ import {
     type RuleGenerationStatus,
 } from "@agent-tracer/kernel";
 import { CancelRuleGenerationUseCase } from "~tracer-api/domain/rule/application/command/cancel.rule.generation.usecase.js";
+import { DeleteRuleGenerationUseCase } from "~tracer-api/domain/rule/application/command/delete.rule.generation.usecase.js";
 import { LeaseRuleGenerationUseCase } from "~tracer-api/domain/rule/application/command/lease.rule.generation.usecase.js";
 import { RequestRuleGenerationUseCase } from "~tracer-api/domain/rule/application/command/request.rule.generation.usecase.js";
 import { SettleRuleGenerationUseCase } from "~tracer-api/domain/rule/application/command/settle.rule.generation.usecase.js";
@@ -43,6 +45,7 @@ export class RuleGenerationController {
         private readonly lease: LeaseRuleGenerationUseCase,
         private readonly settle: SettleRuleGenerationUseCase,
         private readonly cancel: CancelRuleGenerationUseCase,
+        private readonly remove: DeleteRuleGenerationUseCase,
         private readonly list: ListRuleGenerationsUseCase,
     ) {}
 
@@ -159,6 +162,21 @@ export class RuleGenerationController {
         @Param("id", pathParamPipe) id: string,
     ) {
         return this.cancel.execute(resolveUserId(user), id);
+    }
+
+    @Delete()
+    @HttpCode(HttpStatus.OK)
+    async clearHistory(@Headers(MONITOR_USER_HEADER) user: string | undefined) {
+        return this.remove.clear(resolveUserId(user));
+    }
+
+    @Delete(":id")
+    @HttpCode(HttpStatus.OK)
+    async deleteRequest(
+        @Headers(MONITOR_USER_HEADER) user: string | undefined,
+        @Param("id", pathParamPipe) id: string,
+    ) {
+        return this.remove.execute(resolveUserId(user), id);
     }
 }
 
