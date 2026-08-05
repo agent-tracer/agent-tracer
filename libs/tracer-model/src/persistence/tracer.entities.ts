@@ -4,6 +4,7 @@ import { MemoEntity } from "../memo/memo.entity.js";
 import { RecipeApplicationEntity } from "../recipe/application/recipe.application.entity.js";
 import { RecipeEntity } from "../recipe/recipe.entity.js";
 import { RuleGenerationEntity } from "../rule/generation/rule.generation.entity.js";
+import { RuleGenerationSettingsEntity } from "../rule/generation/rule.generation.settings.entity.js";
 import { RuleEntity } from "../rule/rule.entity.js";
 import { VerdictEntity } from "../rule/verification/verdict.entity.js";
 import { SearchOutboxEntity } from "../search/search.outbox.entity.js";
@@ -25,6 +26,7 @@ export const TRACER_ENTITIES = [
     TurnEntity,
     RuleEntity,
     RuleGenerationEntity,
+    RuleGenerationSettingsEntity,
     VerdictEntity,
     RecipeEntity,
     RecipeApplicationEntity,

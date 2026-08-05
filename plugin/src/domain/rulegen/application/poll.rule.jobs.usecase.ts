@@ -65,45 +65,32 @@ export class PollRuleJobsUsecase {
     }
 
     private async dispatch(job: PendingRuleJob, taskId: string): Promise<void> {
-        const workspacePath = await this.jobs.workspacePath(taskId);
-        if (workspacePath === null) {
-            this.log.write(`no workspacePath for task ${taskId}, failing job ${job.id}`);
-            await this.jobs.fail(job.id, ruleGenerationFailure(`task ${taskId} has no workspacePath`))
-                .catch(() => this.log.write(`failed to mark job ${job.id} failed`));
-            return;
-        }
-
         const anchorEventId = readJobAnchorEventId(job);
         if (anchorEventId === undefined) {
-            await this.failInvalidAnchor(job.id, "rule generation job has no anchor event");
+            await this.failInvalidAnchor(job.id, "rule generation request has no anchor event");
             return;
         }
-        const rawAnchorText = await this.jobs.anchorText(taskId, anchorEventId);
-        if (rawAnchorText === undefined) {
-            await this.failInvalidAnchor(job.id, `anchor ${anchorEventId} is not an owned user message`);
-            return;
-        }
-        const anchorText = toRuleRequestText(rawAnchorText);
+        // 클레임을 먼저 걸어야 집지 못할 요청에 왕복을 쓰지 않는다.
+        if (!await this.claim(job.id)) return;
 
-        try {
-            if (!await this.jobs.claim(job.id)) {
-                this.log.write(`could not start job ${job.id}, skipping`);
-                return;
-            }
-        } catch (error) {
-            this.log.write(`could not start job ${job.id}: ${String(error)}`);
+        const context = await this.gather(taskId, anchorEventId);
+        if (typeof context === "string") {
+            await this.failInvalidAnchor(job.id, context);
             return;
         }
+        const settings = this.settings.snapshot();
         const request = toRuleGenerationRequest(job, taskId, {
-            workspacePath,
-            anchorText,
-            model: this.settings.snapshot().model,
+            ...context,
+            anchorEventId,
+            model: settings.model,
+            language: settings.outputLanguage,
+            effort: settings.effort,
         });
 
         const cancel = new AbortController();
         this.running.set(job.id, cancel);
         const stopHeartbeat = this.startHeartbeat(job.id, cancel);
-        this.log.write(`starting job ${job.id} for task ${taskId}`);
+        this.log.write(`starting request ${job.id} for task ${taskId}`);
 
         void this.runner(request, cancel.signal)
             .then(() => this.log.write(`job ${job.id} completed`))
@@ -117,6 +104,29 @@ export class PollRuleJobsUsecase {
                 stopHeartbeat();
                 this.running.delete(job.id);
             });
+    }
+
+    /** 클레임에 실패한 요청은 남이 쥐었거나 사라진 것이므로 조용히 넘긴다. */
+    private async claim(jobId: string): Promise<boolean> {
+        try {
+            if (await this.jobs.claim(jobId)) return true;
+            this.log.write(`could not claim request ${jobId}, skipping`);
+        } catch (error) {
+            this.log.write(`could not claim request ${jobId}: ${String(error)}`);
+        }
+        return false;
+    }
+
+    /** 실행에 필요한 것을 모으며 모으지 못한 사유는 그대로 실패 문구가 된다. */
+    private async gather(
+        taskId: string,
+        anchorEventId: string,
+    ): Promise<{readonly workspacePath: string; readonly anchorText: string; readonly anchorTurnId: string | null} | string> {
+        const workspacePath = await this.jobs.workspacePath(taskId);
+        if (workspacePath === null) return `task ${taskId} has no workspacePath`;
+        const anchor = await this.jobs.anchor(taskId, anchorEventId);
+        if (anchor === undefined) return `anchor ${anchorEventId} is not an owned user message`;
+        return {workspacePath, anchorText: toRuleRequestText(anchor.text), anchorTurnId: anchor.turnId};
     }
 
     private async failInvalidAnchor(jobId: string, error: string): Promise<void> {

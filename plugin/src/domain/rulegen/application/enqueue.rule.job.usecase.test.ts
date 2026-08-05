@@ -7,7 +7,7 @@ import {InMemoryRuleJob} from "~plugin/domain/rulegen/port/__fakes__/in-memory.r
 
 function cacheWith(maxRulesPerTask = 2): RuleGenerationSettingCache {
     const cache = new RuleGenerationSettingCache();
-    cache.replace({maxRulesPerTask, model: null});
+    cache.replace({maxRulesPerTask, model: "claude-sonnet-5", outputLanguage: "auto", effort: "high"});
     return cache;
 }
 

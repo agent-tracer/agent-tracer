@@ -2,14 +2,15 @@ import type {
     PendingRuleJob,
     RuleGenerationFailure,
     RuleGenerationReport,
+    RuleAnchorEvidence,
     RuleJobLeaseState,
 } from "~plugin/domain/rulegen/model/rule.job.model.js";
 
-/** 규칙 생성 잡의 조회와 클레임과 결과 보고를 서버 잡 API에 맡긴다. */
+/** 규칙 생성 요청의 조회와 클레임과 종결을 서버 창구에 맡긴다. */
 export interface RuleJobPort {
     pendingJobs(): Promise<readonly PendingRuleJob[]>;
     workspacePath(taskId: string): Promise<string | null>;
-    anchorText(taskId: string, anchorEventId: string): Promise<string | undefined>;
+    anchor(taskId: string, anchorEventId: string): Promise<RuleAnchorEvidence | undefined>;
     claim(jobId: string): Promise<boolean>;
     renewLease(jobId: string): Promise<RuleJobLeaseState>;
     reportResult(jobId: string, report: RuleGenerationReport): Promise<boolean>;

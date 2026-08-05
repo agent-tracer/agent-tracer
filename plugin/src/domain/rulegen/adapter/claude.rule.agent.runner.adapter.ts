@@ -161,7 +161,7 @@ export class ClaudeRuleAgentRunnerAdapter implements RuleAgentRunnerPort {
                 mcpServers: {[RULEGEN_MCP_SERVER]: createRulegenMcpServer(spec.tools, toolset)},
                 maxTurns: spec.maxTurns,
                 maxBudgetUsd: spec.maxBudgetUsd,
-                effort: spec.effort,
+                effort: spec.effort as Parameters<typeof query>[0]["options"] extends infer O ? O extends {effort?: infer E} ? E : never : never,
                 ...(claudeExecutablePath !== undefined ? {pathToClaudeCodeExecutable: claudeExecutablePath} : {}),
                 systemPrompt: {
                     type: "preset",

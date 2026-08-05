@@ -63,10 +63,10 @@ export class RunRuleJobUsecase {
                 return;
             }
 
-            const screened = this.screen(first.candidates, ledger);
+            const screened = this.screen(first.candidates, ledger, request.anchorTurnId ?? null);
             const {outcome, proposals, skipped} = screened.errors.length === 0
                 ? {outcome: first, proposals: screened.proposals, skipped: []}
-                : await this.repair(spec, toolset, signal, ledger, first, screened.errors);
+                : await this.repair(spec, toolset, signal, ledger, first, screened.errors, request.anchorTurnId ?? null);
             if (isRulegenCanceled(signal.reason)) return;
             if (outcome.error !== null) {
                 await this.jobs.fail(request.jobId, this.failure(spec, startedAt, outcome, outcome.error));
@@ -103,6 +103,7 @@ export class RunRuleJobUsecase {
         ledger: RulegenProvenanceLedger,
         first: RuleGenerationOutcome,
         errors: readonly string[],
+        anchorTurnId: string | null,
     ): Promise<{
         readonly outcome: RuleGenerationOutcome;
         readonly proposals: readonly RuleProposalPayload[];
@@ -118,16 +119,20 @@ export class RunRuleJobUsecase {
             return {outcome, proposals: [], skipped: []};
         }
 
-        const screened = this.screen(outcome.candidates, ledger);
+        const screened = this.screen(outcome.candidates, ledger, anchorTurnId);
         for (const error of screened.errors) {
             this.log.write(`dropped proposal after repair: ${error}`);
         }
         return {outcome, proposals: screened.proposals, skipped: screened.errors};
     }
 
-    private screen(candidates: readonly unknown[], ledger: RulegenProvenanceLedger): ScreenedProposals {
+    private screen(
+        candidates: readonly unknown[],
+        ledger: RulegenProvenanceLedger,
+        anchorTurnId: string | null,
+    ): ScreenedProposals {
         const {accepted, rejected} = validateRuleProposals(candidates);
-        const {grounded, errors} = groundRuleProposals(accepted, ledger.snapshot());
+        const {grounded, errors} = groundRuleProposals(accepted, ledger.snapshot(), anchorTurnId);
         return {
             proposals: grounded,
             errors: [

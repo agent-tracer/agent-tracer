@@ -2,6 +2,7 @@ import { SystemClock } from "@agent-tracer/platform";
 import {
     EventRepository,
     RuleGenerationRepository,
+    RuleGenerationSettingsRepository,
     RuleRepository,
     TurnRepository,
     VerdictRepository,
@@ -11,6 +12,7 @@ import { ApproveRuleUseCase } from "~tracer-api/domain/rule/application/command/
 import { CancelRuleGenerationUseCase } from "~tracer-api/domain/rule/application/command/cancel.rule.generation.usecase.js";
 import { CreateRuleUseCase } from "~tracer-api/domain/rule/application/command/create.rule.usecase.js";
 import { LeaseRuleGenerationUseCase } from "~tracer-api/domain/rule/application/command/lease.rule.generation.usecase.js";
+import { SaveRuleGenerationSettingsUseCase } from "~tracer-api/domain/rule/application/command/save.rule.generation.settings.usecase.js";
 import { RequestRuleGenerationUseCase } from "~tracer-api/domain/rule/application/command/request.rule.generation.usecase.js";
 import { SettleRuleGenerationUseCase } from "~tracer-api/domain/rule/application/command/settle.rule.generation.usecase.js";
 import { DeleteRuleUseCase } from "~tracer-api/domain/rule/application/command/delete.rule.usecase.js";
@@ -26,16 +28,18 @@ import { CLOCK } from "~tracer-api/domain/rule/port/clock.port.js";
 import { RULE_EVENT_READER } from "~tracer-api/domain/rule/port/event.reader.port.js";
 import { RULE_ID_GENERATOR } from "~tracer-api/domain/rule/port/rule.id.generator.port.js";
 import { RULE_GENERATION_REPOSITORY } from "~tracer-api/domain/rule/port/rule.generation.repository.port.js";
+import { RULE_GENERATION_SETTINGS_REPOSITORY } from "~tracer-api/domain/rule/port/rule.generation.settings.repository.port.js";
 import { RULE_REPOSITORY } from "~tracer-api/domain/rule/port/rule.repository.port.js";
 import { RULE_TURN_REPOSITORY } from "~tracer-api/domain/rule/port/turn.repository.port.js";
 import { RULE_VERDICT_REPOSITORY } from "~tracer-api/domain/rule/port/verdict.repository.port.js";
 import { RuleDefinitionController } from "~tracer-api/domain/rule/inbound/rule.definition.controller.js";
 import { RuleGenerationController } from "~tracer-api/domain/rule/inbound/rule.generation.controller.js";
+import { RuleGenerationSettingsController } from "~tracer-api/domain/rule/inbound/rule.generation.settings.controller.js";
 import { RuleLifecycleController } from "~tracer-api/domain/rule/inbound/rule.lifecycle.controller.js";
 import { RuleQueryController } from "~tracer-api/domain/rule/inbound/rule.query.controller.js";
 
 export const ruleFeature = {
-    controllers: [RuleGenerationController, RuleQueryController, RuleDefinitionController, RuleLifecycleController],
+    controllers: [RuleGenerationSettingsController, RuleGenerationController, RuleQueryController, RuleDefinitionController, RuleLifecycleController],
     providers: [
         ApproveRuleUseCase,
         CreateRuleUseCase,
@@ -50,10 +54,12 @@ export const ruleFeature = {
         SettleRuleGenerationUseCase,
         CancelRuleGenerationUseCase,
         ListRuleGenerationsUseCase,
+        SaveRuleGenerationSettingsUseCase,
         RuleBackfillService,
         RuleCreationService,
         { provide: RULE_REPOSITORY, useExisting: RuleRepository },
         { provide: RULE_GENERATION_REPOSITORY, useExisting: RuleGenerationRepository },
+        { provide: RULE_GENERATION_SETTINGS_REPOSITORY, useExisting: RuleGenerationSettingsRepository },
         { provide: RULE_TURN_REPOSITORY, useExisting: TurnRepository },
         { provide: RULE_VERDICT_REPOSITORY, useExisting: VerdictRepository },
         { provide: RULE_EVENT_READER, useExisting: EventRepository },
