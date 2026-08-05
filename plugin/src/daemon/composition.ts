@@ -1,3 +1,4 @@
+import {HttpAgentBackend, preferredAgentBackend} from "~plugin/config/agent.backend.js";
 import {monitorUserHeaders, resolveMonitorIdentity} from "~plugin/config/monitor.identity.js";
 import {EvaluateTurnUsecase} from "~plugin/domain/guardrail/application/evaluate.turn.usecase.js";
 import {RefreshRulesUsecase} from "~plugin/domain/guardrail/application/refresh.rules.usecase.js";
@@ -35,6 +36,9 @@ export function composeDaemonHooks(leaseOwner: string): DaemonHooks {
     const baseUrl = identity.baseUrl;
     const headers = monitorUserHeaders(identity);
 
+    // 상류가 둘 이상인 배포에서는 축을 지목하지 않은 에이전트 요청을 게이트웨이가 400으로 거절한다.
+    const agentBackend = new HttpAgentBackend(baseUrl, headers, preferredAgentBackend());
+
     const clock = {now: (): number => Date.now()};
     const scheduler: SchedulerPort = {
         every: (intervalMs, run) => {
@@ -53,9 +57,9 @@ export function composeDaemonHooks(leaseOwner: string): DaemonHooks {
 
     const hint: HintHook = {computeHints: new ComputeHintsUsecase(clock)};
 
-    const requestScan = new RequestRecipeScanUsecase(new HttpRecipeScanJobAdapter(baseUrl, headers));
+    const requestScan = new RequestRecipeScanUsecase(new HttpRecipeScanJobAdapter(baseUrl, headers, agentBackend));
 
-    const jobs = new HttpRuleJobAdapter(baseUrl, headers, leaseOwner);
+    const jobs = new HttpRuleJobAdapter(baseUrl, headers, leaseOwner, agentBackend);
     const runRuleJob = new RunRuleJobUsecase(
         new HttpRuleEvidenceAdapter(baseUrl, headers),
         new AgentRuleGeneratorAdapter(new ClaudeRuleAgentRunnerAdapter()),
@@ -71,7 +75,7 @@ export function composeDaemonHooks(leaseOwner: string): DaemonHooks {
             ruleSettingCache,
         ),
         refreshSetting: new RefreshRuleSettingUsecase(
-            new HttpRuleSettingAdapter(baseUrl, headers),
+            new HttpRuleSettingAdapter(baseUrl, headers, agentBackend),
             ruleSettingCache,
         ),
         enqueueRuleJob: new EnqueueRuleJobUsecase(jobs, ruleSettingCache),

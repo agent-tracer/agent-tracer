@@ -34290,6 +34290,90 @@ function validateDaemonSettingsInput(raw) {
   return { ok: true, value };
 }
 
+// src/config/http.ts
+var DEFAULT_TIMEOUT_MS = 5e3;
+function jsonHeaders(headers) {
+  return { ...headers, "Content-Type": "application/json" };
+}
+function resolveTimeoutSignal(timeoutMs = DEFAULT_TIMEOUT_MS, signal) {
+  return signal ?? AbortSignal.timeout(timeoutMs);
+}
+async function getJson(url, headers, timeoutMs = DEFAULT_TIMEOUT_MS) {
+  let response;
+  try {
+    response = await fetch(url, { headers, signal: resolveTimeoutSignal(timeoutMs) });
+  } catch {
+    return { kind: "unavailable" };
+  }
+  if (response.status === 404) return { kind: "absent" };
+  if (response.status === 501) return { kind: "unsupported" };
+  if (!response.ok) return { kind: "unavailable" };
+  try {
+    const parsed = await response.json();
+    return isRecord(parsed) ? { kind: "found", value: parsed } : { kind: "unavailable" };
+  } catch {
+    return { kind: "unavailable" };
+  }
+}
+async function postJson(url, headers, body, timeoutMs = DEFAULT_TIMEOUT_MS) {
+  return fetch(url, {
+    method: "POST",
+    headers: jsonHeaders(headers),
+    body: JSON.stringify(body),
+    signal: resolveTimeoutSignal(timeoutMs)
+  });
+}
+
+// src/config/agent.backend.ts
+var AGENT_UPSTREAMS = "/api/agent/upstreams";
+function resolveAgentBackend(catalog, preferred) {
+  if (catalog.upstreams.length <= 1) return null;
+  if (preferred !== null && catalog.upstreams.some((upstream) => upstream.name === preferred)) {
+    return preferred;
+  }
+  return catalog.upstreams[0]?.name ?? null;
+}
+function withAgentBackend(url, backend) {
+  if (backend === null) return url;
+  return `${url}${url.includes("?") ? "&" : "?"}backend=${encodeURIComponent(backend)}`;
+}
+function preferredAgentBackend(env = process.env) {
+  const value = env.MONITOR_AGENT_BACKEND?.trim();
+  return value !== void 0 && value.length > 0 ? value : null;
+}
+var NO_AGENT_BACKEND = {
+  current: () => Promise.resolve(null)
+};
+var HttpAgentBackend = class {
+  constructor(baseUrl, headers, preferred = null) {
+    this.baseUrl = baseUrl;
+    this.headers = headers;
+    this.preferred = preferred;
+  }
+  baseUrl;
+  headers;
+  preferred;
+  settled = null;
+  resolved = false;
+  inflight = null;
+  async current() {
+    if (this.resolved) return this.settled;
+    this.inflight ??= this.readCatalog();
+    const backend = await this.inflight;
+    this.inflight = null;
+    return backend;
+  }
+  async readCatalog() {
+    const fetched = await getJson(`${this.baseUrl}${AGENT_UPSTREAMS}`, this.headers);
+    if (fetched.kind !== "found") return null;
+    const catalog = fetched.value.data;
+    if (catalog === void 0) return null;
+    this.settled = resolveAgentBackend(catalog, this.preferred);
+    this.resolved = true;
+    return this.settled;
+  }
+};
+
 // ../libs/kernel/src/rule/definition/rule.vocabulary.ts
 var RULE_SEVERITY = {
   info: "info",
@@ -34938,40 +35022,6 @@ var RULES_ALL_FLAG = "all";
 var RULES_ALL_FLAG_VALUE = "true";
 var RULES_ALL_PATH = `${RULES_PATH}?${RULES_ALL_FLAG}=${RULES_ALL_FLAG_VALUE}`;
 
-// src/config/http.ts
-var DEFAULT_TIMEOUT_MS = 5e3;
-function jsonHeaders(headers) {
-  return { ...headers, "Content-Type": "application/json" };
-}
-function resolveTimeoutSignal(timeoutMs = DEFAULT_TIMEOUT_MS, signal) {
-  return signal ?? AbortSignal.timeout(timeoutMs);
-}
-async function getJson(url, headers, timeoutMs = DEFAULT_TIMEOUT_MS) {
-  let response;
-  try {
-    response = await fetch(url, { headers, signal: resolveTimeoutSignal(timeoutMs) });
-  } catch {
-    return { kind: "unavailable" };
-  }
-  if (response.status === 404) return { kind: "absent" };
-  if (response.status === 501) return { kind: "unsupported" };
-  if (!response.ok) return { kind: "unavailable" };
-  try {
-    const parsed = await response.json();
-    return isRecord(parsed) ? { kind: "found", value: parsed } : { kind: "unavailable" };
-  } catch {
-    return { kind: "unavailable" };
-  }
-}
-async function postJson(url, headers, body, timeoutMs = DEFAULT_TIMEOUT_MS) {
-  return fetch(url, {
-    method: "POST",
-    headers: jsonHeaders(headers),
-    body: JSON.stringify(body),
-    signal: resolveTimeoutSignal(timeoutMs)
-  });
-}
-
 // src/domain/guardrail/adapter/http.rule.source.adapter.ts
 var FETCH_TIMEOUT_MS = 3e3;
 var HttpRuleSourceAdapter = class {
@@ -35147,25 +35197,29 @@ var LOCAL_JOB_LEASE_HEARTBEAT_MS = 3e4;
 var ACTIVE_STATUSES = /* @__PURE__ */ new Set([JOB_STATUS.pending, JOB_STATUS.running]);
 var AGENT_JOBS = "/api/agent/jobs";
 var HttpRecipeScanJobAdapter = class {
-  constructor(baseUrl, headers) {
+  constructor(baseUrl, headers, backend = NO_AGENT_BACKEND) {
     this.baseUrl = baseUrl;
     this.headers = headers;
+    this.backend = backend;
   }
   baseUrl;
   headers;
+  backend;
   async hasActiveScan(taskId) {
-    const url = `${this.baseUrl}${AGENT_JOBS}/latest?kind=${encodeURIComponent(JOB_KIND.recipeScan)}&taskId=${encodeURIComponent(taskId)}`;
+    const url = await this.agentUrl(
+      `${AGENT_JOBS}/latest?kind=${encodeURIComponent(JOB_KIND.recipeScan)}&taskId=${encodeURIComponent(taskId)}`
+    );
     const fetched = await getJson(url, this.headers);
     const status = fetched.kind === "found" ? fetched.value.data?.job?.status : void 0;
     return status !== void 0 && ACTIVE_STATUSES.has(status);
   }
   /** 이 창구를 세우는 에이전트 서비스가 배포에 없으면 `501`이 그 확답이다. */
   async isAvailable() {
-    const fetched = await getJson(`${this.baseUrl}${AGENT_JOBS}`, this.headers);
+    const fetched = await getJson(await this.agentUrl(AGENT_JOBS), this.headers);
     return fetched.kind !== "unsupported";
   }
   async enqueue(taskId, idempotencyKey, userPrompt) {
-    const response = await postJson(`${this.baseUrl}${AGENT_JOBS}`, this.headers, {
+    const response = await postJson(await this.agentUrl(AGENT_JOBS), this.headers, {
       kind: JOB_KIND.recipeScan,
       input: {
         taskId,
@@ -35175,6 +35229,10 @@ var HttpRecipeScanJobAdapter = class {
       idempotencyKey
     });
     return response.ok;
+  }
+  /** 축을 지목하지 않은 요청은 상류가 둘인 배포에서 게이트웨이가 거절하므로 여기서만 URL을 세운다. */
+  async agentUrl(path6) {
+    return withAgentBackend(`${this.baseUrl}${path6}`, await this.backend.current());
   }
 };
 
@@ -35856,16 +35914,20 @@ function failureBody(failure) {
   return { message: failure.error, usage: observation(failure), steps: failure.steps };
 }
 var HttpRuleJobAdapter = class {
-  constructor(baseUrl, headers, leaseOwner) {
+  constructor(baseUrl, headers, leaseOwner, backend = NO_AGENT_BACKEND) {
     this.baseUrl = baseUrl;
     this.headers = headers;
+    this.backend = backend;
     this.leaseHeaders = { ...headers, [MONITOR_LEASE_OWNER_HEADER]: leaseOwner };
   }
   baseUrl;
   headers;
+  backend;
   leaseHeaders;
   async pendingJobs() {
-    const url = `${this.baseUrl}${AGENT_JOBS2}?kind=${encodeURIComponent(JOB_KIND.ruleGeneration)}&status=${encodeURIComponent(JOB_STATUS.pending)}`;
+    const url = await this.agentUrl(
+      `${AGENT_JOBS2}?kind=${encodeURIComponent(JOB_KIND.ruleGeneration)}&status=${encodeURIComponent(JOB_STATUS.pending)}`
+    );
     const fetched = await getJson(url, this.headers);
     return fetched.kind === "found" ? fetched.value.data?.items ?? [] : [];
   }
@@ -35885,11 +35947,11 @@ var HttpRuleJobAdapter = class {
     }
   }
   async claim(jobId) {
-    const response = await postJson(this.jobUrl(jobId, "start"), this.leaseHeaders, {});
+    const response = await postJson(await this.jobUrl(jobId, "start"), this.leaseHeaders, {});
     return response.ok;
   }
   async renewLease(jobId) {
-    const response = await postJson(this.jobUrl(jobId, "lease"), this.leaseHeaders, {});
+    const response = await postJson(await this.jobUrl(jobId, "lease"), this.leaseHeaders, {});
     if (!response.ok) return HELD_LEASE;
     const body = await response.json();
     return body.data ?? HELD_LEASE;
@@ -35897,7 +35959,11 @@ var HttpRuleJobAdapter = class {
   async reportResult(jobId, report) {
     for (let attempt = 1; attempt <= REPORT_MAX_ATTEMPTS; attempt += 1) {
       try {
-        const response = await postJson(this.jobUrl(jobId, "results"), this.leaseHeaders, resultBody(report));
+        const response = await postJson(
+          await this.jobUrl(jobId, "results"),
+          this.leaseHeaders,
+          resultBody(report)
+        );
         if (response.ok) return true;
         throw new Error(`HTTP ${response.status}`);
       } catch (error2) {
@@ -35911,19 +35977,21 @@ var HttpRuleJobAdapter = class {
     return false;
   }
   async fail(jobId, failure) {
-    await postJson(this.jobUrl(jobId, "fail"), this.leaseHeaders, failureBody(failure));
+    await postJson(await this.jobUrl(jobId, "fail"), this.leaseHeaders, failureBody(failure));
   }
   async release(jobId) {
-    await postJson(this.jobUrl(jobId, "release"), this.leaseHeaders, {});
+    await postJson(await this.jobUrl(jobId, "release"), this.leaseHeaders, {});
   }
   async hasActiveJob(taskId) {
-    const url = `${this.baseUrl}${AGENT_JOBS2}/latest?kind=${encodeURIComponent(JOB_KIND.ruleGeneration)}&taskId=${encodeURIComponent(taskId)}`;
+    const url = await this.agentUrl(
+      `${AGENT_JOBS2}/latest?kind=${encodeURIComponent(JOB_KIND.ruleGeneration)}&taskId=${encodeURIComponent(taskId)}`
+    );
     const fetched = await getJson(url, this.headers);
     const status = fetched.kind === "found" ? fetched.value.data?.job?.status : void 0;
     return status !== void 0 && ACTIVE_STATUSES2.has(status);
   }
   async enqueue(taskId, anchorEventId, maxRules) {
-    const response = await postJson(`${this.baseUrl}${AGENT_JOBS2}`, this.headers, {
+    const response = await postJson(await this.agentUrl(AGENT_JOBS2), this.headers, {
       kind: JOB_KIND.ruleGeneration,
       input: {
         taskId,
@@ -35936,7 +36004,11 @@ var HttpRuleJobAdapter = class {
     return response.ok;
   }
   jobUrl(jobId, action) {
-    return `${this.baseUrl}${AGENT_JOBS2}/${encodeURIComponent(jobId)}/${action}`;
+    return this.agentUrl(`${AGENT_JOBS2}/${encodeURIComponent(jobId)}/${action}`);
+  }
+  /** 축을 지목하지 않은 요청은 상류가 둘인 배포에서 게이트웨이가 거절하므로 여기서만 URL을 세운다. */
+  async agentUrl(path6) {
+    return withAgentBackend(`${this.baseUrl}${path6}`, await this.backend.current());
   }
 };
 function sleep(ms) {
@@ -35996,14 +36068,17 @@ var RuleGenerationSettingCache = class {
 
 // src/domain/rulegen/adapter/http.rule.setting.adapter.ts
 var HttpRuleSettingAdapter = class {
-  constructor(baseUrl, headers) {
+  constructor(baseUrl, headers, backend = NO_AGENT_BACKEND) {
     this.baseUrl = baseUrl;
     this.headers = headers;
+    this.backend = backend;
   }
   baseUrl;
   headers;
+  backend;
   async fetch() {
-    const fetched = await getJson(`${this.baseUrl}/api/agent/settings`, this.headers);
+    const url = withAgentBackend(`${this.baseUrl}/api/agent/settings`, await this.backend.current());
+    const fetched = await getJson(url, this.headers);
     if (fetched.kind !== "found") return fetched;
     const items = fetched.value.data?.items;
     if (items === void 0) return { kind: "unavailable" };
@@ -36717,6 +36792,7 @@ function composeDaemonHooks(leaseOwner) {
   const identity = resolveMonitorIdentity();
   const baseUrl = identity.baseUrl;
   const headers = monitorUserHeaders(identity);
+  const agentBackend = new HttpAgentBackend(baseUrl, headers, preferredAgentBackend());
   const clock = { now: () => Date.now() };
   const scheduler = {
     every: (intervalMs, run) => {
@@ -36731,8 +36807,8 @@ function composeDaemonHooks(leaseOwner) {
     refreshRules: new RefreshRulesUsecase(ruleSource)
   };
   const hint = { computeHints: new ComputeHintsUsecase(clock) };
-  const requestScan = new RequestRecipeScanUsecase(new HttpRecipeScanJobAdapter(baseUrl, headers));
-  const jobs = new HttpRuleJobAdapter(baseUrl, headers, leaseOwner);
+  const requestScan = new RequestRecipeScanUsecase(new HttpRecipeScanJobAdapter(baseUrl, headers, agentBackend));
+  const jobs = new HttpRuleJobAdapter(baseUrl, headers, leaseOwner, agentBackend);
   const runRuleJob = new RunRuleJobUsecase(
     new HttpRuleEvidenceAdapter(baseUrl, headers),
     new AgentRuleGeneratorAdapter(new ClaudeRuleAgentRunnerAdapter()),
@@ -36748,7 +36824,7 @@ function composeDaemonHooks(leaseOwner) {
       ruleSettingCache
     ),
     refreshSetting: new RefreshRuleSettingUsecase(
-      new HttpRuleSettingAdapter(baseUrl, headers),
+      new HttpRuleSettingAdapter(baseUrl, headers, agentBackend),
       ruleSettingCache
     ),
     enqueueRuleJob: new EnqueueRuleJobUsecase(jobs, ruleSettingCache)
