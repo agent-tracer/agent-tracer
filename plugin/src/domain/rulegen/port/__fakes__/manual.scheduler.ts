@@ -16,6 +16,8 @@ export class ManualScheduler implements SchedulerPort {
     }
 
     tick(): void {
-        for (const run of [...this.runs]) run();
+        // every가 돌려준 해지 함수가 runs를 splice하므로, 순회 중 자기 해지를 견디려면 사본을 쓴다.
+        const snapshot = this.runs.slice();
+        for (const run of snapshot) run();
     }
 }
