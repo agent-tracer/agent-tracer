@@ -10,6 +10,8 @@ import {
   useCreateTagMutation,
   useUpdateTagMutation,
 } from "~tracer-web/entities/tag/api/mutations.js";
+import { apiErrorMessage } from "~tracer-web/shared/api/api-error-message.js";
+import type { GuidanceMessage } from "~tracer-web/shared/guidance.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
 import { GuidanceText, Input } from "~tracer-web/shared/ui/index.js";
 import { TagColorPicker } from "~tracer-web/widgets/tags/TagColorPicker.js";
@@ -26,7 +28,7 @@ export function TagEditorForm({ tag, onClose }: TagEditorFormProps) {
   const [name, setName] = useState(tag?.name ?? "");
   const [color, setColor] = useState(tag?.color ?? TAG_DEFAULT_COLOR);
   const [description, setDescription] = useState(tag?.description ?? "");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<GuidanceMessage | null>(null);
   const createMutation = useCreateTagMutation();
   const updateMutation = useUpdateTagMutation();
   const isPending = createMutation.isPending || updateMutation.isPending;
@@ -37,17 +39,17 @@ export function TagEditorForm({ tag, onClose }: TagEditorFormProps) {
 
     const trimmedName = name.trim();
     if (!trimmedName) {
-      setError("Name is required.");
+      setError(guidance.messages.tags.nameRequired);
       return;
     }
     if (!TAG_COLOR_PATTERN.test(color)) {
-      setError("Color must be #rrggbb.");
+      setError(guidance.messages.tags.colorFormat);
       return;
     }
 
     const trimmedDescription = description.trim();
     const onError = (mutationError: unknown) =>
-      setError(mutationError instanceof Error ? mutationError.message : "Save failed.");
+      setError(apiErrorMessage(guidance.messages.common, mutationError));
 
     if (isEdit && tag) {
       updateMutation.mutate(
@@ -102,7 +104,7 @@ export function TagEditorForm({ tag, onClose }: TagEditorFormProps) {
 
       {error && (
         <div role="alert" className="m-0 text-xs text-err leading-[1.5]">
-          {error}
+          <GuidanceText locale={guidance.locale} message={error} />
         </div>
       )}
 

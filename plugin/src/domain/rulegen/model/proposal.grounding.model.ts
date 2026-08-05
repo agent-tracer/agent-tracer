@@ -18,6 +18,7 @@ export interface RuleGroundingResult {
 function groundingErrors(
     proposal: RuleProposalPayload,
     snapshot: RulegenProvenanceSnapshot,
+    anchorTurnId: string | null,
 ): readonly string[] {
     const errors: string[] = [];
     const unknownTurns = proposal.citedTurnIds.filter((turnId) => !isTurnGrounded(snapshot, turnId));
@@ -28,6 +29,11 @@ function groundingErrors(
     } else if (proposal.citedTurnIds.length === 0) {
         errors.push(
             `citedTurnIds is empty. A rule verifies an obligation the user stated, so cite the turn ID it came from (${rulegenToolFullName(RULEGEN_TOOL.turns)}).`,
+        );
+    } else if (anchorTurnId !== null && !proposal.citedTurnIds.includes(anchorTurnId)) {
+        // 앵커가 이 실행의 유일한 요구이므로 그 턴을 인용하지 않은 규칙은 다른 요구를 검증하고 있다.
+        errors.push(
+            `citedTurnIds does not contain the anchor turn ${anchorTurnId}. This run verifies that one request, so every rule must cite it.`,
         );
     }
 
@@ -44,11 +50,12 @@ function groundingErrors(
 export function groundRuleProposals(
     proposals: readonly RuleProposalPayload[],
     snapshot: RulegenProvenanceSnapshot,
+    anchorTurnId: string | null = null,
 ): RuleGroundingResult {
     const grounded: RuleProposalPayload[] = [];
     const errors: string[] = [];
     for (const proposal of proposals) {
-        const reasons = groundingErrors(proposal, snapshot);
+        const reasons = groundingErrors(proposal, snapshot, anchorTurnId);
         if (reasons.length === 0) grounded.push(proposal);
         else errors.push(...reasons.map((reason) => `Rule "${proposal.name}": ${reason}`));
     }

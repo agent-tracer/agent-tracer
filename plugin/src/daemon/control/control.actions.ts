@@ -30,7 +30,7 @@ export interface ControlActions {
 }
 
 /** 카탈로그 핸들러가 요청을 처리하는 데 필요한 데몬 자원이다. */
-export interface ControlActionContext {
+interface ControlActionContext {
     readonly actions: ControlActions;
     readonly paths: AgentTracerPaths;
     readonly readBody: () => Promise<string>;
@@ -131,8 +131,6 @@ export const CONTROL_ACTIONS = {
         },
     },
 } satisfies Record<string, ControlAction>;
-
-export type ControlActionKey = keyof typeof CONTROL_ACTIONS;
 
 /** 카탈로그에 없는 키는 미지 경로다. */
 export function findControlAction(key: string): ControlAction | undefined {

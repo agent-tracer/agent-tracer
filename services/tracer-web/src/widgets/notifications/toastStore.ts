@@ -1,8 +1,8 @@
 import { create } from "zustand";
 
-export type ToastTone = "info" | "success" | "error";
+type ToastTone = "info" | "success" | "error";
 
-export interface ToastAction {
+interface ToastAction {
   readonly label: string;
   readonly onClick: () => void;
 }
@@ -16,7 +16,7 @@ export interface Toast {
   readonly createdAtMs: number;
 }
 
-export interface ToastInput {
+interface ToastInput {
   readonly tone: ToastTone;
   readonly title: string;
   readonly body?: string;

@@ -26,13 +26,13 @@ const AGENT_ROUTES = [
   { path: "jobs" },
 ];
 
-function renderWithRoutes(routes: { path: string }[]) {
+function renderWithRoutes(routes: { path: string }[], compact = false) {
   render(
     <MemoryRouter>
       <UiStoreProvider store={createUiStore()}>
         <TooltipProvider>
           <AgentSurfaceProvider surface={collectAgentSurface(routes)}>
-            <TopActions />
+            <TopActions compact={compact} />
           </AgentSurfaceProvider>
         </TooltipProvider>
       </UiStoreProvider>
@@ -71,5 +71,29 @@ describe("TopActions", () => {
     renderWithRoutes([]);
 
     expect(screen.queryByRole("button", { name: "Settings" })).not.toBeNull();
+  });
+
+  it("접힌 상단바는 이름을 지우고도 모든 단추를 남긴다", () => {
+    renderWithRoutes(AGENT_ROUTES, true);
+
+    const names = [
+      "Browse recipes",
+      "Manage rules",
+      "Manage tags",
+      "Browse memos",
+      "Chat with the agent",
+      "Agent jobs",
+      "Settings",
+    ];
+    for (const name of names) {
+      expect(screen.queryByRole("button", { name })).not.toBeNull();
+    }
+  });
+
+  it("접힌 상단바는 단추의 글자를 적지 않는다", () => {
+    renderWithRoutes(AGENT_ROUTES, true);
+
+    expect(agentLabels()).toEqual(["", ""]);
+    expect(screen.queryByRole("button", { name: "Browse recipes" })?.textContent).toBe("");
   });
 });

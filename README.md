@@ -81,6 +81,82 @@ curl http://127.0.0.1:3847/health/ready
 
 브라우저는 `http://127.0.0.1:3847`을 사용합니다. `down`은 컨테이너를 내리고 `down --volumes`는 원장을 포함한 볼륨까지 삭제합니다.
 
+## Claude Code 플러그인 설치
+
+서버를 띄우는 것만으로는 이벤트가 생기지 않습니다. 이벤트를 만드는 쪽은 Claude Code에 붙는 플러그인이며, 스택이 멀쩡해도 이것이 붙어 있지 않으면 대시보드는 계속 비어 있습니다.
+
+```text
+/plugin marketplace add agent-tracer/agent-tracer
+/plugin install agent-tracer-monitor@agent-tracer
+```
+
+개발 체크아웃을 그대로 붙이려면 마켓플레이스 인자에 저장소 경로를 줍니다.
+
+```text
+/plugin marketplace add /path/to/agent-tracer
+```
+
+설치는 `.claude-plugin/marketplace.json`이 가리키는 `plugin/`을 붙이고, `plugin/hooks/hooks.json`의 훅과 statusLine, `plugin/.claude-plugin/plugin.json`의 MCP 서버를 함께 등록합니다. 훅은 모두 `plugin/bin/run-hook-claude.sh <훅 이름>`을 부르고, 이 스크립트가 `plugin/dist`의 번들을 먼저 찾아 없을 때만 `plugin/src`를 로더로 띄웁니다. 번들은 Node 24를 겨냥하므로 PATH의 node가 그보다 낮으면 훅이 stderr에 이유만 남기고 빠집니다. Claude Code를 막지 않는 대신 그 세션의 이벤트도 남지 않습니다.
+
+**설치한 뒤에는 세션을 새로 시작합니다.** 태스크 읽기 모델의 행을 만드는 것은 `agent_tracer.session.started`이고, 이 이벤트는 `SessionStart` 훅이 세션 바인딩을 새로 만들 때만 나갑니다. 이미 열려 있던 세션에서는 나머지 이벤트만 원장에 쌓이고 그 태스크는 목록에 뜨지 않습니다.
+
+플러그인이 부를 주소와 신원은 환경변수 → `~/.agent-tracer/config.json` → 기본값 순서로 정해집니다.
+
+| 값 | 환경변수 | 기본값 |
+| --- | --- | --- |
+| 서버 주소 | `MONITOR_BASE_URL`, 없으면 `MONITOR_PUBLIC_HOST`와 `MONITOR_PORT` | `http://127.0.0.1:3847` |
+| 사용자 | `MONITOR_USER_EMAIL` | `local` |
+| 에이전트 축 | `MONITOR_AGENT_BACKEND` | `/api/agent/upstreams`가 선언한 첫 상류 |
+
+에이전트 축은 데몬이 잡 원장을 어느 에이전트 서비스에 물을지입니다. 게이트웨이는 상류 선언이 둘 이상일 때 축을 지목하지 않은 `/api/agent/*` 요청을 400으로 거절하므로, 데몬은 목록을 읽어 축을 고른 뒤에야 잡을 봅니다. 못박은 축이 선언에 없으면 첫 상류로 떨어집니다.
+
+사용자 값은 수집과 조회 양쪽에 쓰입니다. 수집을 기본값이 아닌 신원으로 보내고 대시보드는 기본값으로 열면 같은 원장을 보고도 목록이 비어 보입니다.
+
+### 상태 표시줄
+
+설치는 훅과 함께 `plugin/hooks/hooks.json`의 `statusLine`도 등록합니다. Claude Code는 API 요청마다 이 스크립트를 부르고 stdout의 첫 줄만 렌더링합니다.
+
+```text
+[monitor] ctx 43% · 5h 18% · $1.234
+```
+
+차례로 컨텍스트 창 사용률, 5시간 한도 사용률, 누적 비용입니다. 페이로드에 오지 않은 값은 빠지고 셋 다 없으면 아무 줄도 내지 않습니다.
+
+이 스크립트는 표시만 하지 않습니다. 호출마다 `agent_tracer.context.snapshot`을 원장에 넣고, 대시보드의 컨텍스트·비용 궤적과 플러그인의 컨텍스트 압력 힌트는 이 이벤트만 읽습니다. 상태 표시줄을 내주면 표시줄만 비는 것이 아니라 그 수치가 통째로 빕니다.
+
+### 다른 상태 표시줄이 이미 있을 때
+
+상태 표시줄 자리는 하나이고 `~/.claude/settings.json`의 `statusLine`이 플러그인 선언을 이깁니다. 터미널 도구나 다른 플러그인이 그 자리를 이미 쓰고 있으면 설치가 성공한 채로 표시줄이 비고 스냅샷도 끊깁니다. 나머지 훅은 그대로 돌아 대시보드에는 태스크가 쌓이므로 이 상태는 설치 실패와 구분되지 않습니다.
+
+쓰던 것이 있으면 한 스크립트에 둘을 태웁니다. stdin은 한 번만 읽히므로 페이로드를 변수에 받아 각각에게 다시 먹이고, 화면에 낼 쪽만 stdout을 남깁니다.
+
+```sh
+#!/bin/sh
+payload=$(cat)
+[ -z "$payload" ] && exit 0
+
+# 쓰던 상태 표시줄. 화면은 아래에 양보한다.
+printf '%s' "$payload" | /bin/sh "$HOME/path/to/other-statusline.sh" >/dev/null 2>&1 || :
+
+# 설치본은 버전 디렉터리 아래에 있으므로 가장 높은 버전을 고른다.
+root="$HOME/.claude/plugins/cache/agent-tracer/agent-tracer-monitor"
+version=$(ls -1 "$root" 2>/dev/null | sort -t. -k1,1n -k2,2n -k3,3n | tail -n 1)
+[ -n "$version" ] && printf '%s' "$payload" | "$root/$version/bin/run-hook-claude.sh" StatusLine 2>/dev/null | head -n 1
+
+exit 0
+```
+
+그리고 `~/.claude/settings.json`이 이 스크립트를 부르게 합니다.
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "/bin/sh \"$HOME/.claude/statusline.sh\""
+  }
+}
+```
+
 ## 개발
 
 ```bash

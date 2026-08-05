@@ -16,14 +16,17 @@
     "plugin:check-version": "node scripts/check-plugin-version.mjs",
     "plugin:package": "node scripts/package-plugin.mjs",
     "migrate": "node scripts/migrate.mjs",
-    "lint": "npm run lint:format && npm run lint:types && npm run lint:structure && npm run lint:deps",
+    "lint": "npm run lint:fast && npm run lint:format && npm run lint:types && npm run lint:structure && npm run lint:deps",
+    "lint:fast": "oxlint --deny-warnings",
     "lint:format": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:types": "node scripts/run-workspaces.mjs lint:types",
     "lint:structure": "node scripts/check-structure.mjs",
     "lint:deps": "node scripts/check-dependencies.mjs",
+    "lint:unused": "knip",
     "build": "node scripts/run-workspaces.mjs build",
-    "test": "vitest run && node --test \"scripts/**/*.test.mjs\""
+    "test": "vitest run && node --test \"scripts/**/*.test.mjs\"",
+    "test:integration": "node --test \"integration/**/*.test.mjs\""
   },
   "engines": {
     "node": ">=24.0.0 <25.0.0"
@@ -38,9 +41,12 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
+    "@testcontainers/postgresql": "^12.1.0",
     "dependency-cruiser": "^16.10.4",
     "eslint": "^9.39.5",
     "globals": "^15.15.0",
+    "knip": "^6.31.0",
+    "oxlint": "^1.77.0",
     "typescript-eslint": "^8.63.0",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.7"

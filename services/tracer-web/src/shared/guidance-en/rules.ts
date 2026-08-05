@@ -13,6 +13,9 @@ export const EN_RULES = {
   emptyTask: createGuidanceMessage(
     "Add a rule to start enforcing checks against this task.",
   ),
+  selectTask: createGuidanceMessage(
+    "Open a task to see the rules attached to it.",
+  ),
   workspaceEmpty: createGuidanceMessage(
     "No rules are configured yet. Create the first rule above.",
   ),
@@ -75,6 +78,32 @@ export const EN_RULES = {
     intentHelp: createGuidanceMessage(
       "Optionally describe what the rules should verify. Leave this empty to scan the entire task.",
     ),
+    waitingToStart: createGuidanceMessage("Waiting for the run to start"),
+    running: createGuidanceMessage("Generating rules"),
+    canceled: createGuidanceMessage("The run was stopped"),
+    failed: createGuidanceMessage("The run failed"),
+    noneCreated: createGuidanceMessage("No rules were created"),
+    created: (count: number) =>
+      createGuidanceMessage(count === 1 ? "Created 1 rule" : `Created ${count} rules`),
+    noObligationFound: createGuidanceMessage(
+      "This request carries no obligation worth verifying.",
+    ),
+    skippedWithoutEvidence: (count: number) =>
+      createGuidanceMessage(
+        count === 1
+          ? "Discarded 1 proposal that cited no evidence."
+          : `Discarded ${count} proposals that cited no evidence.`,
+      ),
+    alreadyInProgress: createGuidanceMessage("A run is already in progress."),
+    loadingSettings: createGuidanceMessage("Loading the generation settings…"),
+    noAnchorInputs: createGuidanceMessage("This task has no user input to anchor to."),
+    historyEmpty: createGuidanceMessage(
+      "No run has been made yet. Start one with Generate rules above.",
+    ),
+    runCount: (total: number, running: number) =>
+      createGuidanceMessage(
+        running > 0 ? `${total} runs · ${running} in flight` : `${total} runs`,
+      ),
   },
   evidence: {
     loading: createGuidanceMessage("Loading rule evidence…"),
@@ -130,6 +159,9 @@ export const EN_RECIPES = {
 } as const;
 
 export const EN_INSPECTOR = {
+  selectTaskForTrace: createGuidanceMessage(
+    "Open a task to see the spans its run produced.",
+  ),
   selectAction: createGuidanceMessage(
     "Select a timeline card to inspect its complete payload.",
   ),

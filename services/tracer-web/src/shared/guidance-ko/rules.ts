@@ -11,6 +11,9 @@ export const KO_RULES = {
   emptyTask: createGuidanceMessage(
     "이 태스크에 검사를 적용하려면 규칙을 추가하세요.",
   ),
+  selectTask: createGuidanceMessage(
+    "태스크를 열면 그 태스크에 붙은 규칙을 볼 수 있습니다.",
+  ),
   workspaceEmpty: createGuidanceMessage(
     "설정된 규칙이 없습니다. 위에서 첫 규칙을 만드세요.",
   ),
@@ -73,6 +76,25 @@ export const KO_RULES = {
     intentHelp: createGuidanceMessage(
       "규칙이 검증할 내용을 선택적으로 설명하세요. 비워 두면 태스크 전체를 스캔합니다.",
     ),
+    waitingToStart: createGuidanceMessage("규칙 생성을 기다리는 중"),
+    running: createGuidanceMessage("규칙을 뽑는 중"),
+    canceled: createGuidanceMessage("규칙 생성을 멈췄습니다"),
+    failed: createGuidanceMessage("규칙 생성이 실패했습니다"),
+    noneCreated: createGuidanceMessage("규칙을 만들지 않았습니다"),
+    created: (count: number) => createGuidanceMessage(`규칙 ${count}건을 만들었습니다`),
+    noObligationFound: createGuidanceMessage("이 요구에서 검증할 의무를 찾지 못했습니다."),
+    skippedWithoutEvidence: (count: number) =>
+      createGuidanceMessage(`근거가 서지 않아 ${count}건을 버렸습니다.`),
+    alreadyInProgress: createGuidanceMessage("이미 실행 중인 생성이 있습니다."),
+    loadingSettings: createGuidanceMessage("생성 설정을 불러오는 중입니다…"),
+    noAnchorInputs: createGuidanceMessage("이 태스크에는 앵커로 삼을 발화가 없습니다."),
+    historyEmpty: createGuidanceMessage(
+      "아직 규칙 생성을 실행한 적이 없습니다. 위의 Generate rules로 시작하세요.",
+    ),
+    runCount: (total: number, running: number) =>
+      createGuidanceMessage(
+        running > 0 ? `${total}건 · 실행 중 ${running}건` : `${total}건`,
+      ),
   },
   evidence: {
     loading: createGuidanceMessage("규칙 근거를 불러오는 중입니다…"),
@@ -127,6 +149,9 @@ export const KO_RECIPES = {
 } as const;
 
 export const KO_INSPECTOR = {
+  selectTaskForTrace: createGuidanceMessage(
+    "태스크를 열면 그 실행이 남긴 스팬을 볼 수 있습니다.",
+  ),
   selectAction: createGuidanceMessage(
     "전체 페이로드를 보려면 타임라인 카드를 선택하세요.",
   ),

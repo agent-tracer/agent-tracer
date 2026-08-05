@@ -19,11 +19,11 @@ interface RealtimeMessageLike {
   readonly payload: unknown;
 }
 
-const KIND_LABEL: Readonly<Record<JobKind, string>> = {
+// 옛 에이전트가 이 대시보드에 없는 종류를 종결시킬 수 있어 조회가 미지의 값도 받는다.
+const KIND_LABEL: Readonly<Record<string, string>> = {
   [JOB_KIND.titleSuggestion]: "Title suggestion",
   [JOB_KIND.taskCleanup]: "Task cleanup",
   [JOB_KIND.recipeScan]: "Recipe scan",
-  [JOB_KIND.ruleGeneration]: "Rule generation",
 };
 
 /** `job.updated` WS 메시지를 구독해 앱 내 토스트로 보여준다. */
@@ -53,7 +53,8 @@ function isToastableJobStatus(status: JobUpdatedPayload["status"]): boolean {
 }
 
 function formatTitle(payload: JobUpdatedPayload): string {
-  const label = KIND_LABEL[payload.kind];
+  // 이 대시보드가 모르는 종류를 옛 에이전트가 종결시킬 수 있으므로 이름을 그대로 보인다.
+  const label = KIND_LABEL[payload.kind] ?? payload.kind;
   return payload.status === JOB_STATUS.failed
     ? `${label} failed`
     : `${label} complete`;

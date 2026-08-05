@@ -1,12 +1,12 @@
 /** MCP tools/list가 그대로 실어 보내는 JSON Schema 성질 하나다. */
-export interface McpJsonSchemaProperty {
+interface McpJsonSchemaProperty {
     readonly type: "string" | "number" | "boolean";
     readonly description?: string;
     readonly enum?: readonly string[];
 }
 
 /** MCP 도구 입력 스키마이며 object 형태만 지원한다. */
-export interface McpJsonSchema {
+interface McpJsonSchema {
     readonly type: "object";
     readonly properties: Record<string, McpJsonSchemaProperty>;
     readonly required?: readonly string[];

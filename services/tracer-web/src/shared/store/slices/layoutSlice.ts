@@ -26,10 +26,10 @@ export const COLLAPSED_RAIL_WIDTH = 28;
 const DEFAULT_SIDEBAR_WIDTH = 280;
 const DEFAULT_INSPECTOR_WIDTH = 380;
 
-export const SIDEBAR_MIN = 220;
-export const SIDEBAR_MAX = 480;
-export const INSPECTOR_MIN = 300;
-export const INSPECTOR_MAX = 600;
+const SIDEBAR_MIN = 220;
+const SIDEBAR_MAX = 480;
+const INSPECTOR_MIN = 300;
+const INSPECTOR_MAX = 600;
 
 type SetState = (
   partial: Partial<LayoutSlice> | ((state: LayoutSlice) => Partial<LayoutSlice>),

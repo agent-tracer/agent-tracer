@@ -7,7 +7,9 @@ import { useJobStatus } from "~tracer-web/entities/job/api/queries.js";
 import { useRecipesQuery } from "~tracer-web/entities/recipe/api/queries.js";
 import { useScanAnchorTasksQuery } from "~tracer-web/entities/task/api/list-queries.js";
 import { useAgentBackendChoice } from "~tracer-web/features/agent-backend/use-agent-backend-choice.js";
+import { apiErrorMessage } from "~tracer-web/shared/api/api-error-message.js";
 import { monitorQueryKeys } from "~tracer-web/shared/api/query-keys.js";
+import { useGuidance } from "~tracer-web/shared/store/index.js";
 import { ScanPanel } from "~tracer-web/widgets/recipes/scan/ScanPanel.js";
 import { RecipeSectionTabs, type RecipeSectionTab } from "~tracer-web/widgets/recipes/RecipeSectionTabs.js";
 import { CandidatesList } from "~tracer-web/widgets/recipes/candidates/CandidatesList.js";
@@ -20,6 +22,7 @@ import { collectScannedTaskIds } from "~tracer-web/widgets/recipes/scan/scan-anc
  */
 export function RecipesPage() {
   const queryClient = useQueryClient();
+  const guidance = useGuidance();
   const [tab, setTab] = useState<RecipeSectionTab>("candidates");
   const job = useJobStatus<RecipeScanJobStatus>(JOB_KIND.recipeScan);
   const candidates = useRecipesQuery("candidate");
@@ -65,7 +68,7 @@ export function RecipesPage() {
         onScan={(input) => enqueue.mutate(input)}
         agentBackend={backend.value}
         onAgentBackendChange={backend.select}
-        scanError={enqueue.isError ? readErrorMessage(enqueue.error) : null}
+        scanError={enqueue.isError ? apiErrorMessage(guidance.messages.common, enqueue.error) : null}
       />
       <RecipeSectionTabs
         active={tab}
@@ -103,8 +106,3 @@ export function RecipesPage() {
   );
 }
 
-function readErrorMessage(err: unknown): string {
-  if (err instanceof Error) return err.message;
-  if (typeof err === "string") return err;
-  return "Scan failed";
-}

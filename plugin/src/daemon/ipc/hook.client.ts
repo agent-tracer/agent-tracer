@@ -3,7 +3,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import {ensureAgentTracerHome, resolveAgentTracerPaths, type AgentTracerPaths} from "~plugin/config/home.paths.js";
 import {resolvePluginRoot} from "~plugin/config/plugin.root.js";
-import {probeSocket, requestDaemon} from "~plugin/daemon/ipc/socket.client.js";
+import {requestDaemon} from "~plugin/daemon/ipc/socket.client.js";
 import {resolveDaemonAction} from "~plugin/daemon/lifecycle/daemon.version.js";
 import {
     parseDaemonDeliveryResponse,
@@ -71,10 +71,6 @@ export async function ensureDaemonRunning(env: NodeJS.ProcessEnv = process.env):
     if (env.AGENT_TRACER_DAEMON_AUTOSTART === "0") return;
     const paths = resolveAgentTracerPaths(env);
     if (await resolveDaemonAction(paths) === "spawn") spawnDaemon(paths);
-}
-
-export function isDaemonAlive(paths: AgentTracerPaths = resolveAgentTracerPaths()): Promise<boolean> {
-    return probeSocket(paths.socketPath);
 }
 
 /** 데몬에서 전처리 힌트를 조회하고 데몬이 없으면 조용히 비운다. */

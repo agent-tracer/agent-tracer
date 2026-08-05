@@ -3,7 +3,7 @@ import * as path from "node:path";
 import {ensureSpoolDir, resolveAgentTracerPaths, type AgentTracerPaths} from "~plugin/config/home.paths.js";
 import {generateUlid} from "~plugin/support/ulid.js";
 
-export const SPOOL_MAX_BYTES = 50 * 1024 * 1024;
+const SPOOL_MAX_BYTES = 50 * 1024 * 1024;
 export const SPOOL_BATCH_MAX = 100;
 
 const SEGMENT_PREFIX = "seg-";

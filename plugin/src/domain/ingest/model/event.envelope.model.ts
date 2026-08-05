@@ -4,7 +4,7 @@ import {toIngestEvent, type IngestEvent} from "~plugin/domain/ingest/model/inges
 import {withTags} from "~plugin/domain/ingest/model/tags.model.js";
 
 /** 모든 이벤트에 붙는 런타임 출처 속성이다. */
-export function runtimeAttributes(runtimeSource: string): Record<string, unknown> {
+function runtimeAttributes(runtimeSource: string): Record<string, unknown> {
     return {
         [AGENT_TRACER_ATTR.runtimeSource]: runtimeSource,
         [SEMCONV_ATTR.providerName]: GEN_AI_PROVIDER.anthropic,

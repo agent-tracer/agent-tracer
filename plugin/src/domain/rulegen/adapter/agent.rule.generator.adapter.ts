@@ -4,7 +4,7 @@ import {RULE_OUTPUT_ROOT_KEY} from "~plugin/domain/rulegen/model/output.schema.m
 import type {
     RuleGenerationOutcome,
     RuleGenerationUsage,
-} from "~plugin/domain/rulegen/model/rule.job.model.js";
+} from "~plugin/domain/rulegen/model/rule.generation.model.js";
 import type {RuleGenerationSpec} from "~plugin/domain/rulegen/model/rulegen.spec.model.js";
 import type {RulegenToolset} from "~plugin/domain/rulegen/model/rulegen.tool.model.js";
 import {TrajectoryRecorder} from "~plugin/domain/rulegen/model/trajectory.model.js";

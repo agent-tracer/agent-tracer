@@ -5,8 +5,9 @@ import { cn } from "~tracer-web/shared/ui/lib/cn.js";
 import { useReEvaluateRuleMutation } from "~tracer-web/entities/rule/api/mutations.js";
 import { useTaskRulesQuery } from "~tracer-web/entities/rule/api/queries.js";
 import { useTaskDetailQuery } from "~tracer-web/entities/task/api/detail-queries.js";
+import type { GuidanceLocale, GuidanceMessage } from "~tracer-web/shared/guidance.js";
 import { useGuidance, useSelectedTaskId } from "~tracer-web/shared/store/index.js";
-import { EmptyView } from "~tracer-web/shared/ui/index.js";
+import { EmptyView, GuidanceText } from "~tracer-web/shared/ui/index.js";
 import { Modal } from "~tracer-web/shared/ui/index.js";
 import { RuleForm } from "~tracer-web/widgets/rules/editor/RuleForm.js";
 import { RuleGenerationPanel } from "~tracer-web/widgets/rules/generation/RuleGenerationPanel.js";
@@ -24,7 +25,14 @@ export function RulesTab() {
   const [bulkReEvalPending, setBulkReEvalPending] = useState(false);
 
   if (!taskId) {
-    return <EmptyView eyebrow="Rules" title="Select a task to view its rules." />;
+    return (
+      <EmptyView
+        eyebrow="Rules"
+        title="Select a task to view its rules."
+        description={guidance.messages.rules.selectTask}
+        locale={guidance.locale}
+      />
+    );
   }
   if (rulesQ.isLoading) {
     return <EmptyView eyebrow="Loading" title="Fetching rules…" />;
@@ -90,7 +98,8 @@ export function RulesTab() {
           title="Rules"
           rules={rules}
           contextTaskId={taskId}
-          emptyHint="No rules attached to this task."
+          emptyHint={guidance.messages.rules.emptyTask}
+          locale={guidance.locale}
           onEdit={handleEdit}
         />
       )}
@@ -174,7 +183,8 @@ interface RuleSectionProps {
   readonly title: string;
   readonly rules: readonly RuleRecord[];
   readonly contextTaskId: TaskId | null;
-  readonly emptyHint: string;
+  readonly emptyHint: GuidanceMessage;
+  readonly locale: GuidanceLocale;
   readonly onEdit: (rule: RuleRecord) => void;
 }
 
@@ -183,6 +193,7 @@ function RuleSection({
   rules,
   contextTaskId,
   emptyHint,
+  locale,
   onEdit,
 }: RuleSectionProps) {
   return (
@@ -192,7 +203,12 @@ function RuleSection({
         <span className="text-ink-muted">{rules.length}</span>
       </div>
       {rules.length === 0 ? (
-        <p className="m-0 text-xs text-ink-subtle pl-0.5">{emptyHint}</p>
+        <GuidanceText
+          as="p"
+          className="m-0 text-xs text-ink-subtle pl-0.5"
+          locale={locale}
+          message={emptyHint}
+        />
       ) : (
         <div className="flex flex-col gap-2">
           {rules.map((rule) => (

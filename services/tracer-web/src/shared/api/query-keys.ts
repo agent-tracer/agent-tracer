@@ -29,6 +29,9 @@ export const monitorQueryKeys = {
     ["monitor", "task", taskId, "openinference"] as const,
   rules: () => ["monitor", "rules"] as const,
   taskRules: (taskId: TaskId) => ["monitor", "task", taskId, "rules"] as const,
+  ruleGenerations: (taskId?: TaskId): readonly string[] =>
+    taskId === undefined ? ["monitor", "rule-generations"] : ["monitor", "rule-generations", taskId],
+  ruleGenerationSettings: () => ["monitor", "rule-generation-settings"] as const,
   taskUserInputs: (taskId: TaskId) => ["monitor", "task", taskId, "user-inputs"] as const,
   search: (searchType: "tasks" | "events", query: string, taskId?: TaskId) =>
     (taskId

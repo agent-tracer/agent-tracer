@@ -58,7 +58,7 @@ export function analyzeSed(base: CommandStep, args: readonly string[]): CommandS
     const targets = pathTargets(
         args.filter((arg) => !arg.startsWith("-") && extractSedLineRange(arg) === undefined),
     );
-    const inPlace = args.some((arg) => arg === "--in-place" || arg.startsWith("--in-place=") || /^-i/.test(arg));
+    const inPlace = args.some((arg) => arg === "--in-place" || arg.startsWith("--in-place=") || arg.startsWith("-i"));
     if (inPlace) {
         return withStep(base, {
             operation: "edit_in_place",

@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 import type { TitleSuggestion } from "~tracer-web/entities/job/model/title-suggestion.js";
+import type { GuidanceMessage } from "~tracer-web/shared/guidance.js";
+import { isGuidanceMessage } from "~tracer-web/shared/guidance.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
 import { AnchoredPopover, GuidanceText } from "~tracer-web/shared/ui/index.js";
 import { AgentBackendSelect } from "~tracer-web/features/agent-backend/AgentBackendSelect.js";
@@ -8,7 +10,7 @@ import { cn } from "~tracer-web/shared/ui/lib/cn.js";
 interface TitleSuggestionsPopoverProps {
   readonly anchorRef: { readonly current: HTMLElement | null };
   readonly loading: boolean;
-  readonly error: string | null;
+  readonly error: GuidanceMessage | string | null;
   readonly suggestions: readonly TitleSuggestion[];
   readonly currentTitle: string;
   readonly agentBackend: string | null;
@@ -94,7 +96,11 @@ export function TitleSuggestionsPopover({
       )}
       {error && (
         <p className="m-0 text-xs text-err [overflow-wrap:anywhere]">
-          {error}
+          {isGuidanceMessage(error) ? (
+            <GuidanceText locale={guidance.locale} message={error} />
+          ) : (
+            error
+          )}
         </p>
       )}
       {!loading && !error && suggestions.length === 0 && (

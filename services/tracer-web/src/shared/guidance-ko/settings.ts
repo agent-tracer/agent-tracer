@@ -55,4 +55,22 @@ export const KO_SETTINGS = {
   outputLanguage: createGuidanceMessage(
     "제목 제안과 정리 제안 등 지원되는 AI 생성 결과의 선호 언어를 지정합니다. 개별 잡이나 프롬프트가 이 값을 덮어쓸 수 있으며, 현재 레시피 생성에는 이 전역 설정이 적용되지 않습니다. 지원되는 경우 Auto는 원본 태스크의 언어를 따릅니다.",
   ),
+  ruleGenerationSection: createGuidanceMessage(
+    "내 기계에서 도는 데몬이 규칙을 뽑을 때 쓰는 설정입니다. 에이전트 서비스와 무관하게 이 워크스페이스가 소유합니다.",
+  ),
+  llmProviderScope: createGuidanceMessage(
+    "이 값은 에이전트 서비스가 실행하는 잡(제목 제안·레시피 스캔·정리 제안)에만 쓰입니다. 로컬 규칙 생성은 아래 Rule generation 설정을 읽습니다.",
+  ),
+  valueRequired: createGuidanceMessage("저장하기 전에 값을 입력하세요."),
+  settingSaved: (label: string) => createGuidanceMessage(`${label} 설정을 저장했습니다.`),
+  settingCleared: (label: string) => createGuidanceMessage(`${label} 설정을 지웠습니다.`),
+  settingSaveFailed: (label: string) => createGuidanceMessage(`${label} 설정을 저장하지 못했습니다.`),
+  settingClearFailed: (label: string) => createGuidanceMessage(`${label} 설정을 지우지 못했습니다.`),
+  identityFailed: createGuidanceMessage("사용자를 지정하지 못했습니다."),
+  daemonUnreachable: createGuidanceMessage(
+    "데몬이 보고하지 않아 제어 화면에 닿을 수 없습니다.",
+  ),
+  daemonControls: createGuidanceMessage(
+    "스풀을 비우거나, 실패한 항목을 다시 넣거나, 데몬을 다시 시작합니다.",
+  ),
 } as const;

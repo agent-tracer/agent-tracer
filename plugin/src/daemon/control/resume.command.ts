@@ -17,12 +17,12 @@ export interface ResumeLaunchResult {
     readonly command: string;
 }
 
-export interface SpawnedProcess {
+interface SpawnedProcess {
     once(event: "error", listener: (error: Error) => void): this;
     once(event: "exit", listener: (code: number | null, signal: NodeJS.Signals | null) => void): this;
 }
 
-export type SpawnFn = (
+type SpawnFn = (
     command: string,
     args: readonly string[],
     options: SpawnOptions,

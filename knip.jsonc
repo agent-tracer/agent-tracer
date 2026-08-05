@@ -1,0 +1,84 @@
+// dependency-cruiser가 의존 "방향"을 보는 자리라면 knip은 아무도 부르지 않는 파일·수출·의존성을 본다.
+// 둘은 겹치지 않으므로 lint를 대체하지 않고 `npm run lint:unused`로 따로 돈다.
+//
+// 보고를 지우기 전에 local-main을 반드시 대조한다. 브로커 없는 sqlite 프로파일이 그 브랜치에만
+// 있어서, 이 판에서 아무도 부르지 않는 이름 상당수를 거기서는 부른다. 대조 없이 지우면 그 브랜치가
+// 조용히 깨진다. `git grep -w <이름> local-main -- '*.ts' '*.tsx'` 로 확인한다.
+// 어휘 배열은 파생 타입의 단일 출처라 이 판에서 값으로 안 읽혀도 공개로 남긴다.
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    ".": {
+      "entry": [
+        "architecture.manifest.mjs",
+        "eslint.config.js",
+        "eslint-rules/index.mjs",
+        "integration/**/*.test.mjs",
+        "scripts/*.mjs",
+        "vitest.config.ts"
+      ],
+      "project": [
+        "*.{js,mjs,ts}",
+        "eslint-rules/**/*.mjs",
+        "integration/**/*.mjs",
+        "scripts/**/*.mjs"
+      ]
+    },
+    "libs/*": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.ts"]
+    },
+    "libs/tracer-model": {
+      // scripts/migrate.mjs가 경로 문자열로만 부르므로 정적 분석이 닿지 않는다.
+      "entry": ["src/index.ts", "src/persistence/tracer.datasource.ts"],
+      "project": ["src/**/*.ts"]
+    },
+    "services/ingest-api": {
+      // event.datasource.ts도 마이그레이션 CLI가 경로로만 부르는 진입점이다.
+      "entry": ["src/main.ts", "src/event.datasource.ts", "src/migrations/*.ts"],
+      "project": ["src/**/*.ts"]
+    },
+    "services/tracer-api": {
+      "entry": [
+        "src/api.main.ts",
+        "src/projector.main.ts",
+        "src/search.reindex.main.ts",
+        "src/migrations/*.ts"
+      ],
+      "project": ["src/**/*.ts"]
+    },
+    "services/tracer-web": {
+      // index.html 다음의 다섯은 vite.config.ts의 module federation exposes가 여는 입구다.
+      "entry": [
+        "index.html",
+        "src/app/main.tsx",
+        "src/shared/ui/index.ts",
+        "src/shared/store/index.ts",
+        "src/shared/api/index.ts",
+        "src/shared/guidance.ts",
+        "src/entities/index.ts",
+        "vite.config.ts"
+      ],
+      "project": ["src/**/*.{ts,tsx}"]
+    },
+    "plugin": {
+      // 훅은 디렉터리를 훑어 번들되고 데몬과 MCP 서버는 build.ts가 낱개로 지목한다.
+      "entry": [
+        "build.ts",
+        "src/agent/claude-code/hooks/*.ts",
+        "src/agent/claude-code/mcp/server.ts",
+        "src/daemon/main.ts"
+      ],
+      "project": ["src/**/*.ts"]
+    }
+  },
+  "ignoreDependencies": [
+    // scripts/check-dependencies.mjs가 node_modules/.bin/depcruise를 경로로 실행한다.
+    "dependency-cruiser",
+    // vite.config.ts가 vitest에서 tailwind를 빼려고 지정자를 런타임에 조립해 import한다.
+    "@tailwindcss/vite",
+    "tailwindcss",
+    // plugin의 build.ts를 띄우는 @swc-node/register가 런타임에 요구하는 짝이다.
+    "@swc/core"
+  ]
+}

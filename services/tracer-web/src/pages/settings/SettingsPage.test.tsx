@@ -7,8 +7,12 @@ vi.mock("~tracer-web/widgets/settings/identity/IdentitySection.js", () => ({
   IdentitySection: () => <section>User identity placeholder</section>,
 }));
 
-vi.mock("~tracer-web/widgets/settings/rule-generation/RuleGenerationSection.js", () => ({
-  RuleGenerationSection: () => <section>Rule generation placeholder</section>,
+vi.mock("~tracer-web/widgets/settings/llm-provider/LlmProviderSection.js", () => ({
+  LlmProviderSection: () => <section>LLM provider placeholder</section>,
+}));
+
+vi.mock("~tracer-web/widgets/settings/rule-generation/RuleGenerationSettingsSection.js", () => ({
+  RuleGenerationSettingsSection: () => <section>Rule generation placeholder</section>,
 }));
 
 vi.mock("~tracer-web/widgets/settings/daemon/DaemonHealthSection.js", () => ({

@@ -6,6 +6,8 @@ import {
   useEditRecipeMutation,
   useRetireRecipeMutation,
 } from "~tracer-web/entities/recipe/api/mutations.js";
+import { apiErrorMessage } from "~tracer-web/shared/api/api-error-message.js";
+import type { GuidanceMessage } from "~tracer-web/shared/guidance.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
 import { RecipeCard } from "~tracer-web/widgets/recipes/presentation/RecipeCard.js";
 import { canDeleteRecipe } from "~tracer-web/widgets/recipes/library/recipe-status.js";
@@ -82,7 +84,7 @@ function ActiveRecipeCard({
     description: recipe.description,
     summaryMd: recipe.summaryMd,
   }));
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<GuidanceMessage | null>(null);
 
   function closeEditor() {
     setEditing(false);
@@ -109,7 +111,7 @@ function ActiveRecipeCard({
       },
       {
         onSuccess: () => closeEditor(),
-        onError: (err) => setError(err instanceof Error ? err.message : "Edit failed."),
+        onError: (err) => setError(apiErrorMessage(guidance.messages.common, err)),
       },
     );
   }
@@ -156,9 +158,12 @@ function ActiveRecipeCard({
         <div className="p-4 flex flex-col gap-3">
           <div className="text-sm text-ink">{recipe.title}</div>
           {remove.isError && (
-            <div className="text-xs text-danger">
-              {remove.error instanceof Error ? remove.error.message : "Delete failed."}
-            </div>
+            <GuidanceText
+              as="div"
+              className="text-xs text-danger"
+              locale={guidance.locale}
+              message={apiErrorMessage(guidance.messages.common, remove.error)}
+            />
           )}
           <div className="flex justify-end gap-2">
             <Button variant="ghost" disabled={remove.isPending} onClick={() => setConfirmingDelete(false)}>
@@ -218,7 +223,14 @@ function ActiveRecipeCard({
               disabled={edit.isPending}
             />
           </Field>
-          {error && <div className="text-xs text-danger">{error}</div>}
+          {error && (
+            <GuidanceText
+              as="div"
+              className="text-xs text-danger"
+              locale={guidance.locale}
+              message={error}
+            />
+          )}
           <div className="flex justify-end gap-2">
             <Button variant="ghost" disabled={edit.isPending} onClick={closeEditor}>
               Cancel

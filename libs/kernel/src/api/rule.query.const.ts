@@ -6,3 +6,6 @@ export const RULES_ALL_FLAG = "all";
 export const RULES_ALL_FLAG_VALUE = "true";
 
 export const RULES_ALL_PATH = `${RULES_PATH}?${RULES_ALL_FLAG}=${RULES_ALL_FLAG_VALUE}`;
+
+/** 규칙 생성 요청의 HTTP 계약이며 실행기와 화면이 같은 값을 읽는다. */
+export const RULE_GENERATIONS_PATH = `${RULES_PATH}/generations`;

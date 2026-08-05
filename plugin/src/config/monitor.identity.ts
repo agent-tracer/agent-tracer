@@ -37,13 +37,6 @@ export function readMonitorConfigFile(
     }
 }
 
-export function writeMonitorConfigFile(
-    config: MonitorConfigFile,
-    paths: AgentTracerPaths = resolveAgentTracerPaths(),
-): void {
-    fs.writeFileSync(paths.configPath, `${JSON.stringify(config, null, 2)}\n`, {mode: 0o600});
-}
-
 function trimmed(value: unknown): string | undefined {
     if (typeof value !== "string") return undefined;
     const next = value.trim();

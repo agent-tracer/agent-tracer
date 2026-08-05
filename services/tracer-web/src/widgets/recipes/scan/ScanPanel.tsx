@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { cn } from "~tracer-web/shared/ui/lib/cn.js";
+import type { GuidanceMessage } from "~tracer-web/shared/guidance.js";
+import { isGuidanceMessage } from "~tracer-web/shared/guidance.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
 import { Button, GuidanceText, Input } from "~tracer-web/shared/ui/index.js";
 import type { RecipeScanJobInput } from "~tracer-web/entities/job/model/recipe-scan.js";
@@ -10,8 +12,8 @@ import { TaskPicker } from "~tracer-web/widgets/recipes/scan/TaskPicker.js";
 
 interface LatestJob {
   readonly status: string;
-  readonly candidatesCreated: number;
-  readonly sourceTaskId?: TaskId;
+  readonly recipes: readonly unknown[];
+  readonly taskId?: TaskId;
   readonly completedAt: string | null;
   readonly error: string | null;
 }
@@ -25,7 +27,8 @@ interface ScanPanelProps {
   readonly includeArchivedTasks: boolean;
   readonly onIncludeArchivedTasksChange: (include: boolean) => void;
   readonly onScan: (input: RecipeScanJobInput) => void;
-  readonly scanError: string | null;
+  /** 요청이 거절된 사유이며 잡이 남긴 문구는 이 자리로 오지 않는다. */
+  readonly scanError: GuidanceMessage | null;
   readonly agentBackend: string | null;
   readonly onAgentBackendChange: (backend: string) => void;
 }
@@ -49,7 +52,7 @@ export function ScanPanel({
   const [selectedTaskId, setSelectedTaskId] = useState<TaskId | null>(null);
   const [userPrompt, setUserPrompt] = useState("");
 
-  const failureMessage =
+  const failureMessage: GuidanceMessage | string | null =
     scanError ?? (latestJob?.status === "failed" ? latestJob.error : null);
 
   return (
@@ -115,9 +118,9 @@ export function ScanPanel({
             {latestJob.status === "completed" && (
               <>
                 {" "}
-                · {latestJob.candidatesCreated} candidate
-                {latestJob.candidatesCreated === 1 ? "" : "s"}
-                {latestJob.sourceTaskId ? ` · ${latestJob.sourceTaskId.slice(0, 8)}` : ""}
+                · {latestJob.recipes.length} candidate
+                {latestJob.recipes.length === 1 ? "" : "s"}
+                {latestJob.taskId ? ` · ${latestJob.taskId.slice(0, 8)}` : ""}
               </>
             )}
           </span>
@@ -125,7 +128,11 @@ export function ScanPanel({
       </div>
       {failureMessage && (
         <div className="mt-2 text-xs py-1.5 px-2.5 rounded-sm bg-err/8 text-err">
-          {failureMessage}
+          {isGuidanceMessage(failureMessage) ? (
+            <GuidanceText locale={guidance.locale} message={failureMessage} />
+          ) : (
+            failureMessage
+          )}
         </div>
       )}
     </div>

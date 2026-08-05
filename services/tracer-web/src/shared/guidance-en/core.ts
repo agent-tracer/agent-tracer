@@ -21,6 +21,20 @@ export const EN_COMMON = {
     idle: createGuidanceMessage("No recent activity was recorded."),
     canceled: createGuidanceMessage("The job stopped before completion."),
   },
+  // 서버는 사유를 코드로만 말하므로 그 코드를 화면의 말로 옮기는 자리가 여기 하나다.
+  apiError: {
+    unauthorized: createGuidanceMessage("Sign in again to continue."),
+    forbidden: createGuidanceMessage("This account may not perform that action."),
+    notFound: createGuidanceMessage("The requested item no longer exists."),
+    conflict: createGuidanceMessage("The item changed since it was loaded. Reload and try again."),
+    badRequest: createGuidanceMessage("The request was rejected. Check the values and try again."),
+    validation: createGuidanceMessage("Some values are not in the expected shape."),
+    rateLimited: createGuidanceMessage("Too many requests. Wait a moment and try again."),
+    serverError: createGuidanceMessage("The monitor server failed to handle the request."),
+    notImplemented: createGuidanceMessage("This deployment does not run the service that answers here."),
+    unreachable: createGuidanceMessage("The monitor server did not answer. Check that it is running."),
+    unknown: createGuidanceMessage("The request could not be completed."),
+  },
 } as const;
 
 export const EN_APP = {

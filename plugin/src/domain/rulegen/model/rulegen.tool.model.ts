@@ -1,4 +1,12 @@
 /** 규칙 생성 에이전트가 실행 중에 근거를 더 가져오는 도구의 명세이며 어댑터는 이것을 zod로 렌더링만 한다. */
+import {
+    ASKED_TEXT_MAX_LEN,
+    ASSISTANT_SUMMARY_MAX_LEN,
+    EVENT_BODY_MAX_LEN,
+    EVENT_TITLE_MAX_LEN,
+    EXISTING_RULE_NAME_MAX_LEN,
+    TURN_DIGEST_MAX_TURNS,
+} from "~plugin/domain/rulegen/model/evidence.model.js";
 
 export const RULEGEN_MCP_SERVER = "monitor-rule-gen";
 
@@ -13,7 +21,7 @@ export type RulegenToolName = (typeof RULEGEN_TOOL)[keyof typeof RULEGEN_TOOL];
 export const RULEGEN_EVENT_LIMIT = {
     fallback: 50,
     min: 1,
-    max: 100,
+    max: 400,
 } as const;
 
 /** 도구 인자 하나의 형태다. */
@@ -53,19 +61,19 @@ const LIMIT_PARAM: RulegenToolParam = {
 export const RULEGEN_TOOL_SPECS: readonly RulegenToolSpec[] = [
     {
         name: RULEGEN_TOOL.turns,
-        description: "Get what the user asked in each turn of the task, chronologically. Returns turnId, turnIndex, askedText, assistantSummary. askedText is the user's own words, the primary source of every obligation, and turnId is the only ID you may cite in citedTurnIds.",
+        description: `Get what the user asked in each turn of the task, chronologically. Returns turnId, turnIndex, askedText, assistantSummary. askedText is the user's own words and turnId is the only ID you may cite in citedTurnIds. Returns at most the ${TURN_DIGEST_MAX_TURNS} most recent turns, with askedText cut at ${ASKED_TEXT_MAX_LEN} characters and assistantSummary at ${ASSISTANT_SUMMARY_MAX_LEN}; a turn longer than that is truncated, not omitted.`,
         failureLabel: "Failed to fetch turns",
         params: [TASK_ID_PARAM],
     },
     {
         name: RULEGEN_TOOL.events,
-        description: `Get the chronological event sequence for a task (tool calls, shell commands, file edits). Returns slim records (eventId, turnId, kind, title, body); eventId is the only ID you may cite in citedEventIds. Returns the most recent events up to the requested limit, default ${RULEGEN_EVENT_LIMIT.fallback}.`,
+        description: `Get the chronological event sequence for a task (tool calls, shell commands, file edits). Returns slim records (eventId, turnId, kind, title, body); eventId is the only ID you may cite in citedEventIds. Returns the most recent events up to the requested limit, default ${RULEGEN_EVENT_LIMIT.fallback}, maximum ${RULEGEN_EVENT_LIMIT.max}. Only the most recent window is reachable, so raise the limit rather than calling again. title is cut at ${EVENT_TITLE_MAX_LEN} characters and body at ${EVENT_BODY_MAX_LEN}.`,
         failureLabel: "Failed to fetch events",
         params: [TASK_ID_PARAM, LIMIT_PARAM],
     },
     {
         name: RULEGEN_TOOL.rules,
-        description: "List existing rules (name + expectation) to avoid duplicates.",
+        description: `Get every rule already configured in this workspace, across all tasks, as name and expectation. Call it before proposing so you do not restate an obligation that is already covered; when a rule you were about to propose overlaps one of these, propose nothing for it. Names are cut at ${EXISTING_RULE_NAME_MAX_LEN} characters.`,
         failureLabel: "Failed to fetch rules",
         params: [],
     },
@@ -101,7 +109,7 @@ export interface RulegenToolInput {
 }
 
 /** 도구 하나가 모델에게 돌려주는 텍스트를 만든다. */
-export type RulegenToolHandler = (input: RulegenToolInput) => Promise<string>;
+type RulegenToolHandler = (input: RulegenToolInput) => Promise<string>;
 
 /** 실행기에 넘기는 도구 구현 묶음이다. */
 export type RulegenToolset = Readonly<Record<RulegenToolName, RulegenToolHandler>>;

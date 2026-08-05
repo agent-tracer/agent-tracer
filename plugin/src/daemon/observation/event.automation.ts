@@ -5,7 +5,7 @@ import {isRecord} from "~plugin/support/json.js";
 export type EventAutomationTrigger = (event: ObservedEvent) => Promise<void>;
 
 /** 자동화가 판단에 쓰는 이벤트의 최소 사실이다. */
-export interface ObservedEvent {
+interface ObservedEvent {
     readonly kind: string;
     readonly taskId: string;
     readonly eventId: string;

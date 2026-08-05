@@ -3,7 +3,7 @@ import * as path from "node:path";
 import type {SDKMessage} from "@anthropic-ai/claude-agent-sdk";
 import type {AiJobStepToolCall} from "@agent-tracer/kernel/job/job.step.const.js";
 import {RULE_AGENT_RESULT_SUCCESS, type RuleAgentMessage} from "~plugin/domain/rulegen/model/agent.message.model.js";
-import type {RuleGenerationUsage} from "~plugin/domain/rulegen/model/rule.job.model.js";
+import type {RuleGenerationUsage} from "~plugin/domain/rulegen/model/rule.generation.model.js";
 import {
     rulegenAllowedTools,
     RULEGEN_MCP_SERVER,
@@ -85,7 +85,7 @@ export function toToolArgs(input: unknown): Record<string, unknown> {
     return isRecord(input) ? input : {};
 }
 
-export function toolResultText(content: unknown): string {
+function toolResultText(content: unknown): string {
     if (typeof content === "string") return content;
     if (!Array.isArray(content)) return "";
     let text = "";
@@ -161,7 +161,7 @@ export class ClaudeRuleAgentRunnerAdapter implements RuleAgentRunnerPort {
                 mcpServers: {[RULEGEN_MCP_SERVER]: createRulegenMcpServer(spec.tools, toolset)},
                 maxTurns: spec.maxTurns,
                 maxBudgetUsd: spec.maxBudgetUsd,
-                effort: spec.effort,
+                effort: spec.effort as Parameters<typeof query>[0]["options"] extends infer O ? O extends {effort?: infer E} ? E : never : never,
                 ...(claudeExecutablePath !== undefined ? {pathToClaudeCodeExecutable: claudeExecutablePath} : {}),
                 systemPrompt: {
                     type: "preset",

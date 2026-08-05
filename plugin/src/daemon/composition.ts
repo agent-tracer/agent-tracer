@@ -1,3 +1,4 @@
+import {HttpAgentBackend, preferredAgentBackend} from "~plugin/config/agent.backend.js";
 import {monitorUserHeaders, resolveMonitorIdentity} from "~plugin/config/monitor.identity.js";
 import {EvaluateTurnUsecase} from "~plugin/domain/guardrail/application/evaluate.turn.usecase.js";
 import {RefreshRulesUsecase} from "~plugin/domain/guardrail/application/refresh.rules.usecase.js";
@@ -10,12 +11,13 @@ import {RequestRecipeScanUsecase} from "~plugin/domain/recipe/application/reques
 import {AgentRuleGeneratorAdapter} from "~plugin/domain/rulegen/adapter/agent.rule.generator.adapter.js";
 import {ClaudeRuleAgentRunnerAdapter} from "~plugin/domain/rulegen/adapter/claude.rule.agent.runner.adapter.js";
 import {HttpRuleEvidenceAdapter} from "~plugin/domain/rulegen/adapter/http.rule.evidence.adapter.js";
-import {HttpRuleJobAdapter} from "~plugin/domain/rulegen/adapter/http.rule.job.adapter.js";
-import {HttpRuleSettingAdapter} from "~plugin/domain/rulegen/adapter/http.rule.setting.adapter.js";
-import {EnqueueRuleJobUsecase} from "~plugin/domain/rulegen/application/enqueue.rule.job.usecase.js";
-import {PollRuleJobsUsecase} from "~plugin/domain/rulegen/application/poll.rule.jobs.usecase.js";
+import {StderrRulegenLogAdapter} from "~plugin/domain/rulegen/adapter/stderr.rulegen.log.adapter.js";
+import {TracerRuleGenerationAdapter} from "~plugin/domain/rulegen/adapter/tracer.rule.generation.adapter.js";
+import {TracerRuleSettingAdapter} from "~plugin/domain/rulegen/adapter/tracer.rule.setting.adapter.js";
+import {RequestRuleGenerationUsecase} from "~plugin/domain/rulegen/application/request.rule.generation.usecase.js";
+import {PollRuleGenerationsUsecase} from "~plugin/domain/rulegen/application/poll.rule.generations.usecase.js";
 import {RefreshRuleSettingUsecase} from "~plugin/domain/rulegen/application/refresh.rule.setting.usecase.js";
-import {RunRuleJobUsecase} from "~plugin/domain/rulegen/application/run.rule.job.usecase.js";
+import {RunRuleGenerationUsecase} from "~plugin/domain/rulegen/application/run.rule.generation.usecase.js";
 import type {RulegenHook} from "~plugin/domain/rulegen/inbound/rulegen.hook.js";
 import {RuleGenerationSettingCache} from "~plugin/domain/rulegen/model/rule.command.model.js";
 import type {SchedulerPort} from "~plugin/domain/rulegen/port/scheduler.port.js";
@@ -35,6 +37,9 @@ export function composeDaemonHooks(leaseOwner: string): DaemonHooks {
     const baseUrl = identity.baseUrl;
     const headers = monitorUserHeaders(identity);
 
+    // 상류가 둘 이상인 배포에서는 축을 지목하지 않은 에이전트 요청을 게이트웨이가 400으로 거절한다.
+    const agentBackend = new HttpAgentBackend(baseUrl, headers, preferredAgentBackend());
+
     const clock = {now: (): number => Date.now()};
     const scheduler: SchedulerPort = {
         every: (intervalMs, run) => {
@@ -53,28 +58,31 @@ export function composeDaemonHooks(leaseOwner: string): DaemonHooks {
 
     const hint: HintHook = {computeHints: new ComputeHintsUsecase(clock)};
 
-    const requestScan = new RequestRecipeScanUsecase(new HttpRecipeScanJobAdapter(baseUrl, headers));
+    const requestScan = new RequestRecipeScanUsecase(new HttpRecipeScanJobAdapter(baseUrl, headers, agentBackend));
 
-    const jobs = new HttpRuleJobAdapter(baseUrl, headers, leaseOwner);
-    const runRuleJob = new RunRuleJobUsecase(
+    const rulegenLog = new StderrRulegenLogAdapter();
+    const jobs = new TracerRuleGenerationAdapter(baseUrl, headers, leaseOwner, rulegenLog);
+    const runRuleJob = new RunRuleGenerationUsecase(
         new HttpRuleEvidenceAdapter(baseUrl, headers),
         new AgentRuleGeneratorAdapter(new ClaudeRuleAgentRunnerAdapter()),
         jobs,
         clock,
+        rulegenLog,
     );
     const ruleSettingCache = new RuleGenerationSettingCache();
     const rulegen: RulegenHook = {
-        pollJobs: new PollRuleJobsUsecase(
+        pollGenerations: new PollRuleGenerationsUsecase(
             jobs,
             (request, signal) => runRuleJob.execute(request, signal),
             scheduler,
             ruleSettingCache,
+            rulegenLog,
         ),
         refreshSetting: new RefreshRuleSettingUsecase(
-            new HttpRuleSettingAdapter(baseUrl, headers),
+            new TracerRuleSettingAdapter(baseUrl, headers),
             ruleSettingCache,
         ),
-        enqueueRuleJob: new EnqueueRuleJobUsecase(jobs, ruleSettingCache),
+        requestGeneration: new RequestRuleGenerationUsecase(jobs, ruleSettingCache, rulegenLog),
     };
 
     return {

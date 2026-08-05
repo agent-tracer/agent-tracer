@@ -1512,7 +1512,7 @@ function analyzeSed(base, args) {
   const targets = pathTargets(
     args.filter((arg) => !arg.startsWith("-") && extractSedLineRange(arg) === void 0)
   );
-  const inPlace = args.some((arg) => arg === "--in-place" || arg.startsWith("--in-place=") || /^-i/.test(arg));
+  const inPlace = args.some((arg) => arg === "--in-place" || arg.startsWith("--in-place=") || arg.startsWith("-i"));
   if (inPlace) {
     return withStep(base, {
       operation: "edit_in_place",
@@ -3273,8 +3273,7 @@ var HttpRecipeOutcomeReportAdapter = class {
 var JOB_KIND = {
   titleSuggestion: "title.suggestion",
   recipeScan: "recipe.scan",
-  taskCleanup: "task.cleanup",
-  ruleGeneration: "rule.generation"
+  taskCleanup: "task.cleanup"
 };
 var RECIPE_SCAN_TRIGGER = {
   dashboard: "dashboard",
@@ -3283,8 +3282,7 @@ var RECIPE_SCAN_TRIGGER = {
 var JOB_EXECUTOR = {
   [JOB_KIND.titleSuggestion]: "temporal",
   [JOB_KIND.recipeScan]: "temporal",
-  [JOB_KIND.taskCleanup]: "temporal",
-  [JOB_KIND.ruleGeneration]: "local"
+  [JOB_KIND.taskCleanup]: "temporal"
 };
 var JOB_STATUS = {
   pending: "pending",
@@ -3295,29 +3293,42 @@ var JOB_STATUS = {
 };
 var JOB_STATUSES = Object.values(JOB_STATUS);
 
+// src/config/agent.backend.ts
+function withAgentBackend(url, backend) {
+  if (backend === null) return url;
+  return `${url}${url.includes("?") ? "&" : "?"}backend=${encodeURIComponent(backend)}`;
+}
+var NO_AGENT_BACKEND = {
+  current: () => Promise.resolve(null)
+};
+
 // src/domain/recipe/adapter/http.recipe.scan.job.adapter.ts
 var ACTIVE_STATUSES = /* @__PURE__ */ new Set([JOB_STATUS.pending, JOB_STATUS.running]);
 var AGENT_JOBS = "/api/agent/jobs";
 var HttpRecipeScanJobAdapter = class {
-  constructor(baseUrl, headers2) {
+  constructor(baseUrl, headers2, backend = NO_AGENT_BACKEND) {
     this.baseUrl = baseUrl;
     this.headers = headers2;
+    this.backend = backend;
   }
   baseUrl;
   headers;
+  backend;
   async hasActiveScan(taskId) {
-    const url = `${this.baseUrl}${AGENT_JOBS}/latest?kind=${encodeURIComponent(JOB_KIND.recipeScan)}&taskId=${encodeURIComponent(taskId)}`;
+    const url = await this.agentUrl(
+      `${AGENT_JOBS}/latest?kind=${encodeURIComponent(JOB_KIND.recipeScan)}&taskId=${encodeURIComponent(taskId)}`
+    );
     const fetched = await getJson(url, this.headers);
     const status = fetched.kind === "found" ? fetched.value.data?.job?.status : void 0;
     return status !== void 0 && ACTIVE_STATUSES.has(status);
   }
   /** 이 창구를 세우는 에이전트 서비스가 배포에 없으면 `501`이 그 확답이다. */
   async isAvailable() {
-    const fetched = await getJson(`${this.baseUrl}${AGENT_JOBS}`, this.headers);
+    const fetched = await getJson(await this.agentUrl(AGENT_JOBS), this.headers);
     return fetched.kind !== "unsupported";
   }
   async enqueue(taskId, idempotencyKey, userPrompt) {
-    const response = await postJson(`${this.baseUrl}${AGENT_JOBS}`, this.headers, {
+    const response = await postJson(await this.agentUrl(AGENT_JOBS), this.headers, {
       kind: JOB_KIND.recipeScan,
       input: {
         taskId,
@@ -3327,6 +3338,10 @@ var HttpRecipeScanJobAdapter = class {
       idempotencyKey
     });
     return response.ok;
+  }
+  /** 축을 지목하지 않은 요청은 상류가 둘인 배포에서 게이트웨이가 거절하므로 여기서만 URL을 세운다. */
+  async agentUrl(path13) {
+    return withAgentBackend(`${this.baseUrl}${path13}`, await this.backend.current());
   }
 };
 

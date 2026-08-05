@@ -1,0 +1,197 @@
+import {createDeadline, isRulegenCanceled} from "~plugin/domain/rulegen/model/deadline.model.js";
+import {groundRuleProposals} from "~plugin/domain/rulegen/model/proposal.grounding.model.js";
+import {validateRuleProposals} from "~plugin/domain/rulegen/model/proposal.validation.model.js";
+import type {RuleProposalPayload} from "@agent-tracer/kernel/rule/proposal/rule.proposal.schema.js";
+import {
+    mergeRuleGenerationOutcomes,
+    ruleGenerationFailure,
+    type RuleGenerationFailure,
+    type RuleGenerationOutcome,
+    type RuleGenerationReport,
+} from "~plugin/domain/rulegen/model/rule.generation.model.js";
+import {buildRulegenRepairPrompt} from "~plugin/domain/rulegen/model/rulegen.prompt.model.js";
+import {RulegenProvenanceLedger} from "~plugin/domain/rulegen/model/rulegen.provenance.model.js";
+import {
+    buildRuleGenerationSpec,
+    type RuleGenerationRequest,
+    type RuleGenerationSpec,
+} from "~plugin/domain/rulegen/model/rulegen.spec.model.js";
+import {
+    resolveEventLimit,
+    rulegenToolFailureText,
+    rulegenToolSpec,
+    RULEGEN_TOOL,
+    type RulegenToolName,
+    type RulegenToolset,
+} from "~plugin/domain/rulegen/model/rulegen.tool.model.js";
+import type {ClockPort} from "~plugin/domain/rulegen/port/clock.port.js";
+import type {RulegenLogPort} from "~plugin/domain/rulegen/port/log.port.js";
+import {RuleEvidenceHttpError, type RuleEvidencePort} from "~plugin/domain/rulegen/port/rule.evidence.port.js";
+import type {RuleGeneratorPort} from "~plugin/domain/rulegen/port/rule.generator.port.js";
+import type {RuleGenerationPort} from "~plugin/domain/rulegen/port/rule.generation.port.js";
+
+const RESULT_REPORT_FAILED = "result report failed";
+
+interface ScreenedProposals {
+    readonly proposals: readonly RuleProposalPayload[];
+    readonly errors: readonly string[];
+}
+
+/** 클레임한 요청 하나를 도구 루프 실행부터 결과 보고까지 끝낸다. */
+export class RunRuleGenerationUsecase {
+    constructor(
+        private readonly evidence: RuleEvidencePort,
+        private readonly generator: RuleGeneratorPort,
+        private readonly jobs: RuleGenerationPort,
+        private readonly clock: ClockPort,
+        private readonly log: RulegenLogPort,
+    ) {}
+
+    async execute(request: RuleGenerationRequest, cancelSignal?: AbortSignal): Promise<void> {
+        const spec = buildRuleGenerationSpec(request);
+        const deadline = createDeadline(spec.deadlineMs, cancelSignal);
+        const signal = deadline.controller.signal;
+        const startedAt = this.clock.now();
+        const ledger = new RulegenProvenanceLedger();
+        try {
+            const toolset = this.toolset(signal, ledger);
+            const first = await this.generator.generate(spec, toolset, signal);
+            // 취소됐거나 리스를 잃은 요청은 더 이상 이 데몬의 것이 아니므로 실패로 종결하지 않는다.
+            if (isRulegenCanceled(signal.reason)) return;
+            if (first.error !== null) {
+                await this.jobs.fail(request.requestId, this.failure(spec, startedAt, first, first.error));
+                return;
+            }
+
+            const screened = this.screen(first.candidates, ledger, request.anchorTurnId ?? null);
+            const {outcome, proposals, skipped} = screened.errors.length === 0
+                ? {outcome: first, proposals: screened.proposals, skipped: []}
+                : await this.repair(spec, toolset, signal, ledger, first, screened.errors, request.anchorTurnId ?? null);
+            if (isRulegenCanceled(signal.reason)) return;
+            if (outcome.error !== null) {
+                await this.jobs.fail(request.requestId, this.failure(spec, startedAt, outcome, outcome.error));
+                return;
+            }
+
+            const report: RuleGenerationReport = {
+                proposals: proposals.slice(0, spec.maxRules),
+                skipped,
+                modelUsed: spec.model,
+                durationMs: this.clock.now() - startedAt,
+                costUsd: outcome.costUsd,
+                numTurns: outcome.numTurns,
+                ...(outcome.usage !== null ? {usage: outcome.usage} : {}),
+                steps: outcome.steps,
+            };
+            if (!await this.jobs.reportResult(request.requestId, report)) {
+                await this.jobs.fail(request.requestId, this.failure(spec, startedAt, outcome, RESULT_REPORT_FAILED));
+            }
+        } catch (error) {
+            if (isRulegenCanceled(signal.reason)) return;
+            const message = error instanceof Error ? error.message : String(error);
+            await this.jobs.fail(request.requestId, ruleGenerationFailure(message));
+        } finally {
+            deadline.dispose();
+        }
+    }
+
+    /** 오류를 모델에게 돌려주고 한 번만 다시 받으며 그래도 근거가 서지 않는 제안은 버린다. */
+    private async repair(
+        spec: RuleGenerationSpec,
+        toolset: RulegenToolset,
+        signal: AbortSignal,
+        ledger: RulegenProvenanceLedger,
+        first: RuleGenerationOutcome,
+        errors: readonly string[],
+        anchorTurnId: string | null,
+    ): Promise<{
+        readonly outcome: RuleGenerationOutcome;
+        readonly proposals: readonly RuleProposalPayload[];
+        readonly skipped: readonly string[];
+    }> {
+        const repairSpec: RuleGenerationSpec = {
+            ...spec,
+            userPrompt: buildRulegenRepairPrompt(spec.userPrompt, {rules: first.candidates}, errors),
+        };
+        const second = await this.generator.generate(repairSpec, toolset, signal);
+        const outcome = mergeRuleGenerationOutcomes(first, second);
+        if (isRulegenCanceled(signal.reason) || outcome.error !== null) {
+            return {outcome, proposals: [], skipped: []};
+        }
+
+        const screened = this.screen(outcome.candidates, ledger, anchorTurnId);
+        for (const error of screened.errors) {
+            this.log.write(`dropped proposal after repair: ${error}`);
+        }
+        return {outcome, proposals: screened.proposals, skipped: screened.errors};
+    }
+
+    private screen(
+        candidates: readonly unknown[],
+        ledger: RulegenProvenanceLedger,
+        anchorTurnId: string | null,
+    ): ScreenedProposals {
+        const {accepted, rejected} = validateRuleProposals(candidates);
+        const {grounded, errors} = groundRuleProposals(accepted, ledger.snapshot(), anchorTurnId);
+        return {
+            proposals: grounded,
+            errors: [
+                ...rejected.map((item) => `Rule #${item.index + 1} violates the output schema: ${item.reason}.`),
+                ...errors,
+            ],
+        };
+    }
+
+    /** 실패한 실행도 이미 비용을 청구했으므로 그 비용과 궤적을 실패 보고에 함께 싣는다. */
+    private failure(
+        spec: RuleGenerationSpec,
+        startedAt: number,
+        outcome: RuleGenerationOutcome,
+        error: string,
+    ): RuleGenerationFailure {
+        return {
+            error,
+            modelUsed: spec.model,
+            durationMs: this.clock.now() - startedAt,
+            costUsd: outcome.costUsd,
+            numTurns: outcome.numTurns,
+            ...(outcome.usage !== null ? {usage: outcome.usage} : {}),
+            steps: outcome.steps,
+        };
+    }
+
+    /** 장부는 도구가 모델에게 실제로 돌려준 응답만 먹어야 검증이 통과 도장이 되지 않는다. */
+    private toolset(signal: AbortSignal, ledger: RulegenProvenanceLedger): RulegenToolset {
+        return {
+            [RULEGEN_TOOL.turns]: (input) =>
+                this.answer(RULEGEN_TOOL.turns, async () => {
+                    const turns = await this.evidence.fetchTurns(input.taskId, signal);
+                    ledger.recordTurns(turns);
+                    return turns;
+                }),
+            [RULEGEN_TOOL.events]: (input) =>
+                this.answer(RULEGEN_TOOL.events, async () => {
+                    const events = await this.evidence.fetchEvents(
+                        input.taskId,
+                        resolveEventLimit(input.limit),
+                        signal,
+                    );
+                    ledger.recordEvents(events);
+                    return events;
+                }),
+            [RULEGEN_TOOL.rules]: () =>
+                this.answer(RULEGEN_TOOL.rules, () => this.evidence.fetchExistingRules(signal)),
+        };
+    }
+
+    private async answer(name: RulegenToolName, fetch: () => Promise<unknown>): Promise<string> {
+        try {
+            return JSON.stringify(await fetch(), null, 2);
+        } catch (error) {
+            if (error instanceof RuleEvidenceHttpError) {
+                return rulegenToolFailureText(rulegenToolSpec(name), error.status);
+            }
+            throw error;
+        }
+    }
+}

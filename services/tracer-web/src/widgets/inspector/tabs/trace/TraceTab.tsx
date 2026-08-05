@@ -31,7 +31,12 @@ export function TraceTab() {
 
   if (!taskId) {
     return (
-      <EmptyView eyebrow="Trace" title="Select a task to view its trace." />
+      <EmptyView
+        eyebrow="Trace"
+        title="Select a task to view its trace."
+        description={guidance.messages.inspector.selectTaskForTrace}
+        locale={guidance.locale}
+      />
     );
   }
   if (isLoading) {
@@ -98,6 +103,6 @@ export function TraceTab() {
 function isTelemetryRow(row: SpanTreeRow): boolean {
   const name = row.span.name;
   if (/^Context \d+% used$/.test(name)) return true;
-  if (/^Notification:/.test(name)) return true;
+  if (name.startsWith("Notification:")) return true;
   return false;
 }

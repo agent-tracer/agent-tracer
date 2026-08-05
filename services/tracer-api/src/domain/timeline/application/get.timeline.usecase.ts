@@ -7,7 +7,7 @@ const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 500;
 
 /** 어느 끝에서부터 읽을지이며 이른 이벤트부터 읽으면 asc, 늦은 이벤트부터 읽으면 desc다. */
-export type TimelineOrder = "asc" | "desc";
+type TimelineOrder = "asc" | "desc";
 
 export interface GetTimelineInput {
     readonly userId: string;

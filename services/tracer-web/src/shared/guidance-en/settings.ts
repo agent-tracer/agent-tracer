@@ -56,4 +56,22 @@ export const EN_SETTINGS = {
   outputLanguage: createGuidanceMessage(
     "Sets the preferred language for supported AI-generated outputs, including title suggestions and cleanup suggestions. Individual jobs and prompts may override it; recipe generation does not currently use this global setting. Auto follows the source task when supported.",
   ),
+  ruleGenerationSection: createGuidanceMessage(
+    "Settings the daemon on your machine reads when it generates rules. This workspace owns them, independent of the agent service.",
+  ),
+  llmProviderScope: createGuidanceMessage(
+    "These values are used only by jobs that run on the agent service — title suggestions, recipe scans, and cleanup suggestions. Local rule generation reads the Rule generation settings below.",
+  ),
+  valueRequired: createGuidanceMessage("Enter a value before saving."),
+  settingSaved: (label: string) => createGuidanceMessage(`Saved ${label}.`),
+  settingCleared: (label: string) => createGuidanceMessage(`Cleared ${label}.`),
+  settingSaveFailed: (label: string) => createGuidanceMessage(`Could not save ${label}.`),
+  settingClearFailed: (label: string) => createGuidanceMessage(`Could not clear ${label}.`),
+  identityFailed: createGuidanceMessage("The identity could not be set."),
+  daemonUnreachable: createGuidanceMessage(
+    "The daemon is not reporting, so its control page is unreachable.",
+  ),
+  daemonControls: createGuidanceMessage(
+    "Flush the spool, requeue dead-letters, or restart the daemon.",
+  ),
 } as const;

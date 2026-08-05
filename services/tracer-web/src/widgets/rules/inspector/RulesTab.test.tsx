@@ -15,7 +15,6 @@ import { RulesTab } from "~tracer-web/widgets/rules/inspector/RulesTab.js";
 const testState = vi.hoisted(() => ({
   enqueue: vi.fn(),
   reEvaluate: vi.fn(),
-  refetchJob: vi.fn(),
   rules: [] as RuleRecord[],
   userInputs: [
     {
@@ -48,30 +47,14 @@ vi.mock("~tracer-web/entities/task/api/detail-queries.js", () => ({
   useTaskUserInputsQuery: () => ({ data: testState.userInputs }),
 }));
 
-vi.mock("~tracer-web/entities/setting/api/queries.js", () => ({
-  useAppSettingsQuery: () => ({
-    data: {
-      settings: [
-        {
-          key: "ruleGen.maxRulesPerTask",
-          maskedValue: "3",
-          updatedAt: "2026-07-13T00:00:00.000Z",
-        },
-      ],
-    },
+vi.mock("~tracer-web/entities/rule/api/rule-generation-queries.js", () => ({
+  useRuleGenerationSettingsQuery: () => ({
+    data: { maxRulesPerTask: 3, model: "claude-sonnet-5", outputLanguage: "auto", effort: "high" },
     isLoading: false,
   }),
-}));
-
-vi.mock("~tracer-web/entities/job/api/queries.js", () => ({
-  useJobStatus: () => ({
-    data: { job: null },
-    refetch: testState.refetchJob,
-  }),
-}));
-
-vi.mock("~tracer-web/entities/job/api/mutations.js", () => ({
-  useEnqueueJob: () => ({ mutateAsync: testState.enqueue }),
+  useRuleGenerationsQuery: () => ({ data: [] }),
+  useRequestRuleGenerationMutation: () => ({ mutateAsync: testState.enqueue, isPending: false }),
+  useCancelRuleGenerationMutation: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
 
 vi.mock("~tracer-web/entities/rule/api/mutations.js", () => ({
@@ -91,7 +74,6 @@ beforeEach(() => {
   testState.enqueue.mockReset();
   testState.enqueue.mockResolvedValue({});
   testState.reEvaluate.mockReset();
-  testState.refetchJob.mockReset();
   testState.rules = [
     makeRule("rule-a", "Run tests", "event-2"),
     makeRule("rule-b", "Run lint", "event-2"),
@@ -108,7 +90,7 @@ describe("RulesTab", () => {
     expect(screen.getByTestId("rule-rule-b").textContent).toBe("Run lint");
   });
 
-  it("최신 사용자 입력과 설정값을 규칙 생성 잡 입력으로 조합한다", async () => {
+  it("최신 사용자 입력과 설정값을 규칙 생성 요청 입력으로 조합한다", async () => {
     renderRulesTab();
 
     fireEvent.change(

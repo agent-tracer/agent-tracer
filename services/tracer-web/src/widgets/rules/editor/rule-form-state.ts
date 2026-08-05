@@ -86,7 +86,7 @@ export function buildRuleExpectation(form: RuleFormState): RuleExpect | null {
 }
 
 /** 여러 줄 입력을 중복 없는 비어 있지 않은 항목으로 변환한다. */
-export function splitRuleFormLines(value: string): readonly string[] {
+function splitRuleFormLines(value: string): readonly string[] {
   const seen = new Set<string>();
   for (const raw of value.split(/\r?\n/)) {
     const item = raw.trim();

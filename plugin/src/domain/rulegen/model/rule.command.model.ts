@@ -1,4 +1,5 @@
 import {KIND} from "@agent-tracer/kernel/ingest/event.kind.const.js";
+import {RULE_GENERATION_SETTINGS_DEFAULT} from "@agent-tracer/kernel";
 
 export const RULE_GENERATION_MAX_RULES = 2;
 const MAX_RULES_LIMIT = 20;
@@ -11,6 +12,12 @@ export function readRuleRequest(prompt: string): string {
     const trimmed = prompt.trimStart();
     if (!RULE_COMMAND.test(trimmed)) return "";
     return trimmed.replace(RULE_COMMAND, "").trim();
+}
+
+/** 근거 텍스트는 사용자가 친 원문이므로 명령 접두사를 벗겨 요구만 남긴다. */
+export function toRuleRequestText(anchorText: string): string {
+    const request = readRuleRequest(anchorText);
+    return request.length > 0 ? request : anchorText;
 }
 
 export function parseMaxRulesPerTask(raw: string | undefined): number {
@@ -34,14 +41,18 @@ export function isRuleGenerationTrigger(
 /** 사용자가 이 데몬의 규칙 생성기에 건 설정이며 서버에서 도는 에이전트는 이 값을 보지 않는다. */
 export interface RuleGenerationSettings {
     readonly maxRulesPerTask: number;
-    readonly model: string | null;
+    readonly model: string;
+    readonly outputLanguage: string;
+    readonly effort: string;
 }
 
 /** 갱신 주기 사이에 두 유스케이스가 함께 보는 규칙 생성 설정이며 창구가 없다는 확답도 함께 담는다. */
 export class RuleGenerationSettingCache {
     private settings: RuleGenerationSettings = {
-        maxRulesPerTask: RULE_GENERATION_MAX_RULES,
-        model: null,
+        maxRulesPerTask: RULE_GENERATION_SETTINGS_DEFAULT.maxRulesPerTask,
+        model: RULE_GENERATION_SETTINGS_DEFAULT.model,
+        outputLanguage: RULE_GENERATION_SETTINGS_DEFAULT.outputLanguage,
+        effort: RULE_GENERATION_SETTINGS_DEFAULT.effort,
     };
     private supported = true;
 
