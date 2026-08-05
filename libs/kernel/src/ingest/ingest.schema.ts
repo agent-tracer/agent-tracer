@@ -29,7 +29,7 @@ export const ingestEventBaseSchema = z.object({
     /** 트레이스 경계이자 턴 span의 앵커이며, 서버가 조립하는 turn_id와는 별개 식별자다. */
     turnId: z.string().min(1).optional(),
     occurredAt: z.string().datetime(),
-    payload: z.record(z.unknown()).default({}),
+    payload: z.record(z.string(), z.unknown()).default({}),
 });
 
 export const ingestBatchSchema = z.object({
@@ -43,7 +43,7 @@ const commonPayloadFields = {
     title: z.string().optional(),
     body: z.string().optional(),
     lane: z.enum(EVENT_LANES).optional(),
-    metadata: z.record(z.unknown()).optional(),
+    metadata: z.record(z.string(), z.unknown()).optional(),
 };
 
 const timelinePayloadSchema = z.object({
@@ -52,7 +52,7 @@ const timelinePayloadSchema = z.object({
     body: z.string().optional(),
     lane: z.enum(EVENT_LANES).optional(),
     filePaths: z.array(z.string()).optional(),
-    metadata: z.record(z.unknown()).optional(),
+    metadata: z.record(z.string(), z.unknown()).optional(),
     toolName: z.string().optional(),
     /** 실패한 셸 도구 호출이 payload 최상위에 싣는 실행 명령문이다. */
     command: z.string().optional(),
@@ -72,7 +72,7 @@ const telemetryPayloadSchema = z.object({
     durationMs: z.number().nonnegative().optional(),
     model: z.string().optional(),
     promptId: z.string().optional(),
-    metadata: z.record(z.unknown()).optional(),
+    metadata: z.record(z.string(), z.unknown()).optional(),
 }).strict();
 
 const sessionStartedPayloadSchema = z.object({
