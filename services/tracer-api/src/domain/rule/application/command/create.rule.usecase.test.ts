@@ -3,12 +3,13 @@ import { RULE_EXPECTATION_KIND } from "@agent-tracer/kernel";
 import { FixedClock } from "~tracer-api/domain/rule/port/__fakes__/fixed.clock.js";
 import { InMemoryRuleRepository } from "~tracer-api/domain/rule/port/__fakes__/in-memory.rule.repository.js";
 import { SequentialRuleIdGenerator } from "~tracer-api/domain/rule/port/__fakes__/sequential.rule.id.generator.js";
+import { RuleCreationService } from "~tracer-api/domain/rule/application/rule.creation.service.js";
 import { CreateRuleUseCase } from "./create.rule.usecase.js";
 
 const NOW = new Date("2026-01-01T00:00:00.000Z");
 
 function createUseCase(repo: InMemoryRuleRepository): CreateRuleUseCase {
-    return new CreateRuleUseCase(repo, new FixedClock(NOW), new SequentialRuleIdGenerator());
+    return new CreateRuleUseCase(new RuleCreationService(repo, new FixedClock(NOW), new SequentialRuleIdGenerator()));
 }
 
 describe("CreateRuleUseCase", () => {

@@ -3,6 +3,7 @@ import {afterEach, describe, expect, it, vi} from "vitest";
 import {PollRuleJobsUsecase} from "~plugin/domain/rulegen/application/poll.rule.jobs.usecase.js";
 import type {PendingRuleJob, RuleJobRunner} from "~plugin/domain/rulegen/model/rule.job.model.js";
 import type {RuleGenerationRequest} from "~plugin/domain/rulegen/model/rulegen.spec.model.js";
+import {RecordingRulegenLog} from "~plugin/domain/rulegen/port/__fakes__/recording.rulegen.log.js";
 import {InMemoryRuleJob} from "~plugin/domain/rulegen/port/__fakes__/in-memory.rule.job.js";
 import {ManualScheduler} from "~plugin/domain/rulegen/port/__fakes__/manual.scheduler.js";
 import {RuleGenerationSettingCache} from "~plugin/domain/rulegen/model/rule.command.model.js";
@@ -54,7 +55,7 @@ describe("PollRuleJobsUsecase", () => {
         const cache = settingCache();
         cache.markUnsupported();
 
-        await new PollRuleJobsUsecase(jobs, spy.runner, new ManualScheduler(), cache).execute();
+        await new PollRuleJobsUsecase(jobs, spy.runner, new ManualScheduler(), cache, new RecordingRulegenLog()).execute();
 
         expect(jobs.claimed).toEqual([]);
         expect(spy.requests).toEqual([]);
@@ -67,7 +68,7 @@ describe("PollRuleJobsUsecase", () => {
         ]));
         const spy = spyRunner();
 
-        await new PollRuleJobsUsecase(jobs, spy.runner, new ManualScheduler(), settingCache()).execute();
+        await new PollRuleJobsUsecase(jobs, spy.runner, new ManualScheduler(), settingCache(), new RecordingRulegenLog()).execute();
 
         expect(jobs.claimed).toEqual(["job-1"]);
         expect(spy.requests[0]).toEqual({
@@ -86,7 +87,7 @@ describe("PollRuleJobsUsecase", () => {
         const spy = spyRunner();
 
         await new PollRuleJobsUsecase(
-            jobs, spy.runner, new ManualScheduler(), settingCache("claude-opus-5"),
+            jobs, spy.runner, new ManualScheduler(), settingCache("claude-opus-5"), new RecordingRulegenLog(),
         ).execute();
 
         expect(spy.requests[0]?.model).toBe("claude-opus-5");
@@ -97,7 +98,7 @@ describe("PollRuleJobsUsecase", () => {
         const jobs = withWorkspace(new InMemoryRuleJob([jobWith({})]));
         const spy = spyRunner();
 
-        await new PollRuleJobsUsecase(jobs, spy.runner, new ManualScheduler(), settingCache()).execute();
+        await new PollRuleJobsUsecase(jobs, spy.runner, new ManualScheduler(), settingCache(), new RecordingRulegenLog()).execute();
 
         expect(spy.requests[0]).not.toHaveProperty("model");
     });
@@ -108,7 +109,7 @@ describe("PollRuleJobsUsecase", () => {
         jobs.anchors.set("evt-1", "린트를 돌려줘");
         const spy = spyRunner();
 
-        await new PollRuleJobsUsecase(jobs, spy.runner, new ManualScheduler(), settingCache()).execute();
+        await new PollRuleJobsUsecase(jobs, spy.runner, new ManualScheduler(), settingCache(), new RecordingRulegenLog()).execute();
 
         expect(spy.requests[0]?.anchorText).toBe("린트를 돌려줘");
     });
@@ -118,7 +119,7 @@ describe("PollRuleJobsUsecase", () => {
         const jobs = withWorkspace(new InMemoryRuleJob([jobWith({intent: "   "})]));
         const spy = spyRunner();
 
-        await new PollRuleJobsUsecase(jobs, spy.runner, new ManualScheduler(), settingCache()).execute();
+        await new PollRuleJobsUsecase(jobs, spy.runner, new ManualScheduler(), settingCache(), new RecordingRulegenLog()).execute();
 
         expect(spy.requests[0]).not.toHaveProperty("intent");
     });
@@ -131,7 +132,7 @@ describe("PollRuleJobsUsecase", () => {
         ]));
         const spy = spyRunner();
 
-        await new PollRuleJobsUsecase(jobs, spy.runner, new ManualScheduler(), settingCache()).execute();
+        await new PollRuleJobsUsecase(jobs, spy.runner, new ManualScheduler(), settingCache(), new RecordingRulegenLog()).execute();
 
         expect(jobs.claimed).toEqual([]);
         expect(jobs.failed).toEqual([
@@ -146,7 +147,7 @@ describe("PollRuleJobsUsecase", () => {
         const jobs = new InMemoryRuleJob([jobWith({})]);
         const spy = spyRunner();
 
-        await new PollRuleJobsUsecase(jobs, spy.runner, new ManualScheduler(), settingCache()).execute();
+        await new PollRuleJobsUsecase(jobs, spy.runner, new ManualScheduler(), settingCache(), new RecordingRulegenLog()).execute();
 
         expect(jobs.claimed).toEqual([]);
         expect(jobs.failed).toEqual([{jobId: "job-1", error: "task task-1 has no workspacePath"}]);
@@ -159,7 +160,7 @@ describe("PollRuleJobsUsecase", () => {
         jobs.claimable = false;
         const spy = spyRunner();
 
-        await new PollRuleJobsUsecase(jobs, spy.runner, new ManualScheduler(), settingCache()).execute();
+        await new PollRuleJobsUsecase(jobs, spy.runner, new ManualScheduler(), settingCache(), new RecordingRulegenLog()).execute();
 
         expect(spy.requests).toEqual([]);
     });
@@ -174,7 +175,7 @@ describe("PollRuleJobsUsecase", () => {
         jobs.anchors.set("evt-1", "기본 요구");
         const spy = spyRunner((signal) => new Promise((resolve) => signal.addEventListener("abort", () => resolve())));
 
-        await new PollRuleJobsUsecase(jobs, spy.runner, new ManualScheduler(), settingCache(), 1).execute();
+        await new PollRuleJobsUsecase(jobs, spy.runner, new ManualScheduler(), settingCache(), new RecordingRulegenLog(), 1).execute();
 
         expect(jobs.claimed).toEqual(["job-1"]);
     });
@@ -183,7 +184,7 @@ describe("PollRuleJobsUsecase", () => {
         vi.spyOn(process.stderr, "write").mockReturnValue(true);
         const jobs = withWorkspace(new InMemoryRuleJob([jobWith({})]));
         const spy = spyRunner((signal) => new Promise((resolve) => signal.addEventListener("abort", () => resolve())));
-        const usecase = new PollRuleJobsUsecase(jobs, spy.runner, new ManualScheduler(), settingCache());
+        const usecase = new PollRuleJobsUsecase(jobs, spy.runner, new ManualScheduler(), settingCache(), new RecordingRulegenLog());
 
         await usecase.execute();
         expect(usecase.hasRunning()).toBe(true);

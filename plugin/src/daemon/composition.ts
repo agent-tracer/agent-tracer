@@ -13,6 +13,7 @@ import {ClaudeRuleAgentRunnerAdapter} from "~plugin/domain/rulegen/adapter/claud
 import {HttpRuleEvidenceAdapter} from "~plugin/domain/rulegen/adapter/http.rule.evidence.adapter.js";
 import {HttpRuleJobAdapter} from "~plugin/domain/rulegen/adapter/http.rule.job.adapter.js";
 import {HttpRuleSettingAdapter} from "~plugin/domain/rulegen/adapter/http.rule.setting.adapter.js";
+import {StderrRulegenLogAdapter} from "~plugin/domain/rulegen/adapter/stderr.rulegen.log.adapter.js";
 import {EnqueueRuleJobUsecase} from "~plugin/domain/rulegen/application/enqueue.rule.job.usecase.js";
 import {PollRuleJobsUsecase} from "~plugin/domain/rulegen/application/poll.rule.jobs.usecase.js";
 import {RefreshRuleSettingUsecase} from "~plugin/domain/rulegen/application/refresh.rule.setting.usecase.js";
@@ -59,12 +60,14 @@ export function composeDaemonHooks(leaseOwner: string): DaemonHooks {
 
     const requestScan = new RequestRecipeScanUsecase(new HttpRecipeScanJobAdapter(baseUrl, headers, agentBackend));
 
-    const jobs = new HttpRuleJobAdapter(baseUrl, headers, leaseOwner, agentBackend);
+    const rulegenLog = new StderrRulegenLogAdapter();
+    const jobs = new HttpRuleJobAdapter(baseUrl, headers, leaseOwner, rulegenLog, agentBackend);
     const runRuleJob = new RunRuleJobUsecase(
         new HttpRuleEvidenceAdapter(baseUrl, headers),
         new AgentRuleGeneratorAdapter(new ClaudeRuleAgentRunnerAdapter()),
         jobs,
         clock,
+        rulegenLog,
     );
     const ruleSettingCache = new RuleGenerationSettingCache();
     const rulegen: RulegenHook = {
@@ -73,12 +76,13 @@ export function composeDaemonHooks(leaseOwner: string): DaemonHooks {
             (request, signal) => runRuleJob.execute(request, signal),
             scheduler,
             ruleSettingCache,
+            rulegenLog,
         ),
         refreshSetting: new RefreshRuleSettingUsecase(
             new HttpRuleSettingAdapter(baseUrl, headers, agentBackend),
             ruleSettingCache,
         ),
-        enqueueRuleJob: new EnqueueRuleJobUsecase(jobs, ruleSettingCache),
+        enqueueRuleJob: new EnqueueRuleJobUsecase(jobs, ruleSettingCache, rulegenLog),
     };
 
     return {

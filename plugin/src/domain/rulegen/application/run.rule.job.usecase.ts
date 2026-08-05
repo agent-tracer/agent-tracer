@@ -9,7 +9,6 @@ import {
     type RuleGenerationOutcome,
     type RuleGenerationReport,
 } from "~plugin/domain/rulegen/model/rule.job.model.js";
-import {ruleGenLogLine} from "~plugin/domain/rulegen/model/rulegen.log.model.js";
 import {buildRulegenRepairPrompt} from "~plugin/domain/rulegen/model/rulegen.prompt.model.js";
 import {RulegenProvenanceLedger} from "~plugin/domain/rulegen/model/rulegen.provenance.model.js";
 import {
@@ -26,6 +25,7 @@ import {
     type RulegenToolset,
 } from "~plugin/domain/rulegen/model/rulegen.tool.model.js";
 import type {ClockPort} from "~plugin/domain/rulegen/port/clock.port.js";
+import type {RulegenLogPort} from "~plugin/domain/rulegen/port/log.port.js";
 import {RuleEvidenceHttpError, type RuleEvidencePort} from "~plugin/domain/rulegen/port/rule.evidence.port.js";
 import type {RuleGeneratorPort} from "~plugin/domain/rulegen/port/rule.generator.port.js";
 import type {RuleJobPort} from "~plugin/domain/rulegen/port/rule.job.port.js";
@@ -44,6 +44,7 @@ export class RunRuleJobUsecase {
         private readonly generator: RuleGeneratorPort,
         private readonly jobs: RuleJobPort,
         private readonly clock: ClockPort,
+        private readonly log: RulegenLogPort,
     ) {}
 
     async execute(request: RuleGenerationRequest, cancelSignal?: AbortSignal): Promise<void> {
@@ -119,7 +120,7 @@ export class RunRuleJobUsecase {
 
         const screened = this.screen(outcome.candidates, ledger);
         for (const error of screened.errors) {
-            process.stderr.write(ruleGenLogLine(`dropped proposal after repair: ${error}`));
+            this.log.write(`dropped proposal after repair: ${error}`);
         }
         return {outcome, proposals: screened.proposals, skipped: screened.errors};
     }

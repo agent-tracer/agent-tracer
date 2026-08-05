@@ -1,4 +1,5 @@
 import {readFileSync} from "node:fs";
+import {RecordingRulegenLog} from "~plugin/domain/rulegen/port/__fakes__/recording.rulegen.log.js";
 import {afterEach, describe, expect, it, vi} from "vitest";
 import {HttpRuleJobAdapter} from "~plugin/domain/rulegen/adapter/http.rule.job.adapter.js";
 import type {
@@ -55,7 +56,7 @@ async function sentBody(send: (adapter: HttpRuleJobAdapter) => Promise<unknown>)
         sent.push(typeof init.body === "string" ? init.body : "");
         return new Response(JSON.stringify({}), {status: 200});
     });
-    await send(new HttpRuleJobAdapter("http://127.0.0.1:3847", {}, "owner-1"));
+    await send(new HttpRuleJobAdapter("http://127.0.0.1:3847", {}, "owner-1", new RecordingRulegenLog()));
     return JSON.parse(sent[0]!) as Record<string, unknown>;
 }
 

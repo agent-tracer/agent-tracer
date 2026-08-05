@@ -37,6 +37,7 @@ export * from "./rule/evaluation/rule.tool-alias.const.js";
 export * from "./rule/evaluation/rule.evaluation.context.js";
 export * from "./rule/evaluation/rule.expectation.condition.js";
 export * from "./rule/evaluation/rule.expectation.evaluate.js";
+export * from "./rule/generation/rule.generation.const.js";
 export * from "./rule/proposal/rule.proposal.js";
 export * from "./observability/semconv.const.js";
 export * from "./observability/otlp/identity.js";

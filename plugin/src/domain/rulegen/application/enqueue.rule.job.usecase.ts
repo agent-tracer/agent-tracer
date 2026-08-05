@@ -2,7 +2,7 @@ import {
     isRuleGenerationTrigger,
     type RuleGenerationSettingCache,
 } from "~plugin/domain/rulegen/model/rule.command.model.js";
-import {ruleGenLogLine} from "~plugin/domain/rulegen/model/rulegen.log.model.js";
+import type {RulegenLogPort} from "~plugin/domain/rulegen/port/log.port.js";
 import type {RuleJobPort} from "~plugin/domain/rulegen/port/rule.job.port.js";
 
 /** 규칙 생성을 부르는 사용자 입력마다 태스크당 하나의 잡을 넣는다. */
@@ -10,6 +10,7 @@ export class EnqueueRuleJobUsecase {
     constructor(
         private readonly jobs: RuleJobPort,
         private readonly cache: RuleGenerationSettingCache,
+        private readonly log: RulegenLogPort,
     ) {}
 
     async execute(kind: string, taskId: string, eventId: string, prompt: string): Promise<void> {
@@ -19,7 +20,7 @@ export class EnqueueRuleJobUsecase {
             if (await this.jobs.hasActiveJob(taskId)) return;
             await this.jobs.enqueue(taskId, eventId, this.cache.snapshot().maxRulesPerTask);
         } catch (error) {
-            process.stderr.write(ruleGenLogLine(`enqueue failed for task ${taskId}: ${String(error)}`));
+            this.log.write(`enqueue failed for task ${taskId}: ${String(error)}`);
         }
     }
 }
