@@ -14,7 +14,7 @@ const optionalBoolean = z.boolean().optional().catch(undefined);
 const filePathsField = z.array(z.unknown()).optional().catch(undefined)
     .transform((value) => (value ?? []).filter((entry): entry is string => typeof entry === "string"));
 
-const metadataField = z.record(z.unknown()).optional().catch(undefined)
+const metadataField = z.record(z.string(), z.unknown()).optional().catch(undefined)
     .transform((value) => value ?? {});
 
 /** 원장에 저장된 payload에서 알려진 필드만 관용적으로 읽는 계약이며, 인제스트 입력 계약과 별개로 진화한다. */
