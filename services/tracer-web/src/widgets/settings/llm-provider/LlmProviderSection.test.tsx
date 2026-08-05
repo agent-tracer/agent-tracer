@@ -1,7 +1,7 @@
 import { act, cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createUiStore, UiStoreProvider } from "~tracer-web/shared/store/index.js";
-import { RuleGenerationSection } from "~tracer-web/widgets/settings/rule-generation/RuleGenerationSection.js";
+import { LlmProviderSection } from "~tracer-web/widgets/settings/llm-provider/LlmProviderSection.js";
 
 const settingsQuery: { data?: unknown; isLoading: boolean; error?: unknown } = {
   data: { settings: [] },
@@ -37,7 +37,7 @@ describe("규칙 생성 설정", () => {
     const store = createUiStore({ persisted: false });
     const { container } = render(
       <UiStoreProvider store={store}>
-        <RuleGenerationSection />
+        <LlmProviderSection />
       </UiStoreProvider>,
     );
 
@@ -60,7 +60,7 @@ describe("규칙 생성 설정", () => {
     const store = createUiStore({ persisted: false });
     render(
       <UiStoreProvider store={store}>
-        <RuleGenerationSection />
+        <LlmProviderSection />
       </UiStoreProvider>,
     );
 
@@ -75,7 +75,7 @@ describe("규칙 생성 설정", () => {
 
     const { container } = render(
       <UiStoreProvider store={store}>
-        <RuleGenerationSection />
+        <LlmProviderSection />
       </UiStoreProvider>,
     );
 

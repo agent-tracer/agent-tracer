@@ -14,9 +14,9 @@ export const DEFAULT_RULEGEN_BUDGET_USD = 2;
 export const RULEGEN_MAX_TURNS = 15;
 export const RULEGEN_MAX_OUTPUT_TOKENS = 8_000;
 
-/** 잡 하나를 규칙 생성 실행에 넘기는 입력이다. */
+/** 요청 하나를 규칙 생성 실행에 넘기는 입력이다. */
 export interface RuleGenerationRequest {
-    readonly jobId: string;
+    readonly requestId: string;
     readonly taskId: string;
     readonly workspacePath: string;
     readonly maxRules?: number;
@@ -31,7 +31,7 @@ export interface RuleGenerationRequest {
 
 /** 실행기가 그대로 집행하는 규칙 생성 명세이며 제품 규칙은 전부 여기에 담긴다. */
 export interface RuleGenerationSpec {
-    readonly jobId: string;
+    readonly requestId: string;
     readonly taskId: string;
     readonly workspacePath: string;
     readonly model: string;
@@ -53,7 +53,7 @@ export function buildRuleGenerationSpec(request: RuleGenerationRequest): RuleGen
     const anchorDirective = buildAnchorDirective(request.anchorText);
     const intentDirective = buildIntentDirective(request.intent);
     return {
-        jobId: request.jobId,
+        requestId: request.requestId,
         taskId: request.taskId,
         workspacePath: request.workspacePath,
         model: request.model,

@@ -11,19 +11,17 @@ import {
   Card,
   Field,
   GuidanceText,
-  Input,
   Select,
 } from "~tracer-web/shared/ui/index.js";
 import { cn } from "~tracer-web/shared/ui/lib/cn.js";
-import { ModelSettingField, SecretSettingField } from "~tracer-web/widgets/settings/rule-generation/ProviderSettingFields.js";
+import { ModelSettingField, SecretSettingField } from "~tracer-web/widgets/settings/llm-provider/ProviderSettingFields.js";
 import {
   LANGUAGE_OPTIONS,
-  RULE_GENERATION_SETTING_KEYS as SETTING_KEYS,
-} from "~tracer-web/widgets/settings/rule-generation/rule-generation.catalog.js";
+  LLM_PROVIDER_SETTING_KEYS as SETTING_KEYS,
+} from "~tracer-web/widgets/settings/llm-provider/llm-provider.catalog.js";
 
-/** 규칙 자동생성 설정: Anthropic API 키 + 모델 + 태스크당 최대 규칙 수 + 출력 언어. */
-/** 규칙 생성 공급자와 출력 정책을 설정한다. */
-export function RuleGenerationSection() {
+/** 에이전트 서비스에서 도는 잡이 쓰는 LLM 공급자 설정이다. */
+export function LlmProviderSection() {
   const guidance = useGuidance();
   const { data, isLoading, error } = useAppSettingsQuery();
   const modelOptions = useModelOptionsQuery();
@@ -37,13 +35,11 @@ export function RuleGenerationSection() {
 
   const [apiKeyDraft, setApiKeyDraft] = useState("");
   const [modelDraft, setModelDraft] = useState("");
-  const [maxRulesDraft, setMaxRulesDraft] = useState("");
   const [languageDraft, setLanguageDraft] = useState("");
   const [feedback, setFeedback] = useState<string | null>(null);
 
   const apiKey = settingsMap.get(SETTING_KEYS.apiKey);
   const model = settingsMap.get(SETTING_KEYS.model);
-  const maxRules = settingsMap.get(SETTING_KEYS.maxRulesPerTask);
   const language = settingsMap.get(SETTING_KEYS.outputLanguage);
   const currentLanguage = language?.masked ?? "auto";
   async function save(key: string, value: string, draftSetter: (v: string) => void) {
@@ -74,13 +70,17 @@ export function RuleGenerationSection() {
 
   return (
     <Card surface="canvas" className="py-5 px-6">
-      <h2 className="text-[15px] font-semibold mb-1">Rule generation</h2>
+      <h2 className="text-[15px] font-semibold mb-1">LLM provider</h2>
       <GuidanceText
         as="p"
         className="text-ink-muted text-[12.5px] mb-5"
         locale={guidance.locale}
         message={guidance.messages.settings.ruleGenerationIntroduction}
       />
+      <p className="text-ink-tertiary text-[12px] mb-4">
+        이 값은 에이전트 서비스가 도는 잡(제목 제안·레시피 스캔·정리 제안)에만 쓰입니다. 로컬 규칙
+        생성은 아래 Rule generation 설정을 읽습니다.
+      </p>
 
       <SecretSettingField
         label="Anthropic API key"
@@ -108,40 +108,6 @@ export function RuleGenerationSection() {
         onSave={() => void save(SETTING_KEYS.model, modelDraft, setModelDraft)}
         onClear={() => void remove(SETTING_KEYS.model)}
       />
-
-      <Field
-        label="Max rules per task"
-        help={guidance.messages.settings.maxRules}
-        helpLocale={guidance.locale}
-      >
-        <div className="flex items-center gap-2">
-          <Input
-            type="number"
-            min={1}
-            max={20}
-            placeholder={maxRules?.masked ?? "5"}
-            value={maxRulesDraft}
-            onChange={(e) => setMaxRulesDraft(e.target.value)}
-            className="w-20"
-          />
-          <Button
-            variant="ghost"
-            disabled={!maxRulesDraft.trim() || putMutation.isPending}
-            onClick={() => void save(SETTING_KEYS.maxRulesPerTask, maxRulesDraft, setMaxRulesDraft)}
-          >
-            Save
-          </Button>
-          {maxRules && (
-            <Button
-              variant="ghost"
-              onClick={() => void remove(SETTING_KEYS.maxRulesPerTask)}
-              className="text-xs border-0 p-0 underline"
-            >
-              Clear
-            </Button>
-          )}
-        </div>
-      </Field>
 
       <Field
         label="Output language"

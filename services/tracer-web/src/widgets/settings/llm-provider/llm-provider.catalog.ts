@@ -1,9 +1,8 @@
 import { APP_SETTING_KEYS } from "@agent-tracer/kernel";
 
-export const RULE_GENERATION_SETTING_KEYS = {
+export const LLM_PROVIDER_SETTING_KEYS = {
   apiKey: APP_SETTING_KEYS.anthropicApiKey,
   model: APP_SETTING_KEYS.anthropicModel,
-  maxRulesPerTask: APP_SETTING_KEYS.ruleGenMaxRulesPerTask,
   outputLanguage: APP_SETTING_KEYS.claudeOutputLanguage,
 } as const;
 

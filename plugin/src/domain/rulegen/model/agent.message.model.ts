@@ -1,5 +1,5 @@
 import type {AiJobStepToolCall} from "@agent-tracer/kernel/job/job.step.const.js";
-import type {RuleGenerationUsage} from "~plugin/domain/rulegen/model/rule.job.model.js";
+import type {RuleGenerationUsage} from "~plugin/domain/rulegen/model/rule.generation.model.js";
 
 // 실행기가 성공을 알리는 종료 부호이며 나머지 부호는 전부 실패다.
 export const RULE_AGENT_RESULT_SUCCESS = "success";

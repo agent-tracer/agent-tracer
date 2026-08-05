@@ -3,7 +3,7 @@ import * as path from "node:path";
 import type {SDKMessage} from "@anthropic-ai/claude-agent-sdk";
 import type {AiJobStepToolCall} from "@agent-tracer/kernel/job/job.step.const.js";
 import {RULE_AGENT_RESULT_SUCCESS, type RuleAgentMessage} from "~plugin/domain/rulegen/model/agent.message.model.js";
-import type {RuleGenerationUsage} from "~plugin/domain/rulegen/model/rule.job.model.js";
+import type {RuleGenerationUsage} from "~plugin/domain/rulegen/model/rule.generation.model.js";
 import {
     rulegenAllowedTools,
     RULEGEN_MCP_SERVER,
