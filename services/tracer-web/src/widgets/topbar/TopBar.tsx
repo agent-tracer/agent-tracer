@@ -24,15 +24,15 @@ export function TopBar({ wsConnected, viewport = "wide" }: TopBarProps) {
     <div className="flex h-full items-center gap-2 px-3 sm:gap-3.5 sm:px-4 bg-canvas">
       {/* 사이드바 토글은 가장 좁은 화면 티어에서만 의미가 있다. */}
       {viewport === "mobile" && <SidebarToggle />}
-      <BrandMark />
+      <BrandMark viewport={viewport} />
       <WsLivePill connected={wsConnected} />
       {!isCompact && (
         <div className="flex-1 min-w-0">
           <Crumbs />
         </div>
       )}
-      <div className="ml-auto flex items-center gap-1">
-        <TopActions />
+      <div className="ml-auto flex items-center gap-1 shrink-0">
+        <TopActions compact={isCompact} />
         {isCompact && <InspectorToggle />}
       </div>
     </div>
