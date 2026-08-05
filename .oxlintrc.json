@@ -1,0 +1,21 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "ignorePatterns": [
+    "**/dist/**",
+    "**/build/**",
+    "**/coverage/**",
+    "**/*.d.ts",
+    "contract/**"
+  ],
+  "categories": {
+    "correctness": "error"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.{ts,tsx,mjs}", "**/__fakes__/**/*.{ts,tsx}"],
+      "rules": {
+        "no-unsafe-optional-chaining": "off"
+      }
+    }
+  ]
+}

@@ -98,6 +98,6 @@ export function TraceTab() {
 function isTelemetryRow(row: SpanTreeRow): boolean {
   const name = row.span.name;
   if (/^Context \d+% used$/.test(name)) return true;
-  if (/^Notification:/.test(name)) return true;
+  if (name.startsWith("Notification:")) return true;
   return false;
 }

@@ -67,7 +67,7 @@ export class InMemorySearchIndex implements SearchIndexWriterPort, SearchIndexAd
     updateDocument(index: string, id: string, document: Record<string, unknown>): Promise<void> {
         if (this.updateFails) return Promise.reject(new Error("opensearch down"));
         const store = this.ensureStore(index);
-        store.set(id, { ...store.get(id) ?? {}, ...document });
+        store.set(id, { ...store.get(id), ...document });
         return Promise.resolve();
     }
 
