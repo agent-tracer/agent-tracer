@@ -18,8 +18,8 @@ import {renderControlPage} from "~plugin/daemon/control/control.page.js";
 const MAX_BODY_BYTES = 16 * 1024;
 const ACTION_DELAY_MS = 50;
 
-export const CONTROL_PAGE_PATH = "/";
-export const CONTROL_API_PREFIX = "/api/v1/control/";
+const CONTROL_PAGE_PATH = "/";
+const CONTROL_API_PREFIX = "/api/v1/control/";
 
 export type {ControlActions} from "~plugin/daemon/control/control.actions.js";
 

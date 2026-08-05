@@ -5,14 +5,7 @@ export type {Fetched};
 
 const DEFAULT_TIMEOUT_MS = 5000;
 
-/** 모니터 API 호출에 공통으로 필요한 연결 정보다. */
-export interface MonitorHttpRequest {
-    readonly baseUrl: string;
-    readonly headers: Record<string, string>;
-    readonly signal?: AbortSignal;
-}
-
-export function jsonHeaders(headers: Record<string, string>): Record<string, string> {
+function jsonHeaders(headers: Record<string, string>): Record<string, string> {
     return {...headers, "Content-Type": "application/json"};
 }
 

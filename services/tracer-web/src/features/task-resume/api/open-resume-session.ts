@@ -4,7 +4,7 @@ import { resolveDaemonBaseUrl } from "~tracer-web/shared/config/daemon-base-url.
 
 const RESUME_TOKEN_HEADER = "x-agent-tracer-resume-token";
 
-export type ResumeOpenStatus = "opened" | "copied";
+type ResumeOpenStatus = "opened" | "copied";
 
 export interface ResumeOpenResult {
   readonly status: ResumeOpenStatus;

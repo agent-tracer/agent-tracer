@@ -13,7 +13,7 @@ import {
 } from "~tracer-api/domain/rule/port/rule.generation.repository.port.js";
 import { RuleCreationService } from "~tracer-api/domain/rule/application/rule.creation.service.js";
 
-export interface SettleRuleGenerationInput {
+interface SettleRuleGenerationInput {
     readonly userId: string;
     readonly id: string;
     readonly owner: string;

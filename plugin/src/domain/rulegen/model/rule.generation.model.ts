@@ -108,11 +108,11 @@ export function ruleGenerationFailure(error: string): RuleGenerationFailure {
 /** 폴러가 클레임한 요청 하나를 끝까지 처리하는 실행 경로다. */
 export type RuleGenerationRunner = (request: RuleGenerationRequest, signal: AbortSignal) => Promise<void>;
 
-export function readMaxRules(job: PendingRuleGeneration): number | undefined {
+function readMaxRules(job: PendingRuleGeneration): number | undefined {
     return typeof job.maxRules === "number" ? job.maxRules : undefined;
 }
 
-export function readIntent(job: PendingRuleGeneration): string | undefined {
+function readIntent(job: PendingRuleGeneration): string | undefined {
     return normalizeRuleGenerationIntent(job.intent);
 }
 

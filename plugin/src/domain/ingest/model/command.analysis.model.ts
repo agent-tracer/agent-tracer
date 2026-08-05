@@ -8,7 +8,7 @@ export interface CommandTarget {
     readonly value: string;
 }
 
-export interface CommandSelectors {
+interface CommandSelectors {
     readonly lineRange?: string;
     readonly pattern?: string;
 }

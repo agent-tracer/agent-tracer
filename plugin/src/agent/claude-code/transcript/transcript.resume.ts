@@ -3,7 +3,7 @@ import * as readline from "node:readline";
 import {parseJsonLine} from "~plugin/agent/claude-code/transcript/transcript.reader.js";
 
 /** 훅 한 번이 재개 판정을 위해 앞에서부터 읽는 최대 줄 수다. */
-export const RESUME_SCAN_MAX_LINES = 20_000;
+const RESUME_SCAN_MAX_LINES = 20_000;
 
 /**
  * 트랜스크립트 JSONL을 앞에서부터 훑어 현재 세션 ID와 다른 session_id 중

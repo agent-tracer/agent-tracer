@@ -85,7 +85,7 @@ export function toToolArgs(input: unknown): Record<string, unknown> {
     return isRecord(input) ? input : {};
 }
 
-export function toolResultText(content: unknown): string {
+function toolResultText(content: unknown): string {
     if (typeof content === "string") return content;
     if (!Array.isArray(content)) return "";
     let text = "";

@@ -5,7 +5,7 @@ export type SendOutcome = "ok" | "dead" | "server-error" | "retry" | "unreachabl
 export type IngestStatusClass = "ok" | "dead" | "retry" | "server-error";
 
 /** 재시도해도 결과가 같아 dead-letter로 보내는 응답 상태코드다. */
-export const DEAD_LETTER_STATUSES: ReadonlySet<number> = new Set([400, 413, 422]);
+const DEAD_LETTER_STATUSES: ReadonlySet<number> = new Set([400, 413, 422]);
 
 export const MAX_INGEST_BACKOFF_MS = 60_000;
 

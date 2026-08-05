@@ -31,7 +31,7 @@ import {
     SEARCH_EVENT_CONSUMER,
 } from "~tracer-api/support/projector.tokens.js";
 
-export interface OtlpExportDeps {
+interface OtlpExportDeps {
     readonly consumer: KafkaConsumer;
     readonly endpoint: string;
 }

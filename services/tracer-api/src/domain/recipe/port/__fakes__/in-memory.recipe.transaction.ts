@@ -8,7 +8,7 @@ import { InMemoryRecipeRepository } from "./in-memory.recipe.repository.js";
 import { cloneRow } from "./clone-row.js";
 
 /** 검색 아웃박스 적재의 인메모리 대역이다. */
-export class InMemoryRecipeSearchOutbox implements RecipeSearchOutboxWriterPort {
+class InMemoryRecipeSearchOutbox implements RecipeSearchOutboxWriterPort {
     private rows = new Map<string, SearchOutboxEntity>();
 
     all(): readonly SearchOutboxEntity[] {

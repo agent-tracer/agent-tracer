@@ -1,5 +1,10 @@
 // dependency-cruiser가 의존 "방향"을 보는 자리라면 knip은 아무도 부르지 않는 파일·수출·의존성을 본다.
 // 둘은 겹치지 않으므로 lint를 대체하지 않고 `npm run lint:unused`로 따로 돈다.
+//
+// 보고를 지우기 전에 local-main을 반드시 대조한다. 브로커 없는 sqlite 프로파일이 그 브랜치에만
+// 있어서, 이 판에서 아무도 부르지 않는 이름 상당수를 거기서는 부른다. 대조 없이 지우면 그 브랜치가
+// 조용히 깨진다. `git grep -w <이름> local-main -- '*.ts' '*.tsx'` 로 확인한다.
+// 어휘 배열은 파생 타입의 단일 출처라 이 판에서 값으로 안 읽혀도 공개로 남긴다.
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {

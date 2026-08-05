@@ -10,7 +10,7 @@ import { InMemoryCleanupSuggestionRepository } from "./in-memory.cleanup.suggest
 import { cloneRow } from "./clone-row.js";
 
 /** 정리 제안 수락이 읽는 태스크의 인메모리 대역이다. */
-export class InMemoryCleanupTaskReader implements CleanupTaskReaderPort {
+class InMemoryCleanupTaskReader implements CleanupTaskReaderPort {
     private readonly rows = new Map<string, TaskEntity>();
 
     seed(...tasks: readonly TaskEntity[]): void {
@@ -32,7 +32,7 @@ export class InMemoryCleanupTaskReader implements CleanupTaskReaderPort {
 }
 
 /** 태스크 사용자 상태 쓰기의 인메모리 대역이며, 저장 실패를 주입할 수 있다. */
-export class InMemoryCleanupTaskUserStateWriter implements CleanupTaskUserStateWriterPort {
+class InMemoryCleanupTaskUserStateWriter implements CleanupTaskUserStateWriterPort {
     private rows = new Map<string, TaskUserStateEntity>();
     saveFailure: Error | null = null;
 
@@ -65,7 +65,7 @@ export class InMemoryCleanupTaskUserStateWriter implements CleanupTaskUserStateW
 }
 
 /** 검색 아웃박스 적재의 인메모리 대역이다. */
-export class InMemoryCleanupSearchOutbox implements CleanupSearchOutboxWriterPort {
+class InMemoryCleanupSearchOutbox implements CleanupSearchOutboxWriterPort {
     private rows = new Map<string, SearchOutboxEntity>();
 
     all(): readonly SearchOutboxEntity[] {

@@ -20,14 +20,14 @@ import {describeRuleExpectation} from "~plugin/domain/guardrail/model/rules.cont
 export type PipelineStatus = "ok" | "idle" | "retrying" | "rejecting" | "unreachable";
 
 /** 서버에서 당겨와 캐싱 중인 값의 신선도다. */
-export interface CacheFreshness {
+interface CacheFreshness {
     readonly lastRefreshAt: number | null;
     readonly lastFailureAt: number | null;
     readonly intervalMs: number;
     readonly entries: number;
 }
 
-export interface DaemonCaches {
+interface DaemonCaches {
     readonly rules: CacheFreshness;
 }
 
@@ -51,12 +51,12 @@ export interface DaemonRuntimeState extends SpoolSenderState {
 }
 
 /** 폼 하나가 신원 2개와 튜닝 8개를 같이 다루므로 스냅샷도 둘을 한 뷰로 합친다. */
-export interface DaemonSettingsView extends DaemonSettings {
+interface DaemonSettingsView extends DaemonSettings {
     readonly userId: string;
     readonly baseUrl: string;
 }
 
-export interface SpoolView {
+interface SpoolView {
     readonly segments: number;
     readonly backlogBytes: number;
     readonly capBytes: number;
@@ -66,7 +66,7 @@ export interface SpoolView {
 }
 
 /** 캐시된 규칙과 그 발동 통계를 합친 제어 화면 행이다. */
-export interface RuleView {
+interface RuleView {
     readonly ruleName: string;
     readonly taskId: string | null;
     readonly severity: string;
@@ -133,7 +133,7 @@ function settingsDiffer(running: DaemonSettingsView, saved: DaemonSettingsView):
     return SETTINGS_FIELDS.some((field) => running[field] !== saved[field]);
 }
 
-export function resolvePipelineStatus(state: DaemonRuntimeState, pendingSegments: number): PipelineStatus {
+function resolvePipelineStatus(state: DaemonRuntimeState, pendingSegments: number): PipelineStatus {
     if (state.retryStatusSince !== null) return "retrying";
     if (state.lastSendOutcome === "unreachable") return "unreachable";
     if (state.lastSendOutcome === "dead") return "rejecting";

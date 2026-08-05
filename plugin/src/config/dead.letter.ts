@@ -4,7 +4,7 @@ import {appendSpoolLines} from "~plugin/config/spool.js";
 import {isRecord} from "~plugin/support/json.js";
 
 /** 서버가 영구 거부해 스풀에서 빠진 이벤트 한 줄이다. */
-export interface DeadLetterEntry {
+interface DeadLetterEntry {
     readonly id: string;
     readonly kind: string;
     readonly taskId: string;

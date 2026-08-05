@@ -24,10 +24,6 @@ interface RequestListEnvelope {
     readonly data?: {readonly items?: readonly PendingRuleGeneration[]};
 }
 
-interface RequestEnvelope {
-    readonly data?: {readonly request?: {readonly status?: string} | null};
-}
-
 interface TaskEnvelope {
     readonly data?: {readonly task: {readonly workspacePath?: string} | null};
 }
@@ -182,5 +178,3 @@ export class TracerRuleGenerationAdapter implements RuleGenerationPort {
 function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
-
-export type {RequestEnvelope};

@@ -1,6 +1,6 @@
 import {isRecord} from "~plugin/support/json.js";
 
-export const HOOK_STDIN_MAX_BYTES = 5 * 1024 * 1024;
+const HOOK_STDIN_MAX_BYTES = 5 * 1024 * 1024;
 
 /** 상한까지 읽은 stdin을 JSON 객체로 파싱하고 비었으면 빈 객체를 낸다. */
 export async function readStdinJson(): Promise<Record<string, unknown>> {

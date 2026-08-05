@@ -2,7 +2,7 @@ import {RULE_EXPECTED_ACTIONS, RULE_SEVERITIES} from "@agent-tracer/kernel/rule/
 import {buildSeverityGuidance} from "~plugin/domain/rulegen/model/severity.clause.model.js";
 import {RULEGEN_TOOL} from "~plugin/domain/rulegen/model/rulegen.tool.model.js";
 
-export const RULE_EXPECTATION_FIELD_GUIDE = `  - expect   : { kind, ... } -- kind selects exactly one shape:
+const RULE_EXPECTATION_FIELD_GUIDE = `  - expect   : { kind, ... } -- kind selects exactly one shape:
                kind="command"  : commandMatches (required, literal commands the agent must run)
                kind="pattern"  : pattern (required regex), tool (optional, narrows which call kind to check)
                kind="action"   : tool (required, one of exactly: ${RULE_EXPECTED_ACTIONS.join(", ")})
