@@ -21,7 +21,7 @@ export interface RecipeProjectionRepositories {
 }
 
 /** 실행 이벤트 라우팅에 필요한 실행·레시피 저장소 경계다. */
-export type RunEventProjectionRepositories = RunProjectionRepositories & RecipeProjectionRepositories;
+type RunEventProjectionRepositories = RunProjectionRepositories & RecipeProjectionRepositories;
 
 /** 타임라인 이벤트와 턴 조립을 투영하는 저장소 경계다. */
 export interface TimelineProjectionRepositories {

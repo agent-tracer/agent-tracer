@@ -1,4 +1,4 @@
-export interface AnchorBounds {
+interface AnchorBounds {
   readonly top: number;
   readonly right: number;
   readonly bottom: number;

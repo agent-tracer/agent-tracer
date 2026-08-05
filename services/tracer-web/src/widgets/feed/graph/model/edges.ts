@@ -1,7 +1,7 @@
 import type { TimelineEventRecord } from "~tracer-web/entities/task/model/timeline/event.js";
 import type { TaskTurnSummary } from "~tracer-web/entities/task/model/task-query.js";
 
-export type EdgeKind = "causal" | "explicit";
+type EdgeKind = "causal" | "explicit";
 
 export interface FeedEdge {
   readonly kind: EdgeKind;

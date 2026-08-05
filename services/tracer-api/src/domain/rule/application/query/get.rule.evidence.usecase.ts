@@ -17,7 +17,7 @@ import {
 
 export type RuleMatchedBy = "action" | "commandMatch" | "pattern" | "trigger-phrase";
 
-export interface RuleEvidenceEventDto {
+interface RuleEvidenceEventDto {
     readonly eventId: string;
     readonly kind: string;
     readonly title: string;

@@ -15,7 +15,6 @@ export const SESSION_END_REASON = {
     clear: "clear",
     promptInputExit: "prompt_input_exit",
 } as const;
-export type SessionEndReason = (typeof SESSION_END_REASON)[keyof typeof SESSION_END_REASON];
 
 /** Claude Code가 SessionStart로 싣는 계기 값이며 clear는 태스크 경계를 여닫는다. */
 export const SESSION_START_SOURCE = {
@@ -24,7 +23,6 @@ export const SESSION_START_SOURCE = {
     clear: "clear",
     compact: "compact",
 } as const;
-export type SessionStartSource = (typeof SESSION_START_SOURCE)[keyof typeof SESSION_START_SOURCE];
 
 export interface SessionStartPayload extends ClaudeSessionContext {
     readonly source: string;

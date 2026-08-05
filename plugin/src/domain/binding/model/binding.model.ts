@@ -24,14 +24,6 @@ export interface BindingRecord {
 
 export type BindingStore = Record<string, BindingRecord>;
 
-/** 턴 경계를 여닫는 훅이 공유 바인딩에 남기는 변경분이다. */
-export interface TurnPatch {
-    readonly currentTurnId?: string;
-    readonly turnStartedAt?: string;
-    readonly previousTurnId?: string;
-    readonly turnPrompt?: string;
-}
-
 /** 단명 훅 사이에서 공유되는 현재 턴 상태다. */
 export interface TurnState {
     readonly turnId: string;

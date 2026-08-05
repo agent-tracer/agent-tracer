@@ -2,7 +2,6 @@ import type {
     RequiredEventMetadata,
 } from "~plugin/domain/ingest/model/tool.metadata.model.js";
 import type {
-    TaskCompletionReason,
     UserMessageCaptureMode,
     UserMessagePhase,
 } from "~plugin/domain/ingest/model/event.model.js";
@@ -107,14 +106,6 @@ export type ActionLoggedMetadata = RequiredEventMetadata & {
     readonly parentTaskId?: string;
     readonly parentSessionId?: string;
     readonly childTaskId?: string;
-};
-
-export type SessionEndedPayload = {
-    readonly runtimeSource: string;
-    readonly runtimeSessionId: string;
-    readonly summary: string;
-    readonly completionReason: TaskCompletionReason;
-    readonly completeTask?: boolean;
 };
 
 export type ContextSnapshotMetadata = RequiredEventMetadata & {

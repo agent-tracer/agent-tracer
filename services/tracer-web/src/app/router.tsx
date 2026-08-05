@@ -14,7 +14,7 @@ import type { RouteObject } from "react-router-dom";
  * 라우트: `/`는 `/tasks`로, `/tasks`는 사이드바만, `/tasks/:taskId`는 운영자 뷰, 나머지는
  * 워크스페이스 화면이며 매칭되지 않으면 404이고, `remoteRoutes`는 연합 리모트가 얹는 자리다.
  */
-export function buildRouteChildren(remoteRoutes: readonly RouteObject[]): RouteObject[] {
+function buildRouteChildren(remoteRoutes: readonly RouteObject[]): RouteObject[] {
   return [
     { index: true, element: <Navigate to="/tasks" replace /> },
     { path: "tasks", element: <TasksRoute /> },

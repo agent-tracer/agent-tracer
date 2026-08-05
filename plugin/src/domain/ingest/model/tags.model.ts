@@ -45,7 +45,7 @@ function readTagValue(metadata: Record<string, unknown>, key: string): string | 
 }
 
 /** 메타데이터에서 이벤트 검색에 쓰는 `key:value` 태그를 만든다. */
-export function buildTagsFromMetadata(metadata: Record<string, unknown>): readonly string[] {
+function buildTagsFromMetadata(metadata: Record<string, unknown>): readonly string[] {
     const tags = new Set<string>();
     for (const [key, prefix] of TAG_KEYS) {
         const value = readTagValue(metadata, key);

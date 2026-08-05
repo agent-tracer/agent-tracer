@@ -1,7 +1,7 @@
 /** 수집기가 읽는 환경변수를 타입 지정 설정으로 해석한다. */
 import {resolveMonitorIdentity} from "~plugin/config/monitor.identity.js";
 
-export type MonitorTaskOrigin = "user" | "server-sdk";
+type MonitorTaskOrigin = "user" | "server-sdk";
 
 export interface MonitorTransportConfig {
     readonly baseUrl: string;

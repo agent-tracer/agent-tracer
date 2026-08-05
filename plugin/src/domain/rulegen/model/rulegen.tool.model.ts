@@ -109,7 +109,7 @@ export interface RulegenToolInput {
 }
 
 /** 도구 하나가 모델에게 돌려주는 텍스트를 만든다. */
-export type RulegenToolHandler = (input: RulegenToolInput) => Promise<string>;
+type RulegenToolHandler = (input: RulegenToolInput) => Promise<string>;
 
 /** 실행기에 넘기는 도구 구현 묶음이다. */
 export type RulegenToolset = Readonly<Record<RulegenToolName, RulegenToolHandler>>;

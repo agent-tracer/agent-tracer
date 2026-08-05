@@ -2,7 +2,7 @@ import type {IngestEvent} from "~plugin/domain/ingest/model/ingest.event.model.j
 import {isRecord} from "~plugin/support/json.js";
 
 /** 태스크 하나가 링에 붙잡아 두는 이벤트 수의 상한이다. */
-export const MAX_RECENT_PER_TASK = 200;
+const MAX_RECENT_PER_TASK = 200;
 
 /** 힌트와 가드레일이 근거로 삼는 최근 이벤트다. */
 export interface RecentEvent {
@@ -18,7 +18,7 @@ export interface RecentEvent {
     readonly metadata: Record<string, unknown>;
 }
 
-export interface RecentTaskStats {
+interface RecentTaskStats {
     readonly taskId: string;
     readonly events: number;
     readonly lastOccurredAt?: string;
@@ -33,7 +33,7 @@ export interface RecentEventStats {
 }
 
 /** 원장으로 나가는 이벤트를 힌트와 가드레일이 읽는 형태로 좁힌다. */
-export function toRecentEvent(event: IngestEvent): RecentEvent {
+function toRecentEvent(event: IngestEvent): RecentEvent {
     const payload = isRecord(event.payload) ? event.payload : {};
     const metadataValue = payload["metadata"];
     return {

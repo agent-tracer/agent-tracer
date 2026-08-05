@@ -8,7 +8,7 @@ import type { TaskId } from "~tracer-web/shared/identity.js";
 import { deleteRequest, getJson, patchPut, postJson } from "~tracer-web/shared/api/client/json-methods.js";
 
 /** 실행이 잰 것이며 실패해도 그때까지 청구된 값을 그대로 싣는다. */
-export interface RuleGenerationObservation {
+interface RuleGenerationObservation {
   readonly model: string | null;
   readonly costUsd: number | null;
   readonly numTurns: number | null;

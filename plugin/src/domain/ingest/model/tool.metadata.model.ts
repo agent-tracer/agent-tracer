@@ -30,7 +30,7 @@ export interface RequiredEventMetadata {
 }
 
 /** PreToolUse와 상관시켜 구한 도구 호출 소요 시간이며, 시작 기록이 없으면 싣지 않는다. */
-export interface ToolTimingMetadata {
+interface ToolTimingMetadata {
     readonly durationMs?: number;
 }
 

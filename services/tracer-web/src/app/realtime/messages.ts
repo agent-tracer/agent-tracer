@@ -1,7 +1,7 @@
 import type { MonitoringSession, MonitoringTask } from "~tracer-web/entities/task/model/task.js";
 import type { JobKind, JobStatus } from "~tracer-web/entities/job/model/job.js";
 import type { TimelineItemDto } from "@agent-tracer/kernel";
-export interface RuleEnforcementAddedPayload {
+interface RuleEnforcementAddedPayload {
     readonly eventId: string;
     readonly ruleId: string;
     readonly matchKind: "trigger" | "expect-fulfilled";
@@ -9,7 +9,7 @@ export interface RuleEnforcementAddedPayload {
     readonly sessionId?: string;
 }
 
-export interface VerdictUpdatedPayload {
+interface VerdictUpdatedPayload {
     readonly turnId: string;
     readonly sessionId: string;
     readonly taskId: string;
@@ -17,7 +17,7 @@ export interface VerdictUpdatedPayload {
     readonly rulesEvaluatedCount: number;
 }
 
-export interface RulesChangedPayload {
+interface RulesChangedPayload {
     readonly ruleId: string;
     readonly change: "created" | "updated" | "deleted" | "promoted";
     readonly scope: "global" | "task";

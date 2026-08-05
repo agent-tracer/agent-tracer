@@ -8,7 +8,7 @@ export interface SearchIndexDefinition {
     readonly rebuiltFromLedger?: boolean;
 }
 
-export const EVENTS_ALIAS = "events";
+const EVENTS_ALIAS = "events";
 export const EVENTS_INDEX = "events-v1";
 export const TASKS_ALIAS = "tasks";
 export const TASKS_INDEX = "tasks-v2";

@@ -61,15 +61,3 @@ export function shapeQuestionTool(call: ToolCall): ShapedToolEvent {
     };
 }
 
-/** 사전 힌트 판정에 필요한 질문 목록을 도구 입력에서 읽는다. */
-export function readAskedQuestions(toolInput: Record<string, unknown>): readonly string[] {
-    const questions = toolInput["questions"];
-    if (!Array.isArray(questions)) return [];
-    const asked: string[] = [];
-    for (const item of questions) {
-        if (typeof item !== "object" || item === null) continue;
-        const text = (item as Record<string, unknown>)["question"];
-        if (typeof text === "string" && text.trim()) asked.push(text.trim());
-    }
-    return asked;
-}
