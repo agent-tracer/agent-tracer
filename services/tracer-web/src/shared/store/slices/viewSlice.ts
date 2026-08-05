@@ -23,6 +23,9 @@ export const ALL_VISIBLE_LANES: readonly VisibleLane[] = [
   "coord",
 ];
 
+/** `ALL_VISIBLE_LANES`와 짝을 이루는, 레인을 모두 숨긴 상태다. */
+export const NO_VISIBLE_LANES: readonly VisibleLane[] = [];
+
 export interface ViewSlice {
   readonly mainView: MainView;
   readonly inspectorTab: InspectorTab;
@@ -49,8 +52,7 @@ export function createViewSlice(set: SetState): ViewSlice {
       set((state) => {
         const has = state.visibleLanes.includes(lane);
         if (has) {
-          // 모든 레인을 숨기는 것은 허용하지 않는다.
-          if (state.visibleLanes.length <= 1) return state;
+          // 모두 숨긴 상태는 All로 되돌릴 수 있으므로 마지막 레인도 끈다.
           return {
             visibleLanes: state.visibleLanes.filter((l) => l !== lane),
           };
