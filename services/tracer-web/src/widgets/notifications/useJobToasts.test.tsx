@@ -38,7 +38,6 @@ describe("useJobToasts", () => {
       [JOB_KIND.titleSuggestion, "Title suggestion complete"],
       [JOB_KIND.taskCleanup, "Task cleanup complete"],
       [JOB_KIND.recipeScan, "Recipe scan complete"],
-      [JOB_KIND.ruleGeneration, "Rule generation complete"],
     ] as const;
 
     for (const [kind, title] of cases) {

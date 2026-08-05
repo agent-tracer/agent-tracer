@@ -24,6 +24,17 @@ export function isTerminalRuleGenerationStatus(status: string): boolean {
 export const RULE_GENERATION_LEASE_TTL_MS = 90_000;
 export const RULE_GENERATION_HEARTBEAT_MS = 30_000;
 
+/** 프롬프트에 그대로 실리므로 입력 표면과 실행 표면이 같은 값으로 잘라야 하는 상한이다. */
+export const RULE_GENERATION_INTENT_MAX_LENGTH = 500;
+
+/** 빈 문자열을 요청에 남기면 멱등이 의도 없는 요청과 갈라지므로 공백뿐인 의도는 없는 것으로 본다. */
+export function normalizeRuleGenerationIntent(value: unknown): string | undefined {
+    if (typeof value !== "string") return undefined;
+    const trimmed = value.trim();
+    if (trimmed.length === 0) return undefined;
+    return trimmed.slice(0, RULE_GENERATION_INTENT_MAX_LENGTH);
+}
+
 /** 요청 하나가 받을 수 있는 규칙 수의 상한이다. */
 export const RULE_GENERATION_MAX_RULES_LIMIT = 20;
 

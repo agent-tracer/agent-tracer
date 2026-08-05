@@ -1,4 +1,4 @@
-import {LOCAL_JOB_LEASE_HEARTBEAT_MS} from "@agent-tracer/kernel/job/job.const.js";
+import {RULE_GENERATION_HEARTBEAT_MS} from "@agent-tracer/kernel";
 import {
     toRuleRequestText,
     type RuleGenerationSettingCache,
@@ -136,7 +136,7 @@ export class PollRuleGenerationsUsecase {
     }
 
     private startHeartbeat(requestId: string, cancel: AbortController): () => void {
-        return this.scheduler.every(LOCAL_JOB_LEASE_HEARTBEAT_MS, () => {
+        return this.scheduler.every(RULE_GENERATION_HEARTBEAT_MS, () => {
             void this.jobs.renewLease(requestId)
                 .then((state) => {
                     if (!state.leaseHeld || state.canceled) cancel.abort(new Error("request canceled"));

@@ -85,7 +85,7 @@ describe("fetchLatestJob", () => {
       job: {
         id: "job-1",
         userId: "u1",
-        kind: JOB_KIND.ruleGeneration,
+        kind: JOB_KIND.recipeScan,
         executor: "local",
         status: "completed",
         attempts: 1,
@@ -102,16 +102,16 @@ describe("fetchLatestJob", () => {
     });
 
     const res = await fetchLatestJob<GenerateRulesJobStatus>(
-      JOB_KIND.ruleGeneration,
+      JOB_KIND.recipeScan,
       { taskId: TaskId("task-1") },
     );
 
     expect(mockGetJson).toHaveBeenCalledWith(
-      "/api/agent/jobs/latest?kind=rule.generation&taskId=task-1",
+      "/api/agent/jobs/latest?kind=recipe.scan&taskId=task-1",
     );
     expect(res.job).toMatchObject({
       id: "job-1",
-      kind: JOB_KIND.ruleGeneration,
+      kind: JOB_KIND.recipeScan,
       status: "completed",
       rulesCreated: 3,
       modelUsed: "claude-sonnet-4-6",

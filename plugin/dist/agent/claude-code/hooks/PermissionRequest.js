@@ -3261,8 +3261,7 @@ var HttpRecipeOutcomeReportAdapter = class {
 var JOB_KIND = {
   titleSuggestion: "title.suggestion",
   recipeScan: "recipe.scan",
-  taskCleanup: "task.cleanup",
-  ruleGeneration: "rule.generation"
+  taskCleanup: "task.cleanup"
 };
 var RECIPE_SCAN_TRIGGER = {
   dashboard: "dashboard",
@@ -3271,8 +3270,7 @@ var RECIPE_SCAN_TRIGGER = {
 var JOB_EXECUTOR = {
   [JOB_KIND.titleSuggestion]: "temporal",
   [JOB_KIND.recipeScan]: "temporal",
-  [JOB_KIND.taskCleanup]: "temporal",
-  [JOB_KIND.ruleGeneration]: "local"
+  [JOB_KIND.taskCleanup]: "temporal"
 };
 var JOB_STATUS = {
   pending: "pending",
