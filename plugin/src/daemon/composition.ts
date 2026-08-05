@@ -14,10 +14,10 @@ import {HttpRuleEvidenceAdapter} from "~plugin/domain/rulegen/adapter/http.rule.
 import {StderrRulegenLogAdapter} from "~plugin/domain/rulegen/adapter/stderr.rulegen.log.adapter.js";
 import {TracerRuleGenerationAdapter} from "~plugin/domain/rulegen/adapter/tracer.rule.generation.adapter.js";
 import {TracerRuleSettingAdapter} from "~plugin/domain/rulegen/adapter/tracer.rule.setting.adapter.js";
-import {EnqueueRuleJobUsecase} from "~plugin/domain/rulegen/application/enqueue.rule.job.usecase.js";
-import {PollRuleJobsUsecase} from "~plugin/domain/rulegen/application/poll.rule.jobs.usecase.js";
+import {RequestRuleGenerationUsecase} from "~plugin/domain/rulegen/application/request.rule.generation.usecase.js";
+import {PollRuleGenerationsUsecase} from "~plugin/domain/rulegen/application/poll.rule.generations.usecase.js";
 import {RefreshRuleSettingUsecase} from "~plugin/domain/rulegen/application/refresh.rule.setting.usecase.js";
-import {RunRuleJobUsecase} from "~plugin/domain/rulegen/application/run.rule.job.usecase.js";
+import {RunRuleGenerationUsecase} from "~plugin/domain/rulegen/application/run.rule.generation.usecase.js";
 import type {RulegenHook} from "~plugin/domain/rulegen/inbound/rulegen.hook.js";
 import {RuleGenerationSettingCache} from "~plugin/domain/rulegen/model/rule.command.model.js";
 import type {SchedulerPort} from "~plugin/domain/rulegen/port/scheduler.port.js";
@@ -62,7 +62,7 @@ export function composeDaemonHooks(leaseOwner: string): DaemonHooks {
 
     const rulegenLog = new StderrRulegenLogAdapter();
     const jobs = new TracerRuleGenerationAdapter(baseUrl, headers, leaseOwner, rulegenLog);
-    const runRuleJob = new RunRuleJobUsecase(
+    const runRuleJob = new RunRuleGenerationUsecase(
         new HttpRuleEvidenceAdapter(baseUrl, headers),
         new AgentRuleGeneratorAdapter(new ClaudeRuleAgentRunnerAdapter()),
         jobs,
@@ -71,7 +71,7 @@ export function composeDaemonHooks(leaseOwner: string): DaemonHooks {
     );
     const ruleSettingCache = new RuleGenerationSettingCache();
     const rulegen: RulegenHook = {
-        pollJobs: new PollRuleJobsUsecase(
+        pollGenerations: new PollRuleGenerationsUsecase(
             jobs,
             (request, signal) => runRuleJob.execute(request, signal),
             scheduler,
@@ -82,7 +82,7 @@ export function composeDaemonHooks(leaseOwner: string): DaemonHooks {
             new TracerRuleSettingAdapter(baseUrl, headers),
             ruleSettingCache,
         ),
-        enqueueRuleJob: new EnqueueRuleJobUsecase(jobs, ruleSettingCache, rulegenLog),
+        requestGeneration: new RequestRuleGenerationUsecase(jobs, ruleSettingCache, rulegenLog),
     };
 
     return {

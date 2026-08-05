@@ -3,7 +3,8 @@ import { GuidanceText } from "~tracer-web/shared/ui/index.js";
 import { DaemonHealthSection } from "~tracer-web/widgets/settings/daemon/DaemonHealthSection.js";
 import { GuidanceLanguageSection } from "~tracer-web/widgets/settings/display/GuidanceLanguageSection.js";
 import { IdentitySection } from "~tracer-web/widgets/settings/identity/IdentitySection.js";
-import { RuleGenerationSection } from "~tracer-web/widgets/settings/rule-generation/RuleGenerationSection.js";
+import { LlmProviderSection } from "~tracer-web/widgets/settings/llm-provider/LlmProviderSection.js";
+import { RuleGenerationSettingsSection } from "~tracer-web/widgets/settings/rule-generation/RuleGenerationSettingsSection.js";
 
 /**
  * 서버 설정과 브라우저 전용 표시 설정을 한 화면에서 구분해 제공한다.
@@ -31,7 +32,8 @@ export function SettingsPage() {
       <main className="px-9 py-6 flex flex-col gap-6 max-w-3xl">
         <IdentitySection />
         <GuidanceLanguageSection />
-        <RuleGenerationSection />
+        <LlmProviderSection />
+        <RuleGenerationSettingsSection />
         <DaemonHealthSection />
 
         <section className="border border-hair rounded-md py-4 px-5 bg-s1 text-[12.5px] text-ink-muted">

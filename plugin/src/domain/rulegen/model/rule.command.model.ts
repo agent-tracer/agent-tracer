@@ -14,6 +14,12 @@ export function readRuleRequest(prompt: string): string {
     return trimmed.replace(RULE_COMMAND, "").trim();
 }
 
+/** 근거 텍스트는 사용자가 친 원문이므로 명령 접두사를 벗겨 요구만 남긴다. */
+export function toRuleRequestText(anchorText: string): string {
+    const request = readRuleRequest(anchorText);
+    return request.length > 0 ? request : anchorText;
+}
+
 export function parseMaxRulesPerTask(raw: string | undefined): number {
     const parsed = Number(raw);
     if (!Number.isInteger(parsed) || parsed < 1) return RULE_GENERATION_MAX_RULES;

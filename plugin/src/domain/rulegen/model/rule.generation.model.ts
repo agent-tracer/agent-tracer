@@ -4,7 +4,7 @@ import type {RuleProposalPayload} from "@agent-tracer/kernel/rule/proposal/rule.
 import type {RuleGenerationRequest} from "~plugin/domain/rulegen/model/rulegen.spec.model.js";
 
 /** 서버가 내려주는 대기 중 규칙 생성 요청이다. */
-export interface PendingRuleJob {
+export interface PendingRuleGeneration {
     readonly id: string;
     readonly taskId: string | null;
     readonly anchorEventId?: string | null;
@@ -19,8 +19,8 @@ export interface RuleAnchorEvidence {
     readonly turnId: string | null;
 }
 
-/** 잡을 계속 쥐고 있어도 되는지 알려주는 리스 상태다. */
-export interface RuleJobLeaseState {
+/** 요청을 계속 쥐고 있어도 되는지 알려주는 리스 상태다. */
+export interface RuleGenerationLeaseState {
     readonly leaseHeld: boolean;
     readonly canceled: boolean;
 }
@@ -105,23 +105,23 @@ export function ruleGenerationFailure(error: string): RuleGenerationFailure {
     return {error, modelUsed: null, durationMs: null, costUsd: null, numTurns: null, steps: []};
 }
 
-/** 폴러가 클레임한 잡 하나를 끝까지 처리하는 실행 경로다. */
-export type RuleJobRunner = (request: RuleGenerationRequest, signal: AbortSignal) => Promise<void>;
+/** 폴러가 클레임한 요청 하나를 끝까지 처리하는 실행 경로다. */
+export type RuleGenerationRunner = (request: RuleGenerationRequest, signal: AbortSignal) => Promise<void>;
 
-export function readJobMaxRules(job: PendingRuleJob): number | undefined {
+export function readMaxRules(job: PendingRuleGeneration): number | undefined {
     return typeof job.maxRules === "number" ? job.maxRules : undefined;
 }
 
-export function readJobIntent(job: PendingRuleJob): string | undefined {
+export function readIntent(job: PendingRuleGeneration): string | undefined {
     return normalizeRuleGenerationIntent(job.intent);
 }
 
-export function readJobAnchorEventId(job: PendingRuleJob): string | undefined {
+export function readAnchorEventId(job: PendingRuleGeneration): string | undefined {
     const value = job.anchorEventId;
     return typeof value === "string" && value.trim().length > 0 ? value : undefined;
 }
 
-export interface RuleJobContext {
+export interface RuleGenerationContext {
     readonly workspacePath: string;
     readonly anchorEventId: string;
     readonly anchorText: string;
@@ -132,14 +132,14 @@ export interface RuleJobContext {
 }
 
 export function toRuleGenerationRequest(
-    job: PendingRuleJob,
+    job: PendingRuleGeneration,
     taskId: string,
-    context: RuleJobContext,
+    context: RuleGenerationContext,
 ): RuleGenerationRequest {
-    const maxRules = readJobMaxRules(job);
-    const intent = readJobIntent(job);
+    const maxRules = readMaxRules(job);
+    const intent = readIntent(job);
     return {
-        jobId: job.id,
+        requestId: job.id,
         taskId,
         workspacePath: context.workspacePath,
         ...(maxRules !== undefined ? {maxRules} : {}),

@@ -5,7 +5,7 @@ import {buildRuleGenerationSpec, type RuleGenerationRequest} from "~plugin/domai
 
 function request(overrides: Partial<RuleGenerationRequest> = {}): RuleGenerationRequest {
     return {
-        jobId: "gen-1",
+        requestId: "gen-1",
         taskId: "task-1",
         workspacePath: "/tmp/workspace",
         anchorText: "린트를 돌려줘",

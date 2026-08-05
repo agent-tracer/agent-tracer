@@ -3,12 +3,12 @@ import {
     type RuleGenerationSettingCache,
 } from "~plugin/domain/rulegen/model/rule.command.model.js";
 import type {RulegenLogPort} from "~plugin/domain/rulegen/port/log.port.js";
-import type {RuleJobPort} from "~plugin/domain/rulegen/port/rule.job.port.js";
+import type {RuleGenerationPort} from "~plugin/domain/rulegen/port/rule.generation.port.js";
 
-/** 규칙 생성을 부르는 사용자 입력마다 태스크당 하나의 잡을 넣는다. */
-export class EnqueueRuleJobUsecase {
+/** 규칙 생성을 부르는 사용자 입력마다 태스크당 하나의 요청을 넣는다. */
+export class RequestRuleGenerationUsecase {
     constructor(
-        private readonly jobs: RuleJobPort,
+        private readonly requests: RuleGenerationPort,
         private readonly cache: RuleGenerationSettingCache,
         private readonly log: RulegenLogPort,
     ) {}
@@ -17,10 +17,10 @@ export class EnqueueRuleJobUsecase {
         if (!isRuleGenerationTrigger(kind, taskId, eventId, prompt)) return;
         if (!this.cache.isSupported()) return;
         try {
-            if (await this.jobs.hasActiveJob(taskId)) return;
-            await this.jobs.enqueue(taskId, eventId, this.cache.snapshot().maxRulesPerTask);
+            if (await this.requests.hasActiveRequest(taskId)) return;
+            await this.requests.enqueue(taskId, eventId, this.cache.snapshot().maxRulesPerTask);
         } catch (error) {
-            this.log.write(`enqueue failed for task ${taskId}: ${String(error)}`);
+            this.log.write(`request failed for task ${taskId}: ${String(error)}`);
         }
     }
 }

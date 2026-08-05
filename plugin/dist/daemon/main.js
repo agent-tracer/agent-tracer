@@ -36099,7 +36099,7 @@ var TracerRuleGenerationAdapter = class {
   headers;
   log;
   leaseHeaders;
-  async pendingJobs() {
+  async pendingRequests() {
     const url = `${this.baseUrl}${RULE_GENERATIONS_PATH}?status=${RULE_GENERATION_STATUS.pending}`;
     const fetched = await getJson(url, this.headers);
     if (fetched.kind !== "found") {
@@ -36125,21 +36125,21 @@ var TracerRuleGenerationAdapter = class {
       return void 0;
     }
   }
-  async claim(jobId) {
-    const response = await postJson(this.requestUrl(jobId, "claim"), this.leaseHeaders, {});
+  async claim(requestId) {
+    const response = await postJson(this.requestUrl(requestId, "claim"), this.leaseHeaders, {});
     return response.ok;
   }
-  async renewLease(jobId) {
-    const response = await postJson(this.requestUrl(jobId, "heartbeat"), this.leaseHeaders, {});
+  async renewLease(requestId) {
+    const response = await postJson(this.requestUrl(requestId, "heartbeat"), this.leaseHeaders, {});
     if (!response.ok) return HELD_LEASE;
     const body = await response.json();
     return body.data ?? HELD_LEASE;
   }
-  async reportResult(jobId, report) {
+  async reportResult(requestId, report) {
     for (let attempt = 1; attempt <= REPORT_MAX_ATTEMPTS; attempt += 1) {
       try {
         const response = await postJson(
-          this.requestUrl(jobId, "complete"),
+          this.requestUrl(requestId, "complete"),
           this.leaseHeaders,
           completeBody(report)
         );
@@ -36147,7 +36147,7 @@ var TracerRuleGenerationAdapter = class {
         throw new Error(`HTTP ${response.status}`);
       } catch (error2) {
         if (attempt === REPORT_MAX_ATTEMPTS) {
-          this.log.write(`result report failed for request ${jobId}: ${String(error2)}`);
+          this.log.write(`result report failed for request ${requestId}: ${String(error2)}`);
           return false;
         }
         await sleep(REPORT_BACKOFF_MS * attempt);
@@ -36155,13 +36155,13 @@ var TracerRuleGenerationAdapter = class {
     }
     return false;
   }
-  async fail(jobId, failure) {
-    await postJson(this.requestUrl(jobId, "fail"), this.leaseHeaders, failBody(failure));
+  async fail(requestId, failure) {
+    await postJson(this.requestUrl(requestId, "fail"), this.leaseHeaders, failBody(failure));
   }
-  async release(jobId) {
-    await postJson(this.requestUrl(jobId, "release"), this.leaseHeaders, {});
+  async release(requestId) {
+    await postJson(this.requestUrl(requestId, "release"), this.leaseHeaders, {});
   }
-  async hasActiveJob(taskId) {
+  async hasActiveRequest(taskId) {
     const url = `${this.baseUrl}${RULE_GENERATIONS_PATH}?taskId=${encodeURIComponent(taskId)}&limit=1`;
     const fetched = await getJson(url, this.headers);
     if (fetched.kind !== "found") return false;
@@ -36219,6 +36219,10 @@ function readRuleRequest(prompt) {
   if (!RULE_COMMAND.test(trimmed2)) return "";
   return trimmed2.replace(RULE_COMMAND, "").trim();
 }
+function toRuleRequestText(anchorText) {
+  const request = readRuleRequest(anchorText);
+  return request.length > 0 ? request : anchorText;
+}
 function isRuleGenerationTrigger(kind, taskId, eventId, prompt) {
   if (kind !== KIND.userMessage) return false;
   if (taskId.length === 0 || eventId.length === 0) return false;
@@ -36248,29 +36252,29 @@ var RuleGenerationSettingCache = class {
   }
 };
 
-// src/domain/rulegen/application/enqueue.rule.job.usecase.ts
-var EnqueueRuleJobUsecase = class {
-  constructor(jobs, cache, log) {
-    this.jobs = jobs;
+// src/domain/rulegen/application/request.rule.generation.usecase.ts
+var RequestRuleGenerationUsecase = class {
+  constructor(requests, cache, log) {
+    this.requests = requests;
     this.cache = cache;
     this.log = log;
   }
-  jobs;
+  requests;
   cache;
   log;
   async execute(kind, taskId, eventId, prompt) {
     if (!isRuleGenerationTrigger(kind, taskId, eventId, prompt)) return;
     if (!this.cache.isSupported()) return;
     try {
-      if (await this.jobs.hasActiveJob(taskId)) return;
-      await this.jobs.enqueue(taskId, eventId, this.cache.snapshot().maxRulesPerTask);
+      if (await this.requests.hasActiveRequest(taskId)) return;
+      await this.requests.enqueue(taskId, eventId, this.cache.snapshot().maxRulesPerTask);
     } catch (error2) {
-      this.log.write(`enqueue failed for task ${taskId}: ${String(error2)}`);
+      this.log.write(`request failed for task ${taskId}: ${String(error2)}`);
     }
   }
 };
 
-// src/domain/rulegen/model/rule.job.model.ts
+// src/domain/rulegen/model/rule.generation.model.ts
 function addTotals(first, second) {
   if (first === null && second === null) return null;
   return (first ?? 0) + (second ?? 0);
@@ -36298,21 +36302,21 @@ function mergeRuleGenerationOutcomes(first, second) {
 function ruleGenerationFailure(error2) {
   return { error: error2, modelUsed: null, durationMs: null, costUsd: null, numTurns: null, steps: [] };
 }
-function readJobMaxRules(job) {
+function readMaxRules(job) {
   return typeof job.maxRules === "number" ? job.maxRules : void 0;
 }
-function readJobIntent(job) {
+function readIntent(job) {
   return normalizeRuleGenerationIntent(job.intent);
 }
-function readJobAnchorEventId(job) {
+function readAnchorEventId(job) {
   const value = job.anchorEventId;
   return typeof value === "string" && value.trim().length > 0 ? value : void 0;
 }
 function toRuleGenerationRequest(job, taskId, context) {
-  const maxRules = readJobMaxRules(job);
-  const intent = readJobIntent(job);
+  const maxRules = readMaxRules(job);
+  const intent = readIntent(job);
   return {
-    jobId: job.id,
+    requestId: job.id,
     taskId,
     workspacePath: context.workspacePath,
     ...maxRules !== void 0 ? { maxRules } : {},
@@ -36326,10 +36330,10 @@ function toRuleGenerationRequest(job, taskId, context) {
   };
 }
 
-// src/domain/rulegen/application/poll.rule.jobs.usecase.ts
-var MAX_CONCURRENT_JOBS = 2;
-var PollRuleJobsUsecase = class {
-  constructor(jobs, runner, scheduler, settings, log, maxConcurrent = MAX_CONCURRENT_JOBS) {
+// src/domain/rulegen/application/poll.rule.generations.usecase.ts
+var MAX_CONCURRENT_REQUESTS = 2;
+var PollRuleGenerationsUsecase = class {
+  constructor(jobs, runner, scheduler, settings, log, maxConcurrent = MAX_CONCURRENT_REQUESTS) {
     this.jobs = jobs;
     this.runner = runner;
     this.scheduler = scheduler;
@@ -36347,25 +36351,25 @@ var PollRuleJobsUsecase = class {
   hasRunning() {
     return this.running.size > 0;
   }
-  /** 데몬이 내려갈 때 실행을 끊고 잡을 서버에 반납한다. */
+  /** 데몬이 내려갈 때 실행을 끊고 요청을 서버에 반납한다. */
   async releaseRunning() {
     const jobIds = [...this.running.keys()];
-    for (const [jobId, cancel] of this.running) {
+    for (const [requestId, cancel] of this.running) {
       cancel.abort(new Error("daemon shutting down"));
-      this.log.write(`releasing job ${jobId} on shutdown`);
+      this.log.write(`releasing request ${requestId} on shutdown`);
     }
     this.running.clear();
     await Promise.all(
-      jobIds.map((jobId) => this.jobs.release(jobId).catch(() => this.log.write(`failed to release job ${jobId}`)))
+      jobIds.map((requestId) => this.jobs.release(requestId).catch(() => this.log.write(`failed to release request ${requestId}`)))
     );
   }
   async execute() {
     if (!this.settings.isSupported()) return;
     let pending;
     try {
-      pending = await this.jobs.pendingJobs();
+      pending = await this.jobs.pendingRequests();
     } catch (error2) {
-      this.log.write(`could not read pending jobs: ${String(error2)}`);
+      this.log.write(`could not read pending requests: ${String(error2)}`);
       return;
     }
     for (const job of pending) {
@@ -36376,7 +36380,7 @@ var PollRuleJobsUsecase = class {
     }
   }
   async dispatch(job, taskId) {
-    const anchorEventId = readJobAnchorEventId(job);
+    const anchorEventId = readAnchorEventId(job);
     if (anchorEventId === void 0) {
       await this.failInvalidAnchor(job.id, "rule generation request has no anchor event");
       return;
@@ -36402,19 +36406,19 @@ var PollRuleJobsUsecase = class {
     void this.runner(request, cancel.signal).then(() => this.log.write(`job ${job.id} completed`)).catch((error2) => {
       this.log.write(`job ${job.id} threw: ${String(error2)}`);
       if (cancel.signal.aborted) return;
-      void this.jobs.fail(job.id, ruleGenerationFailure(String(error2))).catch(() => this.log.write(`failed to mark job ${job.id} failed after throw`));
+      void this.jobs.fail(job.id, ruleGenerationFailure(String(error2))).catch(() => this.log.write(`failed to mark request ${job.id} failed after throw`));
     }).finally(() => {
       stopHeartbeat();
       this.running.delete(job.id);
     });
   }
   /** 클레임에 실패한 요청은 남이 쥐었거나 사라진 것이므로 조용히 넘긴다. */
-  async claim(jobId) {
+  async claim(requestId) {
     try {
-      if (await this.jobs.claim(jobId)) return true;
-      this.log.write(`could not claim request ${jobId}, skipping`);
+      if (await this.jobs.claim(requestId)) return true;
+      this.log.write(`could not claim request ${requestId}, skipping`);
     } catch (error2) {
-      this.log.write(`could not claim request ${jobId}: ${String(error2)}`);
+      this.log.write(`could not claim request ${requestId}: ${String(error2)}`);
     }
     return false;
   }
@@ -36426,22 +36430,18 @@ var PollRuleJobsUsecase = class {
     if (anchor === void 0) return `anchor ${anchorEventId} is not an owned user message`;
     return { workspacePath, anchorText: toRuleRequestText(anchor.text), anchorTurnId: anchor.turnId };
   }
-  async failInvalidAnchor(jobId, error2) {
-    this.log.write(`${error2}, failing job ${jobId}`);
-    await this.jobs.fail(jobId, ruleGenerationFailure(error2)).catch(() => this.log.write(`failed to mark job ${jobId} failed`));
+  async failInvalidAnchor(requestId, error2) {
+    this.log.write(`${error2}, failing request ${requestId}`);
+    await this.jobs.fail(requestId, ruleGenerationFailure(error2)).catch(() => this.log.write(`failed to mark request ${requestId} failed`));
   }
-  startHeartbeat(jobId, cancel) {
+  startHeartbeat(requestId, cancel) {
     return this.scheduler.every(LOCAL_JOB_LEASE_HEARTBEAT_MS, () => {
-      void this.jobs.renewLease(jobId).then((state) => {
-        if (!state.leaseHeld || state.canceled) cancel.abort(new Error("job canceled"));
+      void this.jobs.renewLease(requestId).then((state) => {
+        if (!state.leaseHeld || state.canceled) cancel.abort(new Error("request canceled"));
       }).catch(() => void 0);
     });
   }
 };
-function toRuleRequestText(anchorText) {
-  const request = readRuleRequest(anchorText);
-  return request.length > 0 ? request : anchorText;
-}
 
 // src/domain/rulegen/application/refresh.rule.setting.usecase.ts
 var RefreshRuleSettingUsecase = class {
@@ -36758,7 +36758,7 @@ function buildRuleGenerationSpec(request) {
   const anchorDirective = buildAnchorDirective(request.anchorText);
   const intentDirective = buildIntentDirective(request.intent);
   return {
-    jobId: request.jobId,
+    requestId: request.requestId,
     taskId: request.taskId,
     workspacePath: request.workspacePath,
     model: request.model,
@@ -36791,10 +36791,10 @@ function buildRuleGenerationSpec(request) {
   };
 }
 
-// src/domain/rulegen/application/run.rule.job.usecase.ts
+// src/domain/rulegen/application/run.rule.generation.usecase.ts
 init_rulegen_tool_model();
 var RESULT_REPORT_FAILED = "result report failed";
-var RunRuleJobUsecase = class {
+var RunRuleGenerationUsecase = class {
   constructor(evidence, generator, jobs, clock, log) {
     this.evidence = evidence;
     this.generator = generator;
@@ -36818,14 +36818,14 @@ var RunRuleJobUsecase = class {
       const first = await this.generator.generate(spec, toolset, signal);
       if (isRulegenCanceled(signal.reason)) return;
       if (first.error !== null) {
-        await this.jobs.fail(request.jobId, this.failure(spec, startedAt2, first, first.error));
+        await this.jobs.fail(request.requestId, this.failure(spec, startedAt2, first, first.error));
         return;
       }
       const screened = this.screen(first.candidates, ledger, request.anchorTurnId ?? null);
       const { outcome: outcome3, proposals, skipped } = screened.errors.length === 0 ? { outcome: first, proposals: screened.proposals, skipped: [] } : await this.repair(spec, toolset, signal, ledger, first, screened.errors, request.anchorTurnId ?? null);
       if (isRulegenCanceled(signal.reason)) return;
       if (outcome3.error !== null) {
-        await this.jobs.fail(request.jobId, this.failure(spec, startedAt2, outcome3, outcome3.error));
+        await this.jobs.fail(request.requestId, this.failure(spec, startedAt2, outcome3, outcome3.error));
         return;
       }
       const report = {
@@ -36838,13 +36838,13 @@ var RunRuleJobUsecase = class {
         ...outcome3.usage !== null ? { usage: outcome3.usage } : {},
         steps: outcome3.steps
       };
-      if (!await this.jobs.reportResult(request.jobId, report)) {
-        await this.jobs.fail(request.jobId, this.failure(spec, startedAt2, outcome3, RESULT_REPORT_FAILED));
+      if (!await this.jobs.reportResult(request.requestId, report)) {
+        await this.jobs.fail(request.requestId, this.failure(spec, startedAt2, outcome3, RESULT_REPORT_FAILED));
       }
     } catch (error2) {
       if (isRulegenCanceled(signal.reason)) return;
       const message = error2 instanceof Error ? error2.message : String(error2);
-      await this.jobs.fail(request.jobId, ruleGenerationFailure(message));
+      await this.jobs.fail(request.requestId, ruleGenerationFailure(message));
     } finally {
       deadline.dispose();
     }
@@ -36944,7 +36944,7 @@ function composeDaemonHooks(leaseOwner) {
   const requestScan = new RequestRecipeScanUsecase(new HttpRecipeScanJobAdapter(baseUrl, headers, agentBackend));
   const rulegenLog = new StderrRulegenLogAdapter();
   const jobs = new TracerRuleGenerationAdapter(baseUrl, headers, leaseOwner, rulegenLog);
-  const runRuleJob = new RunRuleJobUsecase(
+  const runRuleJob = new RunRuleGenerationUsecase(
     new HttpRuleEvidenceAdapter(baseUrl, headers),
     new AgentRuleGeneratorAdapter(new ClaudeRuleAgentRunnerAdapter()),
     jobs,
@@ -36953,7 +36953,7 @@ function composeDaemonHooks(leaseOwner) {
   );
   const ruleSettingCache = new RuleGenerationSettingCache();
   const rulegen = {
-    pollJobs: new PollRuleJobsUsecase(
+    pollGenerations: new PollRuleGenerationsUsecase(
       jobs,
       (request, signal) => runRuleJob.execute(request, signal),
       scheduler,
@@ -36964,7 +36964,7 @@ function composeDaemonHooks(leaseOwner) {
       new TracerRuleSettingAdapter(baseUrl, headers),
       ruleSettingCache
     ),
-    enqueueRuleJob: new EnqueueRuleJobUsecase(jobs, ruleSettingCache, rulegenLog)
+    requestGeneration: new RequestRuleGenerationUsecase(jobs, ruleSettingCache, rulegenLog)
   };
   return {
     guardrail,
@@ -39216,19 +39216,19 @@ function readFilePaths(payload) {
 
 // src/domain/rulegen/inbound/rulegen.hook.ts
 function onRuleGenerationPoll(hook) {
-  return hook.pollJobs.execute();
+  return hook.pollGenerations.execute();
 }
 function hasRunningRuleGenerationJobs(hook) {
-  return hook.pollJobs.hasRunning();
+  return hook.pollGenerations.hasRunning();
 }
 function releaseRunningRuleGenerationJobs(hook) {
-  return hook.pollJobs.releaseRunning();
+  return hook.pollGenerations.releaseRunning();
 }
 function onRuleGenerationSettingRefresh(hook) {
   return hook.refreshSetting.execute();
 }
 function onUserInputForRuleGeneration(hook, kind, taskId, eventId, prompt) {
-  return hook.enqueueRuleJob.execute(kind, taskId, eventId, prompt);
+  return hook.requestGeneration.execute(kind, taskId, eventId, prompt);
 }
 
 // src/daemon/main.ts

@@ -6,22 +6,22 @@ import {
 } from "@agent-tracer/kernel";
 import {getJson, postJson} from "~plugin/config/http.js";
 import type {
-    PendingRuleJob,
+    PendingRuleGeneration,
     RuleGenerationFailure,
     RuleGenerationReport,
     RuleAnchorEvidence,
     RuleGenerationUsage,
-    RuleJobLeaseState,
-} from "~plugin/domain/rulegen/model/rule.job.model.js";
+    RuleGenerationLeaseState,
+} from "~plugin/domain/rulegen/model/rule.generation.model.js";
 import type {RulegenLogPort} from "~plugin/domain/rulegen/port/log.port.js";
-import type {RuleJobPort} from "~plugin/domain/rulegen/port/rule.job.port.js";
+import type {RuleGenerationPort} from "~plugin/domain/rulegen/port/rule.generation.port.js";
 
-const HELD_LEASE: RuleJobLeaseState = {leaseHeld: true, canceled: false};
+const HELD_LEASE: RuleGenerationLeaseState = {leaseHeld: true, canceled: false};
 const REPORT_MAX_ATTEMPTS = 3;
 const REPORT_BACKOFF_MS = 500;
 
 interface RequestListEnvelope {
-    readonly data?: {readonly items?: readonly PendingRuleJob[]};
+    readonly data?: {readonly items?: readonly PendingRuleGeneration[]};
 }
 
 interface RequestEnvelope {
@@ -37,7 +37,7 @@ interface UserInputEnvelope {
 }
 
 interface LeaseEnvelope {
-    readonly data?: RuleJobLeaseState;
+    readonly data?: RuleGenerationLeaseState;
 }
 
 /** 이 왕복이 관측의 유일한 통로이므로 잰 것을 계약이 적은 칸에 실어 원장까지 보낸다. */
@@ -75,7 +75,7 @@ function failBody(failure: RuleGenerationFailure): Record<string, unknown> {
 }
 
 /** 규칙 생성 요청의 수명주기를 이 저장소의 규칙 도메인 창구로 왕복한다. */
-export class TracerRuleGenerationAdapter implements RuleJobPort {
+export class TracerRuleGenerationAdapter implements RuleGenerationPort {
     private readonly leaseHeaders: Record<string, string>;
 
     constructor(
@@ -87,7 +87,7 @@ export class TracerRuleGenerationAdapter implements RuleJobPort {
         this.leaseHeaders = {...headers, [MONITOR_LEASE_OWNER_HEADER]: leaseOwner};
     }
 
-    async pendingJobs(): Promise<readonly PendingRuleJob[]> {
+    async pendingRequests(): Promise<readonly PendingRuleGeneration[]> {
         const url = `${this.baseUrl}${RULE_GENERATIONS_PATH}?status=${RULE_GENERATION_STATUS.pending}`;
         const fetched = await getJson<RequestListEnvelope>(url, this.headers);
         if (fetched.kind !== "found") {
@@ -116,23 +116,23 @@ export class TracerRuleGenerationAdapter implements RuleJobPort {
         }
     }
 
-    async claim(jobId: string): Promise<boolean> {
-        const response = await postJson(this.requestUrl(jobId, "claim"), this.leaseHeaders, {});
+    async claim(requestId: string): Promise<boolean> {
+        const response = await postJson(this.requestUrl(requestId, "claim"), this.leaseHeaders, {});
         return response.ok;
     }
 
-    async renewLease(jobId: string): Promise<RuleJobLeaseState> {
-        const response = await postJson(this.requestUrl(jobId, "heartbeat"), this.leaseHeaders, {});
+    async renewLease(requestId: string): Promise<RuleGenerationLeaseState> {
+        const response = await postJson(this.requestUrl(requestId, "heartbeat"), this.leaseHeaders, {});
         if (!response.ok) return HELD_LEASE;
         const body = await response.json() as LeaseEnvelope;
         return body.data ?? HELD_LEASE;
     }
 
-    async reportResult(jobId: string, report: RuleGenerationReport): Promise<boolean> {
+    async reportResult(requestId: string, report: RuleGenerationReport): Promise<boolean> {
         for (let attempt = 1; attempt <= REPORT_MAX_ATTEMPTS; attempt += 1) {
             try {
                 const response = await postJson(
-                    this.requestUrl(jobId, "complete"),
+                    this.requestUrl(requestId, "complete"),
                     this.leaseHeaders,
                     completeBody(report),
                 );
@@ -140,7 +140,7 @@ export class TracerRuleGenerationAdapter implements RuleJobPort {
                 throw new Error(`HTTP ${response.status}`);
             } catch (error) {
                 if (attempt === REPORT_MAX_ATTEMPTS) {
-                    this.log.write(`result report failed for request ${jobId}: ${String(error)}`);
+                    this.log.write(`result report failed for request ${requestId}: ${String(error)}`);
                     return false;
                 }
                 await sleep(REPORT_BACKOFF_MS * attempt);
@@ -149,15 +149,15 @@ export class TracerRuleGenerationAdapter implements RuleJobPort {
         return false;
     }
 
-    async fail(jobId: string, failure: RuleGenerationFailure): Promise<void> {
-        await postJson(this.requestUrl(jobId, "fail"), this.leaseHeaders, failBody(failure));
+    async fail(requestId: string, failure: RuleGenerationFailure): Promise<void> {
+        await postJson(this.requestUrl(requestId, "fail"), this.leaseHeaders, failBody(failure));
     }
 
-    async release(jobId: string): Promise<void> {
-        await postJson(this.requestUrl(jobId, "release"), this.leaseHeaders, {});
+    async release(requestId: string): Promise<void> {
+        await postJson(this.requestUrl(requestId, "release"), this.leaseHeaders, {});
     }
 
-    async hasActiveJob(taskId: string): Promise<boolean> {
+    async hasActiveRequest(taskId: string): Promise<boolean> {
         const url = `${this.baseUrl}${RULE_GENERATIONS_PATH}?taskId=${encodeURIComponent(taskId)}&limit=1`;
         const fetched = await getJson<RequestListEnvelope>(url, this.headers);
         if (fetched.kind !== "found") return false;
