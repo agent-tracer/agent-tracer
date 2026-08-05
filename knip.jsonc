@@ -8,10 +8,16 @@
         "architecture.manifest.mjs",
         "eslint.config.js",
         "eslint-rules/index.mjs",
+        "integration/**/*.test.mjs",
         "scripts/*.mjs",
         "vitest.config.ts"
       ],
-      "project": ["*.{js,mjs,ts}", "eslint-rules/**/*.mjs", "scripts/**/*.mjs"]
+      "project": [
+        "*.{js,mjs,ts}",
+        "eslint-rules/**/*.mjs",
+        "integration/**/*.mjs",
+        "scripts/**/*.mjs"
+      ]
     },
     "libs/*": {
       "entry": ["src/index.ts"],

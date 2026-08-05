@@ -82,7 +82,7 @@ export default tseslint.config([
   ...pathRuleConfigs,
 
   {
-    files: [...UNIT_SOURCES, "scripts/**/*.mjs", "eslint-rules/**/*.mjs", "*.mjs"],
+    files: [...UNIT_SOURCES, "scripts/**/*.mjs", "eslint-rules/**/*.mjs", "integration/**/*.mjs", "*.mjs"],
     plugins: { local: localPlugin },
     rules: { "local/comment-language": "error" },
   },
