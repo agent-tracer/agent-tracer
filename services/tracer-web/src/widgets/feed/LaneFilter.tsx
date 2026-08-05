@@ -1,5 +1,6 @@
 import {
   ALL_VISIBLE_LANES,
+  NO_VISIBLE_LANES,
   type VisibleLane,
 } from "~tracer-web/shared/store/slices/viewSlice.js";
 import {
@@ -41,6 +42,7 @@ export function LaneFilter() {
   const setVisibleLanes = useSetVisibleLanes();
   const visibleSet = new Set(visible);
   const allOn = visible.length === ALL_VISIBLE_LANES.length;
+  const allOff = visible.length === 0;
 
   return (
     <div className="flex items-center gap-1.5 flex-wrap font-mono text-[10px]">
@@ -52,14 +54,18 @@ export function LaneFilter() {
         onClick={() => setVisibleLanes(ALL_VISIBLE_LANES)}
         aria-pressed={allOn}
         disabled={allOn}
-        className={cn(
-          "py-0.5 px-2.5 rounded-pill transition-all duration-[120ms] uppercase tracking-[0.06em] border",
-          allOn
-            ? "border-hair-strong bg-s2 text-ink cursor-default opacity-100"
-            : "border-hair bg-transparent text-ink-muted cursor-pointer opacity-85",
-        )}
+        className={bulkButtonClass(allOn)}
       >
         All
+      </button>
+      <button
+        type="button"
+        onClick={() => setVisibleLanes(NO_VISIBLE_LANES)}
+        aria-pressed={allOff}
+        disabled={allOff}
+        className={bulkButtonClass(allOff)}
+      >
+        None
       </button>
       <span aria-hidden className="w-px h-3.5 bg-hair mx-0.5" />
       {ALL_VISIBLE_LANES.map((lane) => {
@@ -96,6 +102,16 @@ export function LaneFilter() {
         );
       })}
     </div>
+  );
+}
+
+/** All·None처럼 이미 그 상태일 때 눌러도 바뀌지 않는 일괄 버튼의 표시. */
+function bulkButtonClass(active: boolean) {
+  return cn(
+    "py-0.5 px-2.5 rounded-pill transition-all duration-[120ms] uppercase tracking-[0.06em] border",
+    active
+      ? "border-hair-strong bg-s2 text-ink cursor-default opacity-100"
+      : "border-hair bg-transparent text-ink-muted cursor-pointer opacity-85",
   );
 }
 
