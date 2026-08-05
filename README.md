@@ -81,6 +81,34 @@ curl http://127.0.0.1:3847/health/ready
 
 브라우저는 `http://127.0.0.1:3847`을 사용합니다. `down`은 컨테이너를 내리고 `down --volumes`는 원장을 포함한 볼륨까지 삭제합니다.
 
+## Claude Code 플러그인 설치
+
+서버를 띄우는 것만으로는 이벤트가 생기지 않습니다. 이벤트를 만드는 쪽은 Claude Code에 붙는 플러그인이며, 스택이 멀쩡해도 이것이 붙어 있지 않으면 대시보드는 계속 비어 있습니다.
+
+```text
+/plugin marketplace add agent-tracer/agent-tracer
+/plugin install agent-tracer-monitor@agent-tracer
+```
+
+개발 체크아웃을 그대로 붙이려면 마켓플레이스 인자에 저장소 경로를 줍니다.
+
+```text
+/plugin marketplace add /path/to/agent-tracer
+```
+
+설치는 `.claude-plugin/marketplace.json`이 가리키는 `plugin/`을 붙이고, `plugin/hooks/hooks.json`의 훅과 statusLine, `plugin/.claude-plugin/plugin.json`의 MCP 서버를 함께 등록합니다. 훅은 모두 `plugin/bin/run-hook-claude.sh <훅 이름>`을 부르고, 이 스크립트가 `plugin/dist`의 번들을 먼저 찾아 없을 때만 `plugin/src`를 로더로 띄웁니다. 번들은 Node 24를 겨냥하므로 PATH의 node가 그보다 낮으면 훅이 stderr에 이유만 남기고 빠집니다. Claude Code를 막지 않는 대신 그 세션의 이벤트도 남지 않습니다.
+
+**설치한 뒤에는 세션을 새로 시작합니다.** 태스크 읽기 모델의 행을 만드는 것은 `agent_tracer.session.started`이고, 이 이벤트는 `SessionStart` 훅이 세션 바인딩을 새로 만들 때만 나갑니다. 이미 열려 있던 세션에서는 나머지 이벤트만 원장에 쌓이고 그 태스크는 목록에 뜨지 않습니다.
+
+플러그인이 부를 주소와 신원은 환경변수 → `~/.agent-tracer/config.json` → 기본값 순서로 정해집니다.
+
+| 값 | 환경변수 | 기본값 |
+| --- | --- | --- |
+| 서버 주소 | `MONITOR_BASE_URL`, 없으면 `MONITOR_PUBLIC_HOST`와 `MONITOR_PORT` | `http://127.0.0.1:3847` |
+| 사용자 | `MONITOR_USER_EMAIL` | `local` |
+
+사용자 값은 수집과 조회 양쪽에 쓰입니다. 수집을 기본값이 아닌 신원으로 보내고 대시보드는 기본값으로 열면 같은 원장을 보고도 목록이 비어 보입니다.
+
 ## 개발
 
 ```bash
