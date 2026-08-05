@@ -1,8 +1,10 @@
 import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
+import type {AgentBackendPort} from "~plugin/config/agent.backend.js";
 import {HttpRuleJobAdapter} from "~plugin/domain/rulegen/adapter/http.rule.job.adapter.js";
 import type {RuleGenerationReport} from "~plugin/domain/rulegen/model/rule.job.model.js";
 
 const BASE_URL = "http://127.0.0.1:3847";
+const TS_AXIS: AgentBackendPort = {current: (): Promise<string | null> => Promise.resolve("ts")};
 const REPORT: RuleGenerationReport = {
     proposals: [],
     skipped: [],
@@ -98,6 +100,49 @@ describe("HttpRuleJobAdapter.hasActiveJob", () => {
         const active = await new HttpRuleJobAdapter(BASE_URL, {}, "owner-1").hasActiveJob("task-1");
 
         expect(active).toBe(false);
+    });
+});
+
+describe("HttpRuleJobAdapter 축 지목", () => {
+    it("대기 잡 조회가 고른 축을 싣는다", async () => {
+        const seen: string[] = [];
+        const fetchMock = vi.fn(async (url: string) => {
+            seen.push(url);
+            return jsonResponse({data: {items: []}});
+        });
+        vi.stubGlobal("fetch", fetchMock);
+
+        await new HttpRuleJobAdapter(BASE_URL, {}, "owner-1", TS_AXIS).pendingJobs();
+
+        expect(seen[0]).toBe(
+            `${BASE_URL}/api/agent/jobs?kind=rule.generation&status=pending&backend=ts`,
+        );
+    });
+
+    it("잡 수명주기 창구도 고른 축을 싣는다", async () => {
+        const seen: string[] = [];
+        const fetchMock = vi.fn(async (url: string) => {
+            seen.push(url);
+            return jsonResponse({}, 200);
+        });
+        vi.stubGlobal("fetch", fetchMock);
+
+        await new HttpRuleJobAdapter(BASE_URL, {}, "owner-1", TS_AXIS).claim("job-1");
+
+        expect(seen[0]).toBe(`${BASE_URL}/api/agent/jobs/job-1/start?backend=ts`);
+    });
+
+    it("고른 축이 없으면 URL을 그대로 둔다", async () => {
+        const seen: string[] = [];
+        const fetchMock = vi.fn(async (url: string) => {
+            seen.push(url);
+            return jsonResponse({data: {items: []}});
+        });
+        vi.stubGlobal("fetch", fetchMock);
+
+        await new HttpRuleJobAdapter(BASE_URL, {}, "owner-1").pendingJobs();
+
+        expect(seen[0]).toBe(`${BASE_URL}/api/agent/jobs?kind=rule.generation&status=pending`);
     });
 });
 

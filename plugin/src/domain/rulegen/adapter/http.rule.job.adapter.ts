@@ -1,5 +1,6 @@
 import {JOB_KIND, JOB_STATUS, RULE_GENERATION_FOCUS} from "@agent-tracer/kernel/job/job.const.js";
 import {MONITOR_LEASE_OWNER_HEADER} from "@agent-tracer/kernel/user/user.header.const.js";
+import {NO_AGENT_BACKEND, withAgentBackend, type AgentBackendPort} from "~plugin/config/agent.backend.js";
 import {getJson, postJson} from "~plugin/config/http.js";
 import type {
     PendingRuleJob,
@@ -82,12 +83,15 @@ export class HttpRuleJobAdapter implements RuleJobPort {
         private readonly baseUrl: string,
         private readonly headers: Record<string, string>,
         leaseOwner: string,
+        private readonly backend: AgentBackendPort = NO_AGENT_BACKEND,
     ) {
         this.leaseHeaders = {...headers, [MONITOR_LEASE_OWNER_HEADER]: leaseOwner};
     }
 
     async pendingJobs(): Promise<readonly PendingRuleJob[]> {
-        const url = `${this.baseUrl}${AGENT_JOBS}?kind=${encodeURIComponent(JOB_KIND.ruleGeneration)}&status=${encodeURIComponent(JOB_STATUS.pending)}`;
+        const url = await this.agentUrl(
+            `${AGENT_JOBS}?kind=${encodeURIComponent(JOB_KIND.ruleGeneration)}&status=${encodeURIComponent(JOB_STATUS.pending)}`,
+        );
         const fetched = await getJson<JobListEnvelope>(url, this.headers);
         return fetched.kind === "found" ? (fetched.value.data?.items ?? []) : [];
     }
@@ -110,12 +114,12 @@ export class HttpRuleJobAdapter implements RuleJobPort {
     }
 
     async claim(jobId: string): Promise<boolean> {
-        const response = await postJson(this.jobUrl(jobId, "start"), this.leaseHeaders, {});
+        const response = await postJson(await this.jobUrl(jobId, "start"), this.leaseHeaders, {});
         return response.ok;
     }
 
     async renewLease(jobId: string): Promise<RuleJobLeaseState> {
-        const response = await postJson(this.jobUrl(jobId, "lease"), this.leaseHeaders, {});
+        const response = await postJson(await this.jobUrl(jobId, "lease"), this.leaseHeaders, {});
         if (!response.ok) return HELD_LEASE;
         const body = await response.json() as LeaseEnvelope;
         return body.data ?? HELD_LEASE;
@@ -124,7 +128,11 @@ export class HttpRuleJobAdapter implements RuleJobPort {
     async reportResult(jobId: string, report: RuleGenerationReport): Promise<boolean> {
         for (let attempt = 1; attempt <= REPORT_MAX_ATTEMPTS; attempt += 1) {
             try {
-                const response = await postJson(this.jobUrl(jobId, "results"), this.leaseHeaders, resultBody(report));
+                const response = await postJson(
+                    await this.jobUrl(jobId, "results"),
+                    this.leaseHeaders,
+                    resultBody(report),
+                );
                 if (response.ok) return true;
                 throw new Error(`HTTP ${response.status}`);
             } catch (error) {
@@ -139,22 +147,24 @@ export class HttpRuleJobAdapter implements RuleJobPort {
     }
 
     async fail(jobId: string, failure: RuleGenerationFailure): Promise<void> {
-        await postJson(this.jobUrl(jobId, "fail"), this.leaseHeaders, failureBody(failure));
+        await postJson(await this.jobUrl(jobId, "fail"), this.leaseHeaders, failureBody(failure));
     }
 
     async release(jobId: string): Promise<void> {
-        await postJson(this.jobUrl(jobId, "release"), this.leaseHeaders, {});
+        await postJson(await this.jobUrl(jobId, "release"), this.leaseHeaders, {});
     }
 
     async hasActiveJob(taskId: string): Promise<boolean> {
-        const url = `${this.baseUrl}${AGENT_JOBS}/latest?kind=${encodeURIComponent(JOB_KIND.ruleGeneration)}&taskId=${encodeURIComponent(taskId)}`;
+        const url = await this.agentUrl(
+            `${AGENT_JOBS}/latest?kind=${encodeURIComponent(JOB_KIND.ruleGeneration)}&taskId=${encodeURIComponent(taskId)}`,
+        );
         const fetched = await getJson<LatestJobEnvelope>(url, this.headers);
         const status = fetched.kind === "found" ? fetched.value.data?.job?.status : undefined;
         return status !== undefined && ACTIVE_STATUSES.has(status);
     }
 
     async enqueue(taskId: string, anchorEventId: string, maxRules: number): Promise<boolean> {
-        const response = await postJson(`${this.baseUrl}${AGENT_JOBS}`, this.headers, {
+        const response = await postJson(await this.agentUrl(AGENT_JOBS), this.headers, {
             kind: JOB_KIND.ruleGeneration,
             input: {
                 taskId,
@@ -167,8 +177,13 @@ export class HttpRuleJobAdapter implements RuleJobPort {
         return response.ok;
     }
 
-    private jobUrl(jobId: string, action: string): string {
-        return `${this.baseUrl}${AGENT_JOBS}/${encodeURIComponent(jobId)}/${action}`;
+    private jobUrl(jobId: string, action: string): Promise<string> {
+        return this.agentUrl(`${AGENT_JOBS}/${encodeURIComponent(jobId)}/${action}`);
+    }
+
+    /** 축을 지목하지 않은 요청은 상류가 둘인 배포에서 게이트웨이가 거절하므로 여기서만 URL을 세운다. */
+    private async agentUrl(path: string): Promise<string> {
+        return withAgentBackend(`${this.baseUrl}${path}`, await this.backend.current());
     }
 }
 

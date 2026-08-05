@@ -1,4 +1,5 @@
 import {APP_SETTING_KEYS} from "@agent-tracer/kernel/settings/setting.const.js";
+import {NO_AGENT_BACKEND, withAgentBackend, type AgentBackendPort} from "~plugin/config/agent.backend.js";
 import {getJson} from "~plugin/config/http.js";
 import {
     parseMaxRulesPerTask,
@@ -16,10 +17,12 @@ export class HttpRuleSettingAdapter implements RuleSettingPort {
     constructor(
         private readonly baseUrl: string,
         private readonly headers: Record<string, string>,
+        private readonly backend: AgentBackendPort = NO_AGENT_BACKEND,
     ) {}
 
     async fetch(): Promise<Fetched<RuleGenerationSettings>> {
-        const fetched = await getJson<SettingsEnvelope>(`${this.baseUrl}/api/agent/settings`, this.headers);
+        const url = withAgentBackend(`${this.baseUrl}/api/agent/settings`, await this.backend.current());
+        const fetched = await getJson<SettingsEnvelope>(url, this.headers);
         if (fetched.kind !== "found") return fetched;
         const items = fetched.value.data?.items;
         if (items === undefined) return {kind: "unavailable"};
