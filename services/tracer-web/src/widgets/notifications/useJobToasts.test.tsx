@@ -1,6 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { JOB_KIND, JOB_STATUS } from "~tracer-web/entities/job/model/job.js";
+import type { JobKind } from "~tracer-web/entities/job/model/job.js";
 import type { MonitorRealtimeMessage } from "~tracer-web/app/realtime/messages.js";
 import { useJobToasts } from "~tracer-web/widgets/notifications/useJobToasts.js";
 import { useToastStore } from "~tracer-web/widgets/notifications/toastStore.js";
@@ -89,6 +90,21 @@ describe("useJobToasts", () => {
       tone: "error",
       title: "Task cleanup failed",
       body: "API key missing",
+    });
+  });
+
+  it("이 대시보드가 모르는 잡 종류도 이름을 그대로 보인다", () => {
+    const { result } = renderHook(() => useJobToasts());
+
+    act(() => {
+      result.current({
+        type: "job.updated",
+        payload: { kind: "rule.generation" as JobKind, status: JOB_STATUS.completed },
+      } satisfies MonitorRealtimeMessage);
+    });
+
+    expect(useToastStore.getState().toasts[0]).toMatchObject({
+      title: "rule.generation complete",
     });
   });
 });
