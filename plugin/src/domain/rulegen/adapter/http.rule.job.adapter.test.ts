@@ -1,3 +1,4 @@
+import {RecordingRulegenLog} from "~plugin/domain/rulegen/port/__fakes__/recording.rulegen.log.js";
 import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
 import type {AgentBackendPort} from "~plugin/config/agent.backend.js";
 import {HttpRuleJobAdapter} from "~plugin/domain/rulegen/adapter/http.rule.job.adapter.js";
@@ -36,7 +37,7 @@ describe("HttpRuleJobAdapter.reportResult", () => {
         const fetchMock = vi.fn(async () => jsonResponse({}, 200));
         vi.stubGlobal("fetch", fetchMock);
 
-        const ok = await new HttpRuleJobAdapter(BASE_URL, {}, "owner-1").reportResult("job-1", REPORT);
+        const ok = await new HttpRuleJobAdapter(BASE_URL, {}, "owner-1", new RecordingRulegenLog()).reportResult("job-1", REPORT);
 
         expect(ok).toBe(true);
         expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -47,7 +48,7 @@ describe("HttpRuleJobAdapter.reportResult", () => {
         vi.stubGlobal("fetch", fetchMock);
         const stderrSpy = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
-        const promise = new HttpRuleJobAdapter(BASE_URL, {}, "owner-1").reportResult("job-1", REPORT);
+        const promise = new HttpRuleJobAdapter(BASE_URL, {}, "owner-1", new RecordingRulegenLog()).reportResult("job-1", REPORT);
         await vi.advanceTimersByTimeAsync(500);
         await vi.advanceTimersByTimeAsync(1000);
         const ok = await promise;
@@ -65,7 +66,7 @@ describe("HttpRuleJobAdapter.reportResult", () => {
         });
         vi.stubGlobal("fetch", fetchMock);
 
-        const promise = new HttpRuleJobAdapter(BASE_URL, {}, "owner-1").reportResult("job-1", REPORT);
+        const promise = new HttpRuleJobAdapter(BASE_URL, {}, "owner-1", new RecordingRulegenLog()).reportResult("job-1", REPORT);
         await vi.advanceTimersByTimeAsync(500);
         const ok = await promise;
 
@@ -79,7 +80,7 @@ describe("HttpRuleJobAdapter.hasActiveJob", () => {
         for (const status of ["pending", "running"]) {
             vi.stubGlobal("fetch", vi.fn(async () => jsonResponse({data: {job: {status}}})));
 
-            const active = await new HttpRuleJobAdapter(BASE_URL, {}, "owner-1").hasActiveJob("task-1");
+            const active = await new HttpRuleJobAdapter(BASE_URL, {}, "owner-1", new RecordingRulegenLog()).hasActiveJob("task-1");
 
             expect(active).toBe(true);
             vi.unstubAllGlobals();
@@ -89,7 +90,7 @@ describe("HttpRuleJobAdapter.hasActiveJob", () => {
     it("completed 같은 종결 상태는 활성 잡이 아니다", async () => {
         vi.stubGlobal("fetch", vi.fn(async () => jsonResponse({data: {job: {status: "completed"}}})));
 
-        const active = await new HttpRuleJobAdapter(BASE_URL, {}, "owner-1").hasActiveJob("task-1");
+        const active = await new HttpRuleJobAdapter(BASE_URL, {}, "owner-1", new RecordingRulegenLog()).hasActiveJob("task-1");
 
         expect(active).toBe(false);
     });
@@ -97,7 +98,7 @@ describe("HttpRuleJobAdapter.hasActiveJob", () => {
     it("잡이 없으면 활성 잡이 아니다", async () => {
         vi.stubGlobal("fetch", vi.fn(async () => jsonResponse({data: {job: null}})));
 
-        const active = await new HttpRuleJobAdapter(BASE_URL, {}, "owner-1").hasActiveJob("task-1");
+        const active = await new HttpRuleJobAdapter(BASE_URL, {}, "owner-1", new RecordingRulegenLog()).hasActiveJob("task-1");
 
         expect(active).toBe(false);
     });
@@ -112,7 +113,7 @@ describe("HttpRuleJobAdapter 축 지목", () => {
         });
         vi.stubGlobal("fetch", fetchMock);
 
-        await new HttpRuleJobAdapter(BASE_URL, {}, "owner-1", TS_AXIS).pendingJobs();
+        await new HttpRuleJobAdapter(BASE_URL, {}, "owner-1", new RecordingRulegenLog(), TS_AXIS).pendingJobs();
 
         expect(seen[0]).toBe(
             `${BASE_URL}/api/agent/jobs?kind=rule.generation&status=pending&backend=ts`,
@@ -127,7 +128,7 @@ describe("HttpRuleJobAdapter 축 지목", () => {
         });
         vi.stubGlobal("fetch", fetchMock);
 
-        await new HttpRuleJobAdapter(BASE_URL, {}, "owner-1", TS_AXIS).claim("job-1");
+        await new HttpRuleJobAdapter(BASE_URL, {}, "owner-1", new RecordingRulegenLog(), TS_AXIS).claim("job-1");
 
         expect(seen[0]).toBe(`${BASE_URL}/api/agent/jobs/job-1/start?backend=ts`);
     });
@@ -140,7 +141,7 @@ describe("HttpRuleJobAdapter 축 지목", () => {
         });
         vi.stubGlobal("fetch", fetchMock);
 
-        await new HttpRuleJobAdapter(BASE_URL, {}, "owner-1").pendingJobs();
+        await new HttpRuleJobAdapter(BASE_URL, {}, "owner-1", new RecordingRulegenLog()).pendingJobs();
 
         expect(seen[0]).toBe(`${BASE_URL}/api/agent/jobs?kind=rule.generation&status=pending`);
     });
@@ -153,7 +154,7 @@ describe("HttpRuleJobAdapter.renewLease", () => {
             vi.fn(async () => jsonResponse({data: {leaseHeld: false, canceled: true}})),
         );
 
-        const lease = await new HttpRuleJobAdapter(BASE_URL, {}, "owner-1").renewLease("job-1");
+        const lease = await new HttpRuleJobAdapter(BASE_URL, {}, "owner-1", new RecordingRulegenLog()).renewLease("job-1");
 
         expect(lease).toEqual({leaseHeld: false, canceled: true});
     });
@@ -161,7 +162,7 @@ describe("HttpRuleJobAdapter.renewLease", () => {
     it("응답이 실패면 리스를 쥔 채로 fail-soft한다", async () => {
         vi.stubGlobal("fetch", vi.fn(async () => jsonResponse({}, 500)));
 
-        const lease = await new HttpRuleJobAdapter(BASE_URL, {}, "owner-1").renewLease("job-1");
+        const lease = await new HttpRuleJobAdapter(BASE_URL, {}, "owner-1", new RecordingRulegenLog()).renewLease("job-1");
 
         expect(lease).toEqual({leaseHeld: true, canceled: false});
     });
@@ -169,7 +170,7 @@ describe("HttpRuleJobAdapter.renewLease", () => {
     it("ok인데 data가 없으면 리스를 쥔 채로 방어한다", async () => {
         vi.stubGlobal("fetch", vi.fn(async () => jsonResponse({})));
 
-        const lease = await new HttpRuleJobAdapter(BASE_URL, {}, "owner-1").renewLease("job-1");
+        const lease = await new HttpRuleJobAdapter(BASE_URL, {}, "owner-1", new RecordingRulegenLog()).renewLease("job-1");
 
         expect(lease).toEqual({leaseHeld: true, canceled: false});
     });

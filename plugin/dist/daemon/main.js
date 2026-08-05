@@ -35021,6 +35021,7 @@ var RULES_PATH = "/api/v1/rules";
 var RULES_ALL_FLAG = "all";
 var RULES_ALL_FLAG_VALUE = "true";
 var RULES_ALL_PATH = `${RULES_PATH}?${RULES_ALL_FLAG}=${RULES_ALL_FLAG_VALUE}`;
+var RULE_GENERATIONS_PATH = `${RULES_PATH}/generations`;
 
 // src/domain/guardrail/adapter/http.rule.source.adapter.ts
 var FETCH_TIMEOUT_MS = 3e3;
@@ -35877,13 +35878,6 @@ var HttpRuleEvidenceAdapter = class {
   }
 };
 
-// src/domain/rulegen/model/rulegen.log.model.ts
-var RULE_GEN_LOG_PREFIX = "[rule-gen]";
-function ruleGenLogLine(message) {
-  return `${RULE_GEN_LOG_PREFIX} ${message}
-`;
-}
-
 // src/domain/rulegen/adapter/http.rule.job.adapter.ts
 var ACTIVE_STATUSES2 = /* @__PURE__ */ new Set([JOB_STATUS.pending, JOB_STATUS.running]);
 var HELD_LEASE = { leaseHeld: true, canceled: false };
@@ -35914,14 +35908,16 @@ function failureBody(failure) {
   return { message: failure.error, usage: observation(failure), steps: failure.steps };
 }
 var HttpRuleJobAdapter = class {
-  constructor(baseUrl, headers, leaseOwner, backend = NO_AGENT_BACKEND) {
+  constructor(baseUrl, headers, leaseOwner, log, backend = NO_AGENT_BACKEND) {
     this.baseUrl = baseUrl;
     this.headers = headers;
+    this.log = log;
     this.backend = backend;
     this.leaseHeaders = { ...headers, [MONITOR_LEASE_OWNER_HEADER]: leaseOwner };
   }
   baseUrl;
   headers;
+  log;
   backend;
   leaseHeaders;
   async pendingJobs() {
@@ -35968,7 +35964,7 @@ var HttpRuleJobAdapter = class {
         throw new Error(`HTTP ${response.status}`);
       } catch (error2) {
         if (attempt === REPORT_MAX_ATTEMPTS) {
-          process.stderr.write(ruleGenLogLine(`result report failed for job ${jobId}: ${String(error2)}`));
+          this.log.write(`result report failed for job ${jobId}: ${String(error2)}`);
           return false;
         }
         await sleep(REPORT_BACKOFF_MS * attempt);
@@ -36094,14 +36090,30 @@ var HttpRuleSettingAdapter = class {
   }
 };
 
+// src/domain/rulegen/model/rulegen.log.model.ts
+var RULE_GEN_LOG_PREFIX = "[rule-gen]";
+function ruleGenLogLine(message) {
+  return `${RULE_GEN_LOG_PREFIX} ${message}
+`;
+}
+
+// src/domain/rulegen/adapter/stderr.rulegen.log.adapter.ts
+var StderrRulegenLogAdapter = class {
+  write(message) {
+    process.stderr.write(ruleGenLogLine(message));
+  }
+};
+
 // src/domain/rulegen/application/enqueue.rule.job.usecase.ts
 var EnqueueRuleJobUsecase = class {
-  constructor(jobs, cache) {
+  constructor(jobs, cache, log) {
     this.jobs = jobs;
     this.cache = cache;
+    this.log = log;
   }
   jobs;
   cache;
+  log;
   async execute(kind, taskId, eventId, prompt) {
     if (!isRuleGenerationTrigger(kind, taskId, eventId, prompt)) return;
     if (!this.cache.isSupported()) return;
@@ -36109,7 +36121,7 @@ var EnqueueRuleJobUsecase = class {
       if (await this.jobs.hasActiveJob(taskId)) return;
       await this.jobs.enqueue(taskId, eventId, this.cache.snapshot().maxRulesPerTask);
     } catch (error2) {
-      process.stderr.write(ruleGenLogLine(`enqueue failed for task ${taskId}: ${String(error2)}`));
+      this.log.write(`enqueue failed for task ${taskId}: ${String(error2)}`);
     }
   }
 };
@@ -36174,21 +36186,20 @@ function toRuleGenerationRequest(job, taskId, context) {
 
 // src/domain/rulegen/application/poll.rule.jobs.usecase.ts
 var MAX_CONCURRENT_JOBS = 2;
-function log(message) {
-  process.stderr.write(ruleGenLogLine(message));
-}
 var PollRuleJobsUsecase = class {
-  constructor(jobs, runner, scheduler, settings, maxConcurrent = MAX_CONCURRENT_JOBS) {
+  constructor(jobs, runner, scheduler, settings, log, maxConcurrent = MAX_CONCURRENT_JOBS) {
     this.jobs = jobs;
     this.runner = runner;
     this.scheduler = scheduler;
     this.settings = settings;
+    this.log = log;
     this.maxConcurrent = maxConcurrent;
   }
   jobs;
   runner;
   scheduler;
   settings;
+  log;
   maxConcurrent;
   running = /* @__PURE__ */ new Map();
   hasRunning() {
@@ -36199,11 +36210,11 @@ var PollRuleJobsUsecase = class {
     const jobIds = [...this.running.keys()];
     for (const [jobId, cancel] of this.running) {
       cancel.abort(new Error("daemon shutting down"));
-      log(`releasing job ${jobId} on shutdown`);
+      this.log.write(`releasing job ${jobId} on shutdown`);
     }
     this.running.clear();
     await Promise.all(
-      jobIds.map((jobId) => this.jobs.release(jobId).catch(() => log(`failed to release job ${jobId}`)))
+      jobIds.map((jobId) => this.jobs.release(jobId).catch(() => this.log.write(`failed to release job ${jobId}`)))
     );
   }
   async execute() {
@@ -36211,7 +36222,8 @@ var PollRuleJobsUsecase = class {
     let pending;
     try {
       pending = await this.jobs.pendingJobs();
-    } catch {
+    } catch (error2) {
+      this.log.write(`could not read pending jobs: ${String(error2)}`);
       return;
     }
     for (const job of pending) {
@@ -36224,8 +36236,8 @@ var PollRuleJobsUsecase = class {
   async dispatch(job, taskId) {
     const workspacePath = await this.jobs.workspacePath(taskId);
     if (workspacePath === null) {
-      log(`no workspacePath for task ${taskId}, failing job ${job.id}`);
-      await this.jobs.fail(job.id, ruleGenerationFailure(`task ${taskId} has no workspacePath`)).catch(() => log(`failed to mark job ${job.id} failed`));
+      this.log.write(`no workspacePath for task ${taskId}, failing job ${job.id}`);
+      await this.jobs.fail(job.id, ruleGenerationFailure(`task ${taskId} has no workspacePath`)).catch(() => this.log.write(`failed to mark job ${job.id} failed`));
       return;
     }
     const anchorEventId = readJobAnchorEventId(job);
@@ -36241,11 +36253,11 @@ var PollRuleJobsUsecase = class {
     const anchorText = toRuleRequestText(rawAnchorText);
     try {
       if (!await this.jobs.claim(job.id)) {
-        log(`could not start job ${job.id}, skipping`);
+        this.log.write(`could not start job ${job.id}, skipping`);
         return;
       }
     } catch (error2) {
-      log(`could not start job ${job.id}: ${String(error2)}`);
+      this.log.write(`could not start job ${job.id}: ${String(error2)}`);
       return;
     }
     const request = toRuleGenerationRequest(job, taskId, {
@@ -36256,19 +36268,19 @@ var PollRuleJobsUsecase = class {
     const cancel = new AbortController();
     this.running.set(job.id, cancel);
     const stopHeartbeat = this.startHeartbeat(job.id, cancel);
-    log(`starting job ${job.id} for task ${taskId}`);
-    void this.runner(request, cancel.signal).then(() => log(`job ${job.id} completed`)).catch((error2) => {
-      log(`job ${job.id} threw: ${String(error2)}`);
+    this.log.write(`starting job ${job.id} for task ${taskId}`);
+    void this.runner(request, cancel.signal).then(() => this.log.write(`job ${job.id} completed`)).catch((error2) => {
+      this.log.write(`job ${job.id} threw: ${String(error2)}`);
       if (cancel.signal.aborted) return;
-      void this.jobs.fail(job.id, ruleGenerationFailure(String(error2))).catch(() => log(`failed to mark job ${job.id} failed after throw`));
+      void this.jobs.fail(job.id, ruleGenerationFailure(String(error2))).catch(() => this.log.write(`failed to mark job ${job.id} failed after throw`));
     }).finally(() => {
       stopHeartbeat();
       this.running.delete(job.id);
     });
   }
   async failInvalidAnchor(jobId, error2) {
-    log(`${error2}, failing job ${jobId}`);
-    await this.jobs.fail(jobId, ruleGenerationFailure(error2)).catch(() => log(`failed to mark job ${jobId} failed`));
+    this.log.write(`${error2}, failing job ${jobId}`);
+    await this.jobs.fail(jobId, ruleGenerationFailure(error2)).catch(() => this.log.write(`failed to mark job ${jobId} failed`));
   }
   startHeartbeat(jobId, cancel) {
     return this.scheduler.every(LOCAL_JOB_LEASE_HEARTBEAT_MS, () => {
@@ -36663,16 +36675,18 @@ function buildRuleGenerationSpec(request) {
 init_rulegen_tool_model();
 var RESULT_REPORT_FAILED = "result report failed";
 var RunRuleJobUsecase = class {
-  constructor(evidence, generator, jobs, clock) {
+  constructor(evidence, generator, jobs, clock, log) {
     this.evidence = evidence;
     this.generator = generator;
     this.jobs = jobs;
     this.clock = clock;
+    this.log = log;
   }
   evidence;
   generator;
   jobs;
   clock;
+  log;
   async execute(request, cancelSignal) {
     const spec = buildRuleGenerationSpec(request);
     const deadline = createDeadline(spec.deadlineMs, cancelSignal);
@@ -36728,7 +36742,7 @@ var RunRuleJobUsecase = class {
     }
     const screened = this.screen(outcome3.candidates, ledger);
     for (const error2 of screened.errors) {
-      process.stderr.write(ruleGenLogLine(`dropped proposal after repair: ${error2}`));
+      this.log.write(`dropped proposal after repair: ${error2}`);
     }
     return { outcome: outcome3, proposals: screened.proposals, skipped: screened.errors };
   }
@@ -36808,12 +36822,14 @@ function composeDaemonHooks(leaseOwner) {
   };
   const hint = { computeHints: new ComputeHintsUsecase(clock) };
   const requestScan = new RequestRecipeScanUsecase(new HttpRecipeScanJobAdapter(baseUrl, headers, agentBackend));
-  const jobs = new HttpRuleJobAdapter(baseUrl, headers, leaseOwner, agentBackend);
+  const rulegenLog = new StderrRulegenLogAdapter();
+  const jobs = new HttpRuleJobAdapter(baseUrl, headers, leaseOwner, rulegenLog, agentBackend);
   const runRuleJob = new RunRuleJobUsecase(
     new HttpRuleEvidenceAdapter(baseUrl, headers),
     new AgentRuleGeneratorAdapter(new ClaudeRuleAgentRunnerAdapter()),
     jobs,
-    clock
+    clock,
+    rulegenLog
   );
   const ruleSettingCache = new RuleGenerationSettingCache();
   const rulegen = {
@@ -36821,13 +36837,14 @@ function composeDaemonHooks(leaseOwner) {
       jobs,
       (request, signal) => runRuleJob.execute(request, signal),
       scheduler,
-      ruleSettingCache
+      ruleSettingCache,
+      rulegenLog
     ),
     refreshSetting: new RefreshRuleSettingUsecase(
       new HttpRuleSettingAdapter(baseUrl, headers, agentBackend),
       ruleSettingCache
     ),
-    enqueueRuleJob: new EnqueueRuleJobUsecase(jobs, ruleSettingCache)
+    enqueueRuleJob: new EnqueueRuleJobUsecase(jobs, ruleSettingCache, rulegenLog)
   };
   return {
     guardrail,

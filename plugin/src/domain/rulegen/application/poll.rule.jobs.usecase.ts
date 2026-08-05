@@ -10,15 +10,11 @@ import {
     type PendingRuleJob,
     type RuleJobRunner,
 } from "~plugin/domain/rulegen/model/rule.job.model.js";
-import {ruleGenLogLine} from "~plugin/domain/rulegen/model/rulegen.log.model.js";
+import type {RulegenLogPort} from "~plugin/domain/rulegen/port/log.port.js";
 import type {RuleJobPort} from "~plugin/domain/rulegen/port/rule.job.port.js";
 import type {SchedulerPort} from "~plugin/domain/rulegen/port/scheduler.port.js";
 
 const MAX_CONCURRENT_JOBS = 2;
-
-function log(message: string): void {
-    process.stderr.write(ruleGenLogLine(message));
-}
 
 /** 대기 중인 규칙 생성 잡을 클레임해 로컬 실행기에 넘기고 리스를 살려 둔다. */
 export class PollRuleJobsUsecase {
@@ -29,6 +25,7 @@ export class PollRuleJobsUsecase {
         private readonly runner: RuleJobRunner,
         private readonly scheduler: SchedulerPort,
         private readonly settings: RuleGenerationSettingCache,
+        private readonly log: RulegenLogPort,
         private readonly maxConcurrent: number = MAX_CONCURRENT_JOBS,
     ) {}
 
@@ -41,11 +38,11 @@ export class PollRuleJobsUsecase {
         const jobIds = [...this.running.keys()];
         for (const [jobId, cancel] of this.running) {
             cancel.abort(new Error("daemon shutting down"));
-            log(`releasing job ${jobId} on shutdown`);
+            this.log.write(`releasing job ${jobId} on shutdown`);
         }
         this.running.clear();
         await Promise.all(
-            jobIds.map((jobId) => this.jobs.release(jobId).catch(() => log(`failed to release job ${jobId}`))),
+            jobIds.map((jobId) => this.jobs.release(jobId).catch(() => this.log.write(`failed to release job ${jobId}`))),
         );
     }
 
@@ -54,7 +51,8 @@ export class PollRuleJobsUsecase {
         let pending: readonly PendingRuleJob[];
         try {
             pending = await this.jobs.pendingJobs();
-        } catch {
+        } catch (error) {
+            this.log.write(`could not read pending jobs: ${String(error)}`);
             return;
         }
 
@@ -69,9 +67,9 @@ export class PollRuleJobsUsecase {
     private async dispatch(job: PendingRuleJob, taskId: string): Promise<void> {
         const workspacePath = await this.jobs.workspacePath(taskId);
         if (workspacePath === null) {
-            log(`no workspacePath for task ${taskId}, failing job ${job.id}`);
+            this.log.write(`no workspacePath for task ${taskId}, failing job ${job.id}`);
             await this.jobs.fail(job.id, ruleGenerationFailure(`task ${taskId} has no workspacePath`))
-                .catch(() => log(`failed to mark job ${job.id} failed`));
+                .catch(() => this.log.write(`failed to mark job ${job.id} failed`));
             return;
         }
 
@@ -89,11 +87,11 @@ export class PollRuleJobsUsecase {
 
         try {
             if (!await this.jobs.claim(job.id)) {
-                log(`could not start job ${job.id}, skipping`);
+                this.log.write(`could not start job ${job.id}, skipping`);
                 return;
             }
         } catch (error) {
-            log(`could not start job ${job.id}: ${String(error)}`);
+            this.log.write(`could not start job ${job.id}: ${String(error)}`);
             return;
         }
         const request = toRuleGenerationRequest(job, taskId, {
@@ -105,15 +103,15 @@ export class PollRuleJobsUsecase {
         const cancel = new AbortController();
         this.running.set(job.id, cancel);
         const stopHeartbeat = this.startHeartbeat(job.id, cancel);
-        log(`starting job ${job.id} for task ${taskId}`);
+        this.log.write(`starting job ${job.id} for task ${taskId}`);
 
         void this.runner(request, cancel.signal)
-            .then(() => log(`job ${job.id} completed`))
+            .then(() => this.log.write(`job ${job.id} completed`))
             .catch((error: unknown) => {
-                log(`job ${job.id} threw: ${String(error)}`);
+                this.log.write(`job ${job.id} threw: ${String(error)}`);
                 if (cancel.signal.aborted) return;
                 void this.jobs.fail(job.id, ruleGenerationFailure(String(error)))
-                    .catch(() => log(`failed to mark job ${job.id} failed after throw`));
+                    .catch(() => this.log.write(`failed to mark job ${job.id} failed after throw`));
             })
             .finally(() => {
                 stopHeartbeat();
@@ -122,9 +120,9 @@ export class PollRuleJobsUsecase {
     }
 
     private async failInvalidAnchor(jobId: string, error: string): Promise<void> {
-        log(`${error}, failing job ${jobId}`);
+        this.log.write(`${error}, failing job ${jobId}`);
         await this.jobs.fail(jobId, ruleGenerationFailure(error))
-            .catch(() => log(`failed to mark job ${jobId} failed`));
+            .catch(() => this.log.write(`failed to mark job ${jobId} failed`));
     }
 
     private startHeartbeat(jobId: string, cancel: AbortController): () => void {

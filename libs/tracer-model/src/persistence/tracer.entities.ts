@@ -3,6 +3,7 @@ import { DaemonHealthEntity } from "../daemon/daemon.health.entity.js";
 import { MemoEntity } from "../memo/memo.entity.js";
 import { RecipeApplicationEntity } from "../recipe/application/recipe.application.entity.js";
 import { RecipeEntity } from "../recipe/recipe.entity.js";
+import { RuleGenerationEntity } from "../rule/generation/rule.generation.entity.js";
 import { RuleEntity } from "../rule/rule.entity.js";
 import { VerdictEntity } from "../rule/verification/verdict.entity.js";
 import { SearchOutboxEntity } from "../search/search.outbox.entity.js";
@@ -23,6 +24,7 @@ export const TRACER_ENTITIES = [
     EventEntity,
     TurnEntity,
     RuleEntity,
+    RuleGenerationEntity,
     VerdictEntity,
     RecipeEntity,
     RecipeApplicationEntity,

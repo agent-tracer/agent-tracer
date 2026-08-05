@@ -13,6 +13,7 @@ export const REBUILDABLE_TABLES = [
 // 원장에 대응 이벤트가 없어 재생할 수 없는 소유 상태이며 리빌드가 절대 건드리지 않는다.
 export const OWNED_TABLES = [
     "rules",
+    "rule_generations",
     "recipes",
     "users",
     "task_user_state",

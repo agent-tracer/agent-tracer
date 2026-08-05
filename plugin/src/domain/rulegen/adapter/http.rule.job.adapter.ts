@@ -9,7 +9,7 @@ import type {
     RuleGenerationUsage,
     RuleJobLeaseState,
 } from "~plugin/domain/rulegen/model/rule.job.model.js";
-import {ruleGenLogLine} from "~plugin/domain/rulegen/model/rulegen.log.model.js";
+import type {RulegenLogPort} from "~plugin/domain/rulegen/port/log.port.js";
 import type {RuleJobPort} from "~plugin/domain/rulegen/port/rule.job.port.js";
 
 const ACTIVE_STATUSES: ReadonlySet<string> = new Set([JOB_STATUS.pending, JOB_STATUS.running]);
@@ -83,6 +83,7 @@ export class HttpRuleJobAdapter implements RuleJobPort {
         private readonly baseUrl: string,
         private readonly headers: Record<string, string>,
         leaseOwner: string,
+        private readonly log: RulegenLogPort,
         private readonly backend: AgentBackendPort = NO_AGENT_BACKEND,
     ) {
         this.leaseHeaders = {...headers, [MONITOR_LEASE_OWNER_HEADER]: leaseOwner};
@@ -137,7 +138,7 @@ export class HttpRuleJobAdapter implements RuleJobPort {
                 throw new Error(`HTTP ${response.status}`);
             } catch (error) {
                 if (attempt === REPORT_MAX_ATTEMPTS) {
-                    process.stderr.write(ruleGenLogLine(`result report failed for job ${jobId}: ${String(error)}`));
+                    this.log.write(`result report failed for job ${jobId}: ${String(error)}`);
                     return false;
                 }
                 await sleep(REPORT_BACKOFF_MS * attempt);
