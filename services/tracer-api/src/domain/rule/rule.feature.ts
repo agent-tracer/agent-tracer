@@ -10,6 +10,7 @@ import {
 import { RuleUlidGenerator } from "~tracer-api/domain/rule/adapter/rule.ulid.generator.js";
 import { ApproveRuleUseCase } from "~tracer-api/domain/rule/application/command/approve.rule.usecase.js";
 import { CancelRuleGenerationUseCase } from "~tracer-api/domain/rule/application/command/cancel.rule.generation.usecase.js";
+import { DeleteRuleGenerationUseCase } from "~tracer-api/domain/rule/application/command/delete.rule.generation.usecase.js";
 import { CreateRuleUseCase } from "~tracer-api/domain/rule/application/command/create.rule.usecase.js";
 import { LeaseRuleGenerationUseCase } from "~tracer-api/domain/rule/application/command/lease.rule.generation.usecase.js";
 import { SaveRuleGenerationSettingsUseCase } from "~tracer-api/domain/rule/application/command/save.rule.generation.settings.usecase.js";
@@ -53,6 +54,7 @@ export const ruleFeature = {
         LeaseRuleGenerationUseCase,
         SettleRuleGenerationUseCase,
         CancelRuleGenerationUseCase,
+        DeleteRuleGenerationUseCase,
         ListRuleGenerationsUseCase,
         SaveRuleGenerationSettingsUseCase,
         RuleBackfillService,

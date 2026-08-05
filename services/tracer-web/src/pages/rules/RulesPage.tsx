@@ -9,9 +9,10 @@ import { Button, GuidanceText, Modal } from "~tracer-web/shared/ui/index.js";
 import { useRuleGenerationsQuery } from "~tracer-web/entities/rule/api/rule-generation-queries.js";
 import { RuleForm } from "~tracer-web/widgets/rules/editor/RuleForm.js";
 import { RuleGenerationDialog } from "~tracer-web/widgets/rules/generation/RuleGenerationDialog.js";
-import { RuleGenerationStrip } from "~tracer-web/widgets/rules/generation/RuleGenerationStrip.js";
+import { RuleGenerationHistory } from "~tracer-web/widgets/rules/generation/RuleGenerationHistory.js";
 import { RuleFilterBar, type SeverityFilter, type SourceFilter } from "~tracer-web/widgets/rules/RuleFilterBar.js";
 import { RuleListItem } from "~tracer-web/widgets/rules/RuleListItem.js";
+import { RuleSectionTabs, type RuleSectionTab } from "~tracer-web/widgets/rules/RuleSectionTabs.js";
 
 /** `/rules`. 워크스페이스 전체 규칙 관리 화면이다. */
 export function RulesPage() {
@@ -28,7 +29,10 @@ export function RulesPage() {
   const [source, setSource] = useState<SourceFilter>("all");
   const [editingRule, setEditingRule] = useState<RuleRecord | null>(null);
   const [creating, setCreating] = useState<"none" | "generate" | "manual">("none");
+  const [tab, setTab] = useState<RuleSectionTab>("rules");
   const generations = useRuleGenerationsQuery();
+  const records = generations.data ?? [];
+  const running = records.filter((r) => r.status === "pending" || r.status === "running").length;
 
   const filtered = useMemo(() => {
     if (!data) return [];
@@ -65,63 +69,74 @@ export function RulesPage() {
             locale={guidance.locale}
             message={guidance.messages.rules.workspaceIntroduction}
           />
-          <p className="mt-1 mb-0 text-[12.5px] text-ink-subtle">
-            {isLoading
-              ? "Loading…"
-              : data
-                ? `${data.rules.length} rule${data.rules.length === 1 ? "" : "s"} configured`
-                : "Couldn't load rules."}
-          </p>
+          {tab === "rules" && (
+            <p className="mt-1 mb-0 text-[12.5px] text-ink-subtle">
+              {isLoading
+                ? "Loading…"
+                : data
+                  ? `${data.rules.length} rule${data.rules.length === 1 ? "" : "s"} configured`
+                  : "Couldn't load rules."}
+            </p>
+          )}
         </div>
-
-        <RuleFilterBar
-          severity={severity}
-          onSeverityChange={setSeverity}
-          search={search}
-          onSearchChange={setSearch}
-          source={source}
-          onSourceChange={setSource}
-        />
       </header>
 
-      <div className="px-9 py-6 flex flex-col gap-2.5">
-        {(generations.data ?? []).slice(0, 3).map((record) => (
-          <RuleGenerationStrip key={record.id} record={record} />
-        ))}
-        {isError && (
-          <div className="text-err text-[12.5px]">
-            <p className="m-0">Couldn't load rules.</p>
-            <GuidanceText
-              as="p"
-              className="mt-1 mb-0"
-              locale={guidance.locale}
-              message={guidance.messages.rules.loadError}
-            />
-          </div>
-        )}
-        {!isLoading && filtered.length === 0 && (
-          data && data.rules.length === 0 ? (
-            <GuidanceText
-              as="p"
-              className="text-[12.5px] text-ink-subtle text-center py-8"
-              locale={guidance.locale}
-              message={guidance.messages.rules.workspaceEmpty}
-            />
-          ) : (
-            <p className="text-[12.5px] text-ink-subtle text-center py-8">
-              No rules match the current filters.
-            </p>
-          )
-        )}
-        {filtered.map((rule) => (
-          <RuleListItem
-            key={rule.id}
-            rule={rule}
-            onEdit={setEditingRule}
-            task={taskById.get(rule.taskId) ?? null}
+      <RuleSectionTabs
+        active={tab}
+        onSelect={setTab}
+        counts={{ rules: data?.rules.length ?? 0, generations: records.length }}
+        runningGenerations={running}
+      />
+
+      {tab === "generations" ? (
+        <div className="px-9 py-6 flex flex-col gap-2.5">
+          <RuleGenerationHistory records={records} isLoading={generations.isLoading} />
+        </div>
+      ) : (
+        <div className="px-9 py-6 flex flex-col gap-2.5">
+          <RuleFilterBar
+            severity={severity}
+            onSeverityChange={setSeverity}
+            search={search}
+            onSearchChange={setSearch}
+            source={source}
+            onSourceChange={setSource}
           />
-        ))}
-      </div>
+          {isError && (
+            <div className="text-err text-[12.5px]">
+              <p className="m-0">Couldn't load rules.</p>
+              <GuidanceText
+                as="p"
+                className="mt-1 mb-0"
+                locale={guidance.locale}
+                message={guidance.messages.rules.loadError}
+              />
+            </div>
+          )}
+          {!isLoading && filtered.length === 0 && (
+            data && data.rules.length === 0 ? (
+              <GuidanceText
+                as="p"
+                className="text-[12.5px] text-ink-subtle text-center py-8"
+                locale={guidance.locale}
+                message={guidance.messages.rules.workspaceEmpty}
+              />
+            ) : (
+              <p className="text-[12.5px] text-ink-subtle text-center py-8">
+                No rules match the current filters.
+              </p>
+            )
+          )}
+          {filtered.map((rule) => (
+            <RuleListItem
+              key={rule.id}
+              rule={rule}
+              onEdit={setEditingRule}
+              task={taskById.get(rule.taskId) ?? null}
+            />
+          ))}
+        </div>
+      )}
 
       <Modal
         open={creating !== "none"}

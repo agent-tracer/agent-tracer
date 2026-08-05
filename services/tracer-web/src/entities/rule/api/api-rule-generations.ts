@@ -5,7 +5,7 @@ import {
   type RuleGenerationSettingsDto,
 } from "@agent-tracer/kernel";
 import type { TaskId } from "~tracer-web/shared/identity.js";
-import { getJson, patchPut, postJson } from "~tracer-web/shared/api/client/json-methods.js";
+import { deleteRequest, getJson, patchPut, postJson } from "~tracer-web/shared/api/client/json-methods.js";
 
 /** 실행이 잰 것이며 실패해도 그때까지 청구된 값을 그대로 싣는다. */
 export interface RuleGenerationObservation {
@@ -60,6 +60,14 @@ export function cancelRuleGeneration(
   id: string,
 ): Promise<{ readonly request: RuleGenerationRecord; readonly canceled: boolean }> {
   return postJson(`${RULE_GENERATIONS_PATH}/${encodeURIComponent(id)}/cancel`, {});
+}
+
+export function deleteRuleGeneration(id: string): Promise<{ readonly deleted: boolean }> {
+  return deleteRequest(`${RULE_GENERATIONS_PATH}/${encodeURIComponent(id)}`);
+}
+
+export function clearRuleGenerations(): Promise<{ readonly deleted: number }> {
+  return deleteRequest(RULE_GENERATIONS_PATH);
 }
 
 export async function fetchRuleGenerationSettings(): Promise<RuleGenerationSettingsDto> {

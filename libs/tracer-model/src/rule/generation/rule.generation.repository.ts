@@ -12,6 +12,12 @@ const ACTIVE_STATUSES: readonly RuleGenerationStatus[] = [
     RULE_GENERATION_STATUS.running,
 ];
 
+const TERMINAL_STATUSES: readonly RuleGenerationStatus[] = [
+    RULE_GENERATION_STATUS.completed,
+    RULE_GENERATION_STATUS.failed,
+    RULE_GENERATION_STATUS.canceled,
+];
+
 /** 종결 창구가 요청에 싣는 값이다. */
 export interface RuleGenerationSettlement {
     readonly status: RuleGenerationStatus;
@@ -117,6 +123,18 @@ export class RuleGenerationRepository {
             },
         );
         return (result.affected ?? 0) > 0;
+    }
+
+    /** 실행기가 종결시킬 자리를 잃지 않도록 종료된 요청만 이력에서 지운다. */
+    async deleteTerminal(userId: string, id: string): Promise<boolean> {
+        const result = await this.repo.delete({ id, userId, status: In([...TERMINAL_STATUSES]) });
+        return (result.affected ?? 0) > 0;
+    }
+
+    /** 종료된 요청을 모두 지우고 지운 수를 돌려준다. */
+    async deleteAllTerminal(userId: string): Promise<number> {
+        const result = await this.repo.delete({ userId, status: In([...TERMINAL_STATUSES]) });
+        return result.affected ?? 0;
     }
 
     /** 리스가 끊긴 채 남은 요청을 대기로 돌려 다음 실행기가 집을 수 있게 한다. */
