@@ -14,6 +14,7 @@ export const REBUILDABLE_TABLES = [
 export const OWNED_TABLES = [
     "rules",
     "rule_generations",
+    "rule_generation_settings",
     "recipes",
     "users",
     "task_user_state",

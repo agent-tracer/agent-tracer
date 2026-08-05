@@ -1,6 +1,7 @@
 import type {
     PendingRuleJob,
     RuleGenerationFailure,
+    RuleAnchorEvidence,
     RuleGenerationReport,
     RuleJobLeaseState,
 } from "~plugin/domain/rulegen/model/rule.job.model.js";
@@ -22,7 +23,7 @@ export class InMemoryRuleJob implements RuleJobPort {
     readonly renewed: string[] = [];
 
     workspaces = new Map<string, string>();
-    anchors = new Map<string, string>();
+    anchors = new Map<string, RuleAnchorEvidence>();
     lease: RuleJobLeaseState = {leaseHeld: true, canceled: false};
     claimable = true;
     reportOk = true;
@@ -39,7 +40,7 @@ export class InMemoryRuleJob implements RuleJobPort {
         return this.workspaces.get(taskId) ?? null;
     }
 
-    async anchorText(_taskId: string, anchorEventId: string): Promise<string | undefined> {
+    async anchor(_taskId: string, anchorEventId: string): Promise<RuleAnchorEvidence | undefined> {
         return this.anchors.get(anchorEventId);
     }
 

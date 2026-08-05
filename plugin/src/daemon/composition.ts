@@ -11,9 +11,9 @@ import {RequestRecipeScanUsecase} from "~plugin/domain/recipe/application/reques
 import {AgentRuleGeneratorAdapter} from "~plugin/domain/rulegen/adapter/agent.rule.generator.adapter.js";
 import {ClaudeRuleAgentRunnerAdapter} from "~plugin/domain/rulegen/adapter/claude.rule.agent.runner.adapter.js";
 import {HttpRuleEvidenceAdapter} from "~plugin/domain/rulegen/adapter/http.rule.evidence.adapter.js";
-import {HttpRuleJobAdapter} from "~plugin/domain/rulegen/adapter/http.rule.job.adapter.js";
-import {HttpRuleSettingAdapter} from "~plugin/domain/rulegen/adapter/http.rule.setting.adapter.js";
 import {StderrRulegenLogAdapter} from "~plugin/domain/rulegen/adapter/stderr.rulegen.log.adapter.js";
+import {TracerRuleGenerationAdapter} from "~plugin/domain/rulegen/adapter/tracer.rule.generation.adapter.js";
+import {TracerRuleSettingAdapter} from "~plugin/domain/rulegen/adapter/tracer.rule.setting.adapter.js";
 import {EnqueueRuleJobUsecase} from "~plugin/domain/rulegen/application/enqueue.rule.job.usecase.js";
 import {PollRuleJobsUsecase} from "~plugin/domain/rulegen/application/poll.rule.jobs.usecase.js";
 import {RefreshRuleSettingUsecase} from "~plugin/domain/rulegen/application/refresh.rule.setting.usecase.js";
@@ -61,7 +61,7 @@ export function composeDaemonHooks(leaseOwner: string): DaemonHooks {
     const requestScan = new RequestRecipeScanUsecase(new HttpRecipeScanJobAdapter(baseUrl, headers, agentBackend));
 
     const rulegenLog = new StderrRulegenLogAdapter();
-    const jobs = new HttpRuleJobAdapter(baseUrl, headers, leaseOwner, rulegenLog, agentBackend);
+    const jobs = new TracerRuleGenerationAdapter(baseUrl, headers, leaseOwner, rulegenLog);
     const runRuleJob = new RunRuleJobUsecase(
         new HttpRuleEvidenceAdapter(baseUrl, headers),
         new AgentRuleGeneratorAdapter(new ClaudeRuleAgentRunnerAdapter()),
@@ -79,7 +79,7 @@ export function composeDaemonHooks(leaseOwner: string): DaemonHooks {
             rulegenLog,
         ),
         refreshSetting: new RefreshRuleSettingUsecase(
-            new HttpRuleSettingAdapter(baseUrl, headers, agentBackend),
+            new TracerRuleSettingAdapter(baseUrl, headers),
             ruleSettingCache,
         ),
         enqueueRuleJob: new EnqueueRuleJobUsecase(jobs, ruleSettingCache, rulegenLog),

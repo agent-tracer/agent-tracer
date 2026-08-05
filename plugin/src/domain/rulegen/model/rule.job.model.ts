@@ -1,22 +1,22 @@
-import {
-    RULE_GENERATION_FOCUS,
-    normalizeRuleGenerationIntent,
-    type RuleGenerationFocus,
-} from "@agent-tracer/kernel/job/job.const.js";
+import {normalizeRuleGenerationIntent} from "@agent-tracer/kernel/job/job.const.js";
 import type {AiJobStepPayload} from "@agent-tracer/kernel/job/job.step.const.js";
 import type {RuleProposalPayload} from "@agent-tracer/kernel/rule/proposal/rule.proposal.schema.js";
 import type {RuleGenerationRequest} from "~plugin/domain/rulegen/model/rulegen.spec.model.js";
 
-/** 서버가 내려주는 대기 중 규칙 생성 잡이다. */
+/** 서버가 내려주는 대기 중 규칙 생성 요청이다. */
 export interface PendingRuleJob {
     readonly id: string;
     readonly taskId: string | null;
-    readonly input?: {
-        readonly focus?: string;
-        readonly maxRules?: number;
-        readonly intent?: unknown;
-        readonly anchorEventId?: string;
-    };
+    readonly anchorEventId?: string | null;
+    readonly intent?: unknown;
+    readonly maxRules?: number | null;
+    readonly status?: string;
+}
+
+/** 앵커가 가리키는 사용자 발화이며 turnId가 있어야 규칙이 그 턴을 인용할 수 있다. */
+export interface RuleAnchorEvidence {
+    readonly text: string;
+    readonly turnId: string | null;
 }
 
 /** 잡을 계속 쥐고 있어도 되는지 알려주는 리스 상태다. */
@@ -108,28 +108,27 @@ export function ruleGenerationFailure(error: string): RuleGenerationFailure {
 /** 폴러가 클레임한 잡 하나를 끝까지 처리하는 실행 경로다. */
 export type RuleJobRunner = (request: RuleGenerationRequest, signal: AbortSignal) => Promise<void>;
 
-export function readJobFocus(job: PendingRuleJob): RuleGenerationFocus | undefined {
-    return job.input?.focus === RULE_GENERATION_FOCUS.recent ? RULE_GENERATION_FOCUS.recent : undefined;
-}
-
 export function readJobMaxRules(job: PendingRuleJob): number | undefined {
-    const value = job.input?.maxRules;
-    return typeof value === "number" ? value : undefined;
+    return typeof job.maxRules === "number" ? job.maxRules : undefined;
 }
 
 export function readJobIntent(job: PendingRuleJob): string | undefined {
-    return normalizeRuleGenerationIntent(job.input?.intent);
+    return normalizeRuleGenerationIntent(job.intent);
 }
 
 export function readJobAnchorEventId(job: PendingRuleJob): string | undefined {
-    const value = job.input?.anchorEventId;
+    const value = job.anchorEventId;
     return typeof value === "string" && value.trim().length > 0 ? value : undefined;
 }
 
 export interface RuleJobContext {
     readonly workspacePath: string;
+    readonly anchorEventId: string;
     readonly anchorText: string;
-    readonly model: string | null;
+    readonly anchorTurnId: string | null;
+    readonly model: string;
+    readonly language: string;
+    readonly effort: string;
 }
 
 export function toRuleGenerationRequest(
@@ -137,17 +136,19 @@ export function toRuleGenerationRequest(
     taskId: string,
     context: RuleJobContext,
 ): RuleGenerationRequest {
-    const focus = readJobFocus(job);
     const maxRules = readJobMaxRules(job);
     const intent = readJobIntent(job);
     return {
         jobId: job.id,
         taskId,
         workspacePath: context.workspacePath,
-        ...(focus !== undefined ? {focus} : {}),
         ...(maxRules !== undefined ? {maxRules} : {}),
         ...(intent !== undefined ? {intent} : {}),
-        ...(context.model !== null ? {model: context.model} : {}),
+        ...(context.anchorTurnId !== null ? {anchorTurnId: context.anchorTurnId} : {}),
+        anchorEventId: context.anchorEventId,
+        model: context.model,
+        language: context.language,
+        effort: context.effort,
         anchorText: context.anchorText,
     };
 }

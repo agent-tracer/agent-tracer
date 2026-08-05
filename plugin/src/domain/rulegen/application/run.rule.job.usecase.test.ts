@@ -41,7 +41,7 @@ const REQUEST = {
     jobId: "job-1",
     taskId: "task-1",
     workspacePath: "/tmp/ws",
-    anchorText: "테스트를 실행해줘",
+    anchorEventId: "anchor-1", language: "auto", model: "claude-sonnet-5", effort: "high", anchorText: "테스트를 실행해줘",
 };
 
 const STEP: AiJobStepPayload = {
