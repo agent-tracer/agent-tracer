@@ -23,7 +23,6 @@ const KIND_LABEL: Readonly<Record<JobKind, string>> = {
   [JOB_KIND.titleSuggestion]: "Title suggestion",
   [JOB_KIND.taskCleanup]: "Task cleanup",
   [JOB_KIND.recipeScan]: "Recipe scan",
-  [JOB_KIND.ruleGeneration]: "Rule generation",
 };
 
 /** `job.updated` WS 메시지를 구독해 앱 내 토스트로 보여준다. */

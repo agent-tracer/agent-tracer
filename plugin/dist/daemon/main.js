@@ -35256,16 +35256,8 @@ var ComputeHintsUsecase = class {
 var JOB_KIND = {
   titleSuggestion: "title.suggestion",
   recipeScan: "recipe.scan",
-  taskCleanup: "task.cleanup",
-  ruleGeneration: "rule.generation"
+  taskCleanup: "task.cleanup"
 };
-var RULE_GENERATION_INTENT_MAX_LENGTH = 500;
-function normalizeRuleGenerationIntent(value) {
-  if (typeof value !== "string") return void 0;
-  const trimmed2 = value.trim();
-  if (trimmed2.length === 0) return void 0;
-  return trimmed2.slice(0, RULE_GENERATION_INTENT_MAX_LENGTH);
-}
 var RECIPE_SCAN_TRIGGER = {
   dashboard: "dashboard",
   session: "session"
@@ -35273,8 +35265,7 @@ var RECIPE_SCAN_TRIGGER = {
 var JOB_EXECUTOR = {
   [JOB_KIND.titleSuggestion]: "temporal",
   [JOB_KIND.recipeScan]: "temporal",
-  [JOB_KIND.taskCleanup]: "temporal",
-  [JOB_KIND.ruleGeneration]: "local"
+  [JOB_KIND.taskCleanup]: "temporal"
 };
 var JOB_STATUS = {
   pending: "pending",
@@ -35284,7 +35275,6 @@ var JOB_STATUS = {
   canceled: "canceled"
 };
 var JOB_STATUSES = Object.values(JOB_STATUS);
-var LOCAL_JOB_LEASE_HEARTBEAT_MS = 3e4;
 
 // src/domain/recipe/adapter/http.recipe.scan.job.adapter.ts
 var ACTIVE_STATUSES = /* @__PURE__ */ new Set([JOB_STATUS.pending, JOB_STATUS.running]);
@@ -36000,6 +35990,14 @@ var RULE_GENERATION_STATUSES = Object.values(RULE_GENERATION_STATUS);
 function isTerminalRuleGenerationStatus(status) {
   return status === RULE_GENERATION_STATUS.completed || status === RULE_GENERATION_STATUS.failed || status === RULE_GENERATION_STATUS.canceled;
 }
+var RULE_GENERATION_HEARTBEAT_MS = 3e4;
+var RULE_GENERATION_INTENT_MAX_LENGTH = 500;
+function normalizeRuleGenerationIntent(value) {
+  if (typeof value !== "string") return void 0;
+  const trimmed2 = value.trim();
+  if (trimmed2.length === 0) return void 0;
+  return trimmed2.slice(0, RULE_GENERATION_INTENT_MAX_LENGTH);
+}
 
 // ../libs/kernel/src/rule/generation/rule.generation.settings.ts
 var RULE_GENERATION_SETTINGS_PATH = "/api/v1/settings/rule-generation";
@@ -36435,7 +36433,7 @@ var PollRuleGenerationsUsecase = class {
     await this.jobs.fail(requestId, ruleGenerationFailure(error2)).catch(() => this.log.write(`failed to mark request ${requestId} failed`));
   }
   startHeartbeat(requestId, cancel) {
-    return this.scheduler.every(LOCAL_JOB_LEASE_HEARTBEAT_MS, () => {
+    return this.scheduler.every(RULE_GENERATION_HEARTBEAT_MS, () => {
       void this.jobs.renewLease(requestId).then((state) => {
         if (!state.leaseHeld || state.canceled) cancel.abort(new Error("request canceled"));
       }).catch(() => void 0);

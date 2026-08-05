@@ -1,4 +1,4 @@
-import {normalizeRuleGenerationIntent} from "@agent-tracer/kernel/job/job.const.js";
+import {normalizeRuleGenerationIntent} from "@agent-tracer/kernel";
 import type {AiJobStepPayload} from "@agent-tracer/kernel/job/job.step.const.js";
 import type {RuleProposalPayload} from "@agent-tracer/kernel/rule/proposal/rule.proposal.schema.js";
 import type {RuleGenerationRequest} from "~plugin/domain/rulegen/model/rulegen.spec.model.js";
