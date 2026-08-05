@@ -9,7 +9,10 @@ import {
   useRuleGenerationsQuery,
 } from "~tracer-web/entities/rule/api/rule-generation-queries.js";
 import { useTaskUserInputsQuery } from "~tracer-web/entities/task/api/detail-queries.js";
+import { apiErrorMessage } from "~tracer-web/shared/api/api-error-message.js";
 import { monitorQueryKeys } from "~tracer-web/shared/api/query-keys.js";
+import type { GuidanceMessage } from "~tracer-web/shared/guidance.js";
+import { useGuidance } from "~tracer-web/shared/store/index.js";
 import {
   isSettledRuleGeneration,
   readRuleGenerationIntent,
@@ -18,12 +21,13 @@ import {
 /** 태스크 하나를 보다가 그 자리에서 규칙을 뽑는 화면 상태다. */
 export function useRuleGeneration(taskId: TaskId, taskStatus: string | null) {
   const queryClient = useQueryClient();
+  const guidance = useGuidance();
   const settingsQuery = useRuleGenerationSettingsQuery();
   const userInputsQuery = useTaskUserInputsQuery(taskId);
   const generationsQuery = useRuleGenerationsQuery(taskId);
   const request = useRequestRuleGenerationMutation();
   const cancel = useCancelRuleGenerationMutation();
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<GuidanceMessage | null>(null);
   const [intentDraft, setIntentDraft] = useState("");
   const [anchorEventId, setAnchorEventId] = useState("");
 
@@ -57,7 +61,7 @@ export function useRuleGeneration(taskId: TaskId, taskStatus: string | null) {
       });
       setIntentDraft("");
     } catch (error) {
-      setErrorMessage((error as Error).message);
+      setErrorMessage(apiErrorMessage(guidance.messages.common, error));
     }
   };
 
@@ -67,16 +71,16 @@ export function useRuleGeneration(taskId: TaskId, taskStatus: string | null) {
     try {
       await cancel.mutateAsync(record.id);
     } catch (error) {
-      setErrorMessage((error as Error).message);
+      setErrorMessage(apiErrorMessage(guidance.messages.common, error));
     }
   };
 
   const settingsLoaded = !settingsQuery.isLoading;
   const disabled = !settingsLoaded || isInFlight || anchorEventId === "";
-  const operationalBlockingReason = !settingsLoaded
-    ? "Loading settings…"
+  const operationalBlockingReason: GuidanceMessage | null = !settingsLoaded
+    ? guidance.messages.rules.generation.loadingSettings
     : isInFlight
-      ? "Generation already in progress."
+      ? guidance.messages.rules.generation.alreadyInProgress
       : null;
   const incompleteTimelineStatus = !operationalBlockingReason && taskStatus !== "completed"
     ? taskStatus ?? "unknown"

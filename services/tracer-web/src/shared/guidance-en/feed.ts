@@ -71,4 +71,6 @@ export const EN_TASKS = {
       guidanceCode(runtime),
       ".",
     ),
+  listLoadError: createGuidanceMessage("The task list could not be loaded."),
+  filterEmpty: createGuidanceMessage("No task matches the current filter."),
 } as const;

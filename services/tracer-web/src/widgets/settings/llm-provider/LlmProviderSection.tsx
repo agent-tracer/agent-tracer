@@ -4,7 +4,9 @@ import {
   useDeleteAppSettingMutation,
   usePutAppSettingMutation,
 } from "~tracer-web/entities/setting/api/mutations.js";
+import { apiErrorMessage } from "~tracer-web/shared/api/api-error-message.js";
 import { isNotImplementedError } from "~tracer-web/shared/api/client/response.js";
+import type { GuidanceMessage } from "~tracer-web/shared/guidance.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
 import {
   Button,
@@ -19,6 +21,13 @@ import {
   LANGUAGE_OPTIONS,
   LLM_PROVIDER_SETTING_KEYS as SETTING_KEYS,
 } from "~tracer-web/widgets/settings/llm-provider/llm-provider.catalog.js";
+
+interface ProviderFeedback {
+  readonly tone: "ok" | "err";
+  readonly message: GuidanceMessage;
+  /** 실패한 이유는 봉투의 코드가 고른 말로 뒤에 붙는다. */
+  readonly reason?: GuidanceMessage;
+}
 
 /** 에이전트 서비스에서 도는 잡이 쓰는 LLM 공급자 설정이다. */
 export function LlmProviderSection() {
@@ -36,32 +45,42 @@ export function LlmProviderSection() {
   const [apiKeyDraft, setApiKeyDraft] = useState("");
   const [modelDraft, setModelDraft] = useState("");
   const [languageDraft, setLanguageDraft] = useState("");
-  const [feedback, setFeedback] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<ProviderFeedback | null>(null);
 
   const apiKey = settingsMap.get(SETTING_KEYS.apiKey);
   const model = settingsMap.get(SETTING_KEYS.model);
   const language = settingsMap.get(SETTING_KEYS.outputLanguage);
   const currentLanguage = language?.masked ?? "auto";
+  const messages = guidance.messages.settings;
+
   async function save(key: string, value: string, draftSetter: (v: string) => void) {
     if (!value.trim()) {
-      setFeedback("Value cannot be empty.");
+      setFeedback({ tone: "err", message: messages.valueRequired });
       return;
     }
     try {
       await putMutation.mutateAsync({ key, value: value.trim() });
       draftSetter("");
-      setFeedback(`Saved ${key}.`);
+      setFeedback({ tone: "ok", message: messages.settingSaved(key) });
     } catch (err) {
-      setFeedback(`Failed to save ${key}: ${(err as Error).message}`);
+      setFeedback({
+        tone: "err",
+        message: messages.settingSaveFailed(key),
+        reason: apiErrorMessage(guidance.messages.common, err),
+      });
     }
   }
 
   async function remove(key: string) {
     try {
       await deleteMutation.mutateAsync(key);
-      setFeedback(`Cleared ${key}.`);
+      setFeedback({ tone: "ok", message: messages.settingCleared(key) });
     } catch (err) {
-      setFeedback(`Failed to clear ${key}: ${(err as Error).message}`);
+      setFeedback({
+        tone: "err",
+        message: messages.settingClearFailed(key),
+        reason: apiErrorMessage(guidance.messages.common, err),
+      });
     }
   }
 
@@ -77,10 +96,12 @@ export function LlmProviderSection() {
         locale={guidance.locale}
         message={guidance.messages.settings.ruleGenerationIntroduction}
       />
-      <p className="text-ink-tertiary text-[12px] mb-4">
-        이 값은 에이전트 서비스가 도는 잡(제목 제안·레시피 스캔·정리 제안)에만 쓰입니다. 로컬 규칙
-        생성은 아래 Rule generation 설정을 읽습니다.
-      </p>
+      <GuidanceText
+        as="p"
+        className="text-ink-tertiary text-[12px] mb-4"
+        locale={guidance.locale}
+        message={guidance.messages.settings.llmProviderScope}
+      />
 
       <SecretSettingField
         label="Anthropic API key"
@@ -149,8 +170,14 @@ export function LlmProviderSection() {
       </Field>
 
       {feedback && (
-        <p className={cn("mt-4 text-xs", feedback.startsWith("Failed") ? "text-err" : "text-ink-muted")}>
-          {feedback}
+        <p className={cn("mt-4 text-xs", feedback.tone === "err" ? "text-err" : "text-ink-muted")}>
+          <GuidanceText locale={guidance.locale} message={feedback.message} />
+          {feedback.reason !== undefined && (
+            <>
+              {" "}
+              <GuidanceText locale={guidance.locale} message={feedback.reason} />
+            </>
+          )}
         </p>
       )}
     </Card>
