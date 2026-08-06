@@ -31,7 +31,7 @@ export function SplitMark({ fromTurnIndex, toTurnIndex, taskId }: SplitMarkProps
       </span>
       <Link
         to={`/tasks/${taskId}`}
-        className="rounded-xs border border-hair px-1.5 py-px normal-case tracking-normal hover:text-ink hover:bg-s2"
+        className="inline-flex items-center rounded-pill border border-hair px-2 py-[2px] normal-case tracking-normal text-ink-subtle transition-colors hover:text-ink hover:border-hair-strong"
       >
         open
       </Link>
@@ -39,7 +39,7 @@ export function SplitMark({ fromTurnIndex, toTurnIndex, taskId }: SplitMarkProps
         type="button"
         disabled={revert.isPending}
         onClick={() => revert.mutate(TaskId(taskId))}
-        className="rounded-xs border border-hair px-1.5 py-px normal-case tracking-normal opacity-0 transition-opacity group-hover:opacity-100 hover:text-ink hover:bg-s2 disabled:opacity-40"
+        className="inline-flex items-center rounded-pill border border-hair px-2 py-[2px] normal-case tracking-normal text-ink-subtle opacity-0 transition-opacity group-hover:opacity-100 hover:text-ink hover:border-hair-strong disabled:opacity-40"
       >
         undo
       </button>

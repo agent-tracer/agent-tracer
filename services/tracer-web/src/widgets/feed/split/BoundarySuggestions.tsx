@@ -3,7 +3,7 @@ import type { TaskId } from "~tracer-web/shared/identity.js";
 import type { TaskBoundarySuggestion } from "~tracer-web/entities/task/model/task-query.js";
 import { useTaskBoundariesQuery } from "~tracer-web/entities/task/api/detail-queries.js";
 import { useSplitTaskTurnsMutation } from "~tracer-web/entities/task/api/split-mutations.js";
-import { Button } from "~tracer-web/shared/ui/index.js";
+import { Button, Card } from "~tracer-web/shared/ui/index.js";
 
 interface BoundarySuggestionsProps {
   readonly taskId: TaskId;
@@ -37,11 +37,8 @@ export function BoundarySuggestions({
   if (pending.length === 0) return null;
 
   return (
-    <div className="mx-9 mb-3 rounded-sm border border-hair bg-s1 px-3 py-2.5">
-      <p className="text-[10.5px] uppercase tracking-[0.06em] text-ink-tertiary">
-        Work changed here
-      </p>
-      <ul className="mt-1.5 flex flex-col gap-1.5">
+    <Card title="Work changed here" count={pending.length} className="mx-9 mb-3">
+      <ul className="flex flex-col gap-1.5">
         {pending.map((item) => (
           <li
             key={`${item.sessionId}-${item.fromTurnIndex}`}
@@ -66,6 +63,6 @@ export function BoundarySuggestions({
           </li>
         ))}
       </ul>
-    </div>
+    </Card>
   );
 }
