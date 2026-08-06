@@ -46,7 +46,7 @@ export const KO_SETTINGS = {
     "서버에서 도는 AI 잡이 사용자를 대신해 Anthropic을 부를 때 씁니다. 로컬 규칙 생성기는 대신 CLI 자체 인증을 씁니다.",
   ),
   anthropicModel: createGuidanceMessage(
-    "내 기계에서 도는 규칙 생성기가 쓸 모델입니다. 서버에서 도는 잡은 자기 모델을 쓰며 이 값을 보지 않습니다.",
+    "제목 제안과 레시피 스캔과 정리 제안이 쓸 모델입니다. 비워 두면 잡마다 정해진 기본 모델을 쓰며, 예산과 턴 상한은 모델을 바꿔도 잡이 그대로 갖습니다.",
   ),
   maxRules: createGuidanceMessage(
     guidanceCode("/generate-rules"),

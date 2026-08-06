@@ -46,7 +46,7 @@ export const EN_SETTINGS = {
     "Lets server-side AI jobs call Anthropic on your behalf. The local rule generator uses the CLI's own authentication instead.",
   ),
   anthropicModel: createGuidanceMessage(
-    "Model for the rule generator running on your machine. Server-side jobs pick their own model and ignore this.",
+    "Model used by title suggestions, recipe scans, and cleanup suggestions. Leave it empty to use each job's own default; budget and turn limits stay with the job even when the model changes.",
   ),
   maxRules: createGuidanceMessage(
     "Maximum number of rules returned by ",
