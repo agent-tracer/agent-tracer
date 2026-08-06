@@ -29,7 +29,7 @@ export class ListBoundariesUseCase {
         // 남의 작업은 존재 여부도 드러내지 않는다.
         if (task === null) return null;
 
-        const turns = await this.turns.findByTask(taskId);
+        const turns = await this.turns.findByTask(userId, taskId);
         const byId = new Map(turns.map((turn) => [turn.id, turn]));
         const marks: BoundaryMark[] = [];
 

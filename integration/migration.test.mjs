@@ -13,7 +13,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const EVENT_TABLES = ["events", "event_ingest_keys"];
 
 /** 조회 모델이 세워야 하는 표 가운데 투영이 직접 쓰는 것들이다. */
-const TRACER_TABLES = ["tasks", "events", "turns", "sessions", "rules", "search_outbox"];
+const TRACER_TABLES = ["tasks", "events", "turns", "turn_reassignments", "sessions", "rules", "search_outbox"];
 
 let eventDb;
 let tracerDb;
@@ -83,6 +83,35 @@ describe("스키마 이행", () => {
         const tables = await tablesOf(tracerDb, DATABASES.tracer);
 
         for (const table of TRACER_TABLES) assert.ok(tables.includes(table), `${table}이 없다`);
+    });
+
+    it("조회 모델이 턴 재할당의 구간과 소속을 담는 열을 세운다", async () => {
+        const columns = await query(
+            tracerDb,
+            DATABASES.tracer,
+            "select column_name from information_schema.columns where table_name = 'turn_reassignments' order by column_name",
+        );
+
+        assert.deepEqual(columns.split("\n").map((name) => name.trim()), [
+            "from_turn_index",
+            "id",
+            "moved_at",
+            "origin_task_id",
+            "session_id",
+            "task_id",
+            "to_turn_index",
+            "user_id",
+        ]);
+    });
+
+    it("분리된 태스크가 원본을 가리키는 열을 세운다", async () => {
+        const column = await query(
+            tracerDb,
+            DATABASES.tracer,
+            "select column_name from information_schema.columns where table_name = 'tasks' and column_name = 'split_from_task_id'",
+        );
+
+        assert.equal(column, "split_from_task_id");
     });
 
     it("이행을 다시 실행해도 같은 스키마에 머문다", async () => {

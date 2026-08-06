@@ -28,7 +28,7 @@ function makeUseCase(
 
 describe("ListTurnsUseCase", () => {
     it("소유한 태스크의 턴 목록을 반환한다", async () => {
-        const turn = TurnEntity.open("s1", "t1", 1, "테스트 돌려줘", new Date("2026-01-01T00:00:00.000Z"));
+        const turn = TurnEntity.open("s1", "t1", 1, "테스트 돌려줘", new Date("2026-01-01T00:00:00.000Z"), "u1");
         const useCase = makeUseCase([makeTask("t1", "u1")], [turn]);
         const result = await useCase.execute("u1", "t1");
         expect(result).not.toBeNull();
@@ -54,9 +54,9 @@ describe("ListTurnsUseCase", () => {
             unclassifiedEventIds: [],
             enforcements: [],
         };
-        const turn1 = TurnEntity.open("s1", "t1", 1, "첫 턴", at);
-        const turn2 = TurnEntity.open("s1", "t1", 2, "둘째 턴", at);
-        const turn3 = TurnEntity.open("s1", "t1", 3, "셋째 턴", at);
+        const turn1 = TurnEntity.open("s1", "t1", 1, "첫 턴", at, "u1");
+        const turn2 = TurnEntity.open("s1", "t1", 2, "둘째 턴", at, "u1");
+        const turn3 = TurnEntity.open("s1", "t1", 3, "셋째 턴", at, "u1");
         const verdictReader = new InMemoryVerdictReader();
         verdictReader.seed(
             VerdictEntity.open("r1", turn1.id, "warn", evidence, at),

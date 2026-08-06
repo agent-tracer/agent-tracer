@@ -13,9 +13,9 @@ export class InMemoryTurnReader implements TurnReaderPort {
         return [...this.rows];
     }
 
-    findByTask(taskId: string): Promise<TurnEntity[]> {
+    findByTask(userId: string, taskId: string): Promise<TurnEntity[]> {
         const rows = this.rows
-            .filter((turn) => turn.taskId === taskId)
+            .filter((turn) => turn.userId === userId && turn.taskId === taskId)
             .sort((a, b) => a.turnIndex - b.turnIndex);
         return Promise.resolve(rows);
     }

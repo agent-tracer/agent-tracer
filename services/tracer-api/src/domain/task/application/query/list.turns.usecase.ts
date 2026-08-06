@@ -26,7 +26,7 @@ export class ListTurnsUseCase {
         const task = await this.tasks.findById(userId, taskId);
         // 남의 작업은 존재 여부도 드러내지 않는다.
         if (task === null) return null;
-        const turns = await this.turns.findByTask(taskId);
+        const turns = await this.turns.findByTask(userId, taskId);
         const verdicts = await this.verdicts.findByTurns(turns.map((turn) => turn.id));
         const verdictsByTurn = new Map<string, TurnVerdictDto[]>();
         for (const verdict of verdicts) {
