@@ -66,7 +66,7 @@ export function FeedPanel({ taskId }: FeedPanelProps) {
               to="/tasks"
               className="inline-flex items-center px-3 py-1.5 rounded-xs border border-hair text-body text-ink bg-s1"
             >
-              Back to tasks
+              All tasks
             </Link>
           }
         />
@@ -104,7 +104,7 @@ export function FeedPanel({ taskId }: FeedPanelProps) {
             disabled={loadOlderTimeline.isPending}
             className={cn("inline-flex items-center px-3 py-1.5 rounded-xs border border-hair text-body text-ink-subtle bg-s1 focus-ring", DISABLED)}
           >
-            {loadOlderTimeline.isPending ? "Loading older events…" : "Load older events"}
+            {loadOlderTimeline.isPending ? "Loading…" : "Load older"}
           </button>
         </div>
       )}

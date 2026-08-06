@@ -85,7 +85,7 @@ export function TaskPicker({
         )}
       >
         <span className={cn("flex-1 truncate", selected === null && "text-ink-tertiary")}>
-          {selected === null ? "Select a completed task…" : (selected.displayTitle ?? selected.title)}
+          {selected === null ? "Select a task…" : (selected.displayTitle ?? selected.title)}
         </span>
         <span aria-hidden className="text-ink-tertiary text-mini">
           ▾

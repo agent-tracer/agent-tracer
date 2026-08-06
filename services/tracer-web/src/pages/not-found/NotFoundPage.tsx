@@ -16,7 +16,7 @@ export default function NotFound() {
           to="/tasks"
           className="inline-block text-body text-primary-hover border-b border-dotted border-primary focus-ring"
         >
-          Back to tasks
+          All tasks
         </Link>
       }
     />

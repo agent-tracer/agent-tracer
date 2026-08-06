@@ -10,7 +10,7 @@ describe("레시피 스캔 태스크 선택기", () => {
   it("태스크 목록을 스크롤 컨테이너 밖의 포털에 표시한다", () => {
     renderPicker();
 
-    fireEvent.click(screen.getByRole("button", { name: "Select a completed task…" }));
+    fireEvent.click(screen.getByRole("button", { name: "Select a task…" }));
 
     const dialog = screen.getByRole("dialog", { name: "Completed tasks" });
     expect(dialog.parentElement).toBe(document.body);
@@ -22,7 +22,7 @@ describe("레시피 스캔 태스크 선택기", () => {
   it("Escape를 누르면 열린 태스크 목록을 닫는다", () => {
     renderPicker();
 
-    fireEvent.click(screen.getByRole("button", { name: "Select a completed task…" }));
+    fireEvent.click(screen.getByRole("button", { name: "Select a task…" }));
     fireEvent.keyDown(window, { key: "Escape" });
 
     expect(screen.queryByRole("dialog", { name: "Completed tasks" })).toBeNull();
@@ -32,7 +32,7 @@ describe("레시피 스캔 태스크 선택기", () => {
     const onIncludeArchivedChange = vi.fn();
     renderPicker(onIncludeArchivedChange);
 
-    fireEvent.click(screen.getByRole("button", { name: "Select a completed task…" }));
+    fireEvent.click(screen.getByRole("button", { name: "Select a task…" }));
     const checkbox = screen.getByRole("checkbox", {
       name: "Include archived tasks",
     });
@@ -46,7 +46,7 @@ describe("레시피 스캔 태스크 선택기", () => {
   it("외부를 누르면 열린 태스크 목록을 닫는다", () => {
     renderPicker();
 
-    fireEvent.click(screen.getByRole("button", { name: "Select a completed task…" }));
+    fireEvent.click(screen.getByRole("button", { name: "Select a task…" }));
     fireEvent.pointerDown(document.body);
 
     expect(screen.queryByRole("dialog", { name: "Completed tasks" })).toBeNull();

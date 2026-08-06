@@ -76,7 +76,7 @@ export function IdentitySection() {
                 id {userId}
               </span>
               <Button variant="ghost" onClick={() => setResetOpen(true)} className="text-body border-0 p-0 underline">
-                Reset to local
+                Reset
               </Button>
             </>
           )}

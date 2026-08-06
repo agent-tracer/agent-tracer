@@ -157,7 +157,7 @@ export function LlmProviderSection() {
               onClick={() => void remove(SETTING_KEYS.outputLanguage)}
               className="text-body border-0 p-0 underline"
             >
-              Reset to auto
+              Reset
             </Button>
           )}
         </div>

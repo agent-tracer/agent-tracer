@@ -63,7 +63,7 @@ export function DaemonHealthSection() {
 /** 데몬과 같은 기계에서만 열리는, 데몬이 스스로 서빙하는 제어 화면으로 나가는 링크다. */
 function ControlPageLink({ reachable }: { readonly reachable: boolean }) {
   const guidance = useGuidance();
-  const label = "Open control page";
+  const label = "Control page";
   const className =
     "inline-flex items-center gap-1.5 text-body font-medium no-underline rounded-sm px-2 h-7";
 

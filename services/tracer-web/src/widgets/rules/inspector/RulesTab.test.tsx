@@ -97,7 +97,7 @@ describe("RulesTab", () => {
       screen.getByRole("textbox", { name: "Rule generation intent" }),
       { target: { value: "  Focus on deploy safety  " } },
     );
-    fireEvent.click(screen.getByRole("button", { name: "Generate rules" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate" }));
 
     await waitFor(() =>
       expect(testState.enqueue).toHaveBeenCalledWith({

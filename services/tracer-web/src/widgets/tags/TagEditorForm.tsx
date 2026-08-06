@@ -112,7 +112,7 @@ export function TagEditorForm({ tag, onClose }: TagEditorFormProps) {
           Cancel
         </Button>
         <Button type="submit" variant="primary" disabled={isPending}>
-          {isPending ? "Saving…" : isEdit ? "Save changes" : "Create tag"}
+          {isPending ? "Saving…" : isEdit ? "Save" : "Create"}
         </Button>
       </footer>
     </form>

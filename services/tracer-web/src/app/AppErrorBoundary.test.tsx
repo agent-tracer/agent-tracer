@@ -32,7 +32,7 @@ describe("AppErrorBoundary", () => {
 
     expect(alert.textContent).toContain("Error: raw-error-42");
     expect(alert.textContent).toContain("대부분은 새로고침하면 복구됩니다");
-    expect(screen.getByRole("button").textContent).toBe("Reload dashboard");
+    expect(screen.getByRole("button").textContent).toBe("Reload");
     expect(alert.querySelector('p[lang="ko"]')).not.toBeNull();
   });
 });

@@ -43,7 +43,7 @@ export function TagDeleteConfirm({ tag, onClose }: TagDeleteConfirmProps) {
           onClick={handleDelete}
           disabled={deleteMutation.isPending}
         >
-          {deleteMutation.isPending ? "Deleting…" : "Delete tag"}
+          {deleteMutation.isPending ? "Deleting…" : "Delete"}
         </Button>
       </footer>
     </div>

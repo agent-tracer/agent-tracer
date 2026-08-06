@@ -105,7 +105,7 @@ export function RuleGenerationDialog({
           Close
         </Button>
         <Button disabled={disabled} onClick={() => void submit()}>
-          {request.isPending ? "Starting…" : "Generate rules"}
+          {request.isPending ? "Starting…" : "Generate"}
         </Button>
       </div>
     </div>

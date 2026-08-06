@@ -171,7 +171,7 @@ export function RuleForm({ rule, taskId, onClose }: RuleFormProps) {
           Cancel
         </Button>
         <Button type="submit" variant="primary" disabled={isPending}>
-          {isPending ? "Saving…" : isEdit ? "Save changes" : "Create rule"}
+          {isPending ? "Saving…" : isEdit ? "Save" : "Create"}
         </Button>
       </footer>
     </form>

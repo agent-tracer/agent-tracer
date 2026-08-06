@@ -59,7 +59,7 @@ function AppCrashFallback({ error }: { readonly error: Error }) {
           message={guidance.messages.app.crashRecovery}
         />
         <Button variant="primary" onClick={() => window.location.reload()}>
-          Reload dashboard
+          Reload
         </Button>
       </div>
     </div>

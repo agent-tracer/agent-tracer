@@ -95,7 +95,7 @@ describe("데몬 상태 설정", () => {
     });
     renderSection();
     await waitFor(() => {
-      const link = screen.getByRole("link", { name: "Open control page" });
+      const link = screen.getByRole("link", { name: "Control page" });
       expect(link.getAttribute("href")).toBe("http://127.0.0.1:3848/");
       expect(link.getAttribute("target")).toBe("_blank");
     });
@@ -107,7 +107,7 @@ describe("데몬 상태 설정", () => {
     await waitFor(() => {
       expect(screen.getByText("No health report received yet.")).not.toBeNull();
     });
-    expect(screen.queryByRole("link", { name: "Open control page" })).toBeNull();
-    expect(screen.getByText("Open control page").getAttribute("aria-disabled")).toBe("true");
+    expect(screen.queryByRole("link", { name: "Control page" })).toBeNull();
+    expect(screen.getByText("Control page").getAttribute("aria-disabled")).toBe("true");
   });
 });

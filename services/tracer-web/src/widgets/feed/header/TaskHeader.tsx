@@ -92,7 +92,7 @@ export function TaskHeader({ task, timeline, resumeTarget }: TaskHeaderProps) {
           className="inline-flex items-center gap-1 text-meta font-medium text-ink-subtle hover:text-ink"
         >
           {detailsOpen ? <ChevronDownIcon /> : <ChevronRightIcon />}
-          Details &amp; Memo
+          Details
         </button>
         <span className="ml-auto inline-flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
           <ByItem label="ID" value={shortId} mono title={`Full task id: ${task.id}`} />

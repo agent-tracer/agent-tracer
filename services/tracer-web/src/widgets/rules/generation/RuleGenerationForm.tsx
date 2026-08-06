@@ -99,7 +99,7 @@ export function RuleGenerationForm({ controller }: RuleGenerationFormProps) {
               : "text-canvas bg-ink cursor-pointer",
           )}
         >
-          {isInFlight ? "Generating…" : "Generate rules"}
+          {isInFlight ? "Generating…" : "Generate"}
         </button>
       </div>
     </div>
