@@ -42,13 +42,13 @@ describe("규칙 생성 설정", () => {
     );
 
     expect(container.textContent).toContain(
-      "recipe generation does not currently use this global setting",
+      "title suggestions, recipe scans, and cleanup suggestions",
     );
 
     act(() => store.getState().setGuidanceLocale("ko"));
 
     expect(container.textContent).toContain(
-      "현재 레시피 생성에는 이 전역 설정이 적용되지 않습니다",
+      "제목 제안과 레시피 스캔과 정리 제안이 낼 결과의 언어입니다",
     );
     expect(screen.getByText("Output language").textContent).toBe(
       "Output language",

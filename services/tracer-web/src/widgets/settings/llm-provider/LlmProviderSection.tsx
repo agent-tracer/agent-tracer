@@ -8,7 +8,8 @@ import { apiErrorMessage } from "~tracer-web/shared/api/api-error-message.js";
 import { isNotImplementedError } from "~tracer-web/shared/api/client/response.js";
 import type { GuidanceMessage } from "~tracer-web/shared/guidance.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
-import { Button, Card, Field, GuidanceText, SectionHeading, Select } from "~tracer-web/shared/ui/index.js";
+import { TASK_CLEANUP_MAX_SUGGESTIONS } from "@agent-tracer/kernel";
+import { Button, Card, Field, GuidanceText, Input, SectionHeading, Select } from "~tracer-web/shared/ui/index.js";
 import { cn } from "~tracer-web/shared/ui/lib/cn.js";
 import { ModelSettingField, SecretSettingField } from "~tracer-web/widgets/settings/llm-provider/ProviderSettingFields.js";
 import {
@@ -39,12 +40,14 @@ export function LlmProviderSection() {
   const [apiKeyDraft, setApiKeyDraft] = useState("");
   const [modelDraft, setModelDraft] = useState("");
   const [languageDraft, setLanguageDraft] = useState("");
+  const [maxSuggestionsDraft, setMaxSuggestionsDraft] = useState("");
   const [feedback, setFeedback] = useState<ProviderFeedback | null>(null);
 
   const apiKey = settingsMap.get(SETTING_KEYS.apiKey);
   const model = settingsMap.get(SETTING_KEYS.model);
   const language = settingsMap.get(SETTING_KEYS.outputLanguage);
   const currentLanguage = language?.masked ?? "auto";
+  const maxSuggestions = settingsMap.get(SETTING_KEYS.taskCleanupMaxSuggestions);
   const messages = guidance.messages.settings;
 
   async function save(key: string, value: string, draftSetter: (v: string) => void) {
@@ -156,6 +159,47 @@ export function LlmProviderSection() {
             <Button
               variant="ghost"
               onClick={() => void remove(SETTING_KEYS.outputLanguage)}
+              className="text-body border-0 px-1 py-1 min-h-6 underline"
+            >
+              Reset
+            </Button>
+          )}
+        </div>
+      </Field>
+
+      <Field
+        separated
+        label="Cleanup suggestions per run"
+        help={guidance.messages.settings.taskCleanupMaxSuggestions}
+        helpLocale={guidance.locale}
+      >
+        <div className="flex items-center gap-2">
+          <Input
+            type="number"
+            min={1}
+            max={TASK_CLEANUP_MAX_SUGGESTIONS}
+            placeholder={maxSuggestions?.masked ?? "20"}
+            value={maxSuggestionsDraft}
+            onChange={(e) => setMaxSuggestionsDraft(e.target.value)}
+            className="w-[220px]"
+          />
+          <Button
+            variant="ghost"
+            disabled={!maxSuggestionsDraft.trim() || putMutation.isPending}
+            onClick={() =>
+              void save(
+                SETTING_KEYS.taskCleanupMaxSuggestions,
+                maxSuggestionsDraft,
+                setMaxSuggestionsDraft,
+              )
+            }
+          >
+            Save
+          </Button>
+          {maxSuggestions && (
+            <Button
+              variant="ghost"
+              onClick={() => void remove(SETTING_KEYS.taskCleanupMaxSuggestions)}
               className="text-body border-0 px-1 py-1 min-h-6 underline"
             >
               Reset

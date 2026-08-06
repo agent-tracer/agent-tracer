@@ -54,7 +54,10 @@ export const EN_SETTINGS = {
     ". The default is 5.",
   ),
   outputLanguage: createGuidanceMessage(
-    "Sets the preferred language for supported AI-generated outputs, including title suggestions and cleanup suggestions. Individual jobs and prompts may override it; recipe generation does not currently use this global setting. Auto follows the source task when supported.",
+    "Language for the output of title suggestions, recipe scans, and cleanup suggestions. A language named by the request wins over this value, and Auto follows the language of the source task.",
+  ),
+  taskCleanupMaxSuggestions: createGuidanceMessage(
+    "Largest number of archive candidates one cleanup suggestion job may return. A count named by the request wins over this value; leave it empty to use 20.",
   ),
   ruleGenerationSection: createGuidanceMessage(
     "Settings the daemon on your machine reads when it generates rules. This workspace owns them, independent of the agent service.",

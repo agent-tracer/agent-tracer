@@ -4,6 +4,7 @@ export const LLM_PROVIDER_SETTING_KEYS = {
   apiKey: APP_SETTING_KEYS.anthropicApiKey,
   model: APP_SETTING_KEYS.anthropicModel,
   outputLanguage: APP_SETTING_KEYS.claudeOutputLanguage,
+  taskCleanupMaxSuggestions: APP_SETTING_KEYS.taskCleanupMaxSuggestions,
 } as const;
 
 export const LANGUAGE_OPTIONS: ReadonlyArray<{ value: string; label: string }> = [

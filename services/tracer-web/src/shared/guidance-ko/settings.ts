@@ -53,7 +53,10 @@ export const KO_SETTINGS = {
     "가 반환할 수 있는 최대 규칙 수입니다. 기본값은 5입니다.",
   ),
   outputLanguage: createGuidanceMessage(
-    "제목 제안과 정리 제안 등 지원되는 AI 생성 결과의 선호 언어를 지정합니다. 개별 잡이나 프롬프트가 이 값을 덮어쓸 수 있으며, 현재 레시피 생성에는 이 전역 설정이 적용되지 않습니다. 지원되는 경우 Auto는 원본 태스크의 언어를 따릅니다.",
+    "제목 제안과 레시피 스캔과 정리 제안이 낼 결과의 언어입니다. 요청이 언어를 지정하면 그 값이 우선하며, Auto는 원본 태스크의 언어를 따릅니다.",
+  ),
+  taskCleanupMaxSuggestions: createGuidanceMessage(
+    "정리 제안 한 번이 낼 수 있는 최대 보관 후보 수입니다. 요청이 개수를 지정하면 그 값이 우선하며, 비워 두면 20을 씁니다.",
   ),
   ruleGenerationSection: createGuidanceMessage(
     "내 기계에서 도는 데몬이 규칙을 뽑을 때 쓰는 설정입니다. 에이전트 서비스와 무관하게 이 워크스페이스가 소유합니다.",
