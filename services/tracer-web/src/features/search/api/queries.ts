@@ -1,4 +1,4 @@
-import { useQuery, type UseQueryResult } from "@tanstack/react-query";
+import { keepPreviousData, useQuery, type UseQueryResult } from "@tanstack/react-query";
 import type { TaskId } from "~tracer-web/shared/identity.js";
 import type { SearchResponse } from "~tracer-web/features/search/model/search.js";
 import { fetchSearch } from "~tracer-web/features/search/api/api-search.js";
@@ -18,5 +18,7 @@ export function useSearchQuery(
         ...(options?.limit !== undefined ? { limit: options.limit } : {}),
       }),
     enabled: trimmed.length > 0,
+    // 글자마다 키가 바뀌므로, 앞선 결과를 두지 않으면 목록이 매번 비었다 찬다.
+    placeholderData: keepPreviousData,
   });
 }
