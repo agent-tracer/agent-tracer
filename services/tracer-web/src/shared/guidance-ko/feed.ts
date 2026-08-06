@@ -44,6 +44,7 @@ export const KO_FEED = {
     verify: createGuidanceMessage("규칙 판정으로 확인된 작업입니다."),
     coordinate: createGuidanceMessage("서브에이전트 생성과 인계입니다."),
   },
+  splitOnlyThis: createGuidanceMessage("이 턴 하나만 별도 태스크로 옮깁니다."),
   splitModalTitle: (span: string) =>
     createGuidanceMessage(`턴 ${span}을 별도 태스크로 옮깁니다`),
   splitTitleLabel: createGuidanceMessage("새 태스크 제목"),

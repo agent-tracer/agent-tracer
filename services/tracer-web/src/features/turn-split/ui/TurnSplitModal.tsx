@@ -52,28 +52,31 @@ export function TurnSplitModal({ taskId, target, turns, onClose }: TurnSplitModa
       title={guidancePlainText(guidance.messages.feed.splitModalTitle(splitSpanLabel(target)))}
       description={guidance.messages.feed.splitNoRules}
       descriptionLocale={guidance.locale}
-      maxWidth={480}
+      maxWidth={460}
     >
-      <div className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1.5">
-          <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-tertiary">
+      <div className="flex flex-col gap-5">
+        <label className="flex flex-col gap-2">
+          <span className="text-[11.5px] text-ink-muted">
             <GuidanceText locale={guidance.locale} message={guidance.messages.feed.splitTitleLabel} />
           </span>
           <Input
             autoFocus
             value={title}
             onChange={(event) => setTitle(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && title.trim() !== "") submit();
+            }}
           />
         </label>
 
-        <div className="flex flex-col gap-1.5">
-          <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-tertiary">
+        <div className="flex flex-col gap-2">
+          <span className="text-[11.5px] text-ink-muted">
             <GuidanceText locale={guidance.locale} message={guidance.messages.feed.splitMovingLabel} />
           </span>
-          <ul className="flex flex-col rounded-xs border border-hair bg-s1 divide-y divide-hair">
+          <ul className="flex flex-col gap-1">
             {moved.map((turn) => (
-              <li key={turn.id} className="flex items-baseline gap-2.5 px-2.5 py-1.5">
-                <span className="shrink-0 font-mono text-[10.5px] text-ink-tertiary">
+              <li key={turn.id} className="flex items-baseline gap-2.5 min-w-0">
+                <span className="w-4 shrink-0 text-right font-mono text-[11px] text-ink-tertiary">
                   {turn.turnIndex}
                 </span>
                 <span className="truncate text-[12.5px] text-ink">
@@ -93,7 +96,7 @@ export function TurnSplitModal({ taskId, target, turns, onClose }: TurnSplitModa
           </p>
         ) : null}
 
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-3 border-t border-hair pt-4">
           <span className="text-[11.5px] text-ink-tertiary">
             <GuidanceText locale={guidance.locale} message={guidance.messages.feed.splitReversible} />
           </span>

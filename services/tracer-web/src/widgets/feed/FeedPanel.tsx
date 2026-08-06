@@ -13,6 +13,7 @@ import { TaskHeader } from "~tracer-web/widgets/feed/header/TaskHeader.js";
 import { ActList } from "~tracer-web/widgets/feed/timeline/ActList.js";
 import { buildFeed } from "~tracer-web/widgets/feed/lib/timeline/group-acts.js";
 import { selectResumeTarget } from "~tracer-web/widgets/feed/lib/resume/resume-target.js";
+import { useRevealSelectedLane } from "~tracer-web/widgets/feed/lib/use-reveal-selected-lane.js";
 import { BoundarySuggestions } from "~tracer-web/widgets/feed/split/BoundarySuggestions.js";
 import { TurnSplitModal, useTurnSplit } from "~tracer-web/features/turn-split/index.js";
 
@@ -37,6 +38,7 @@ export function FeedPanel({ taskId }: FeedPanelProps) {
   });
 
   const split = useTurnSplit(data?.turns ?? [], data?.sessions ?? []);
+  useRevealSelectedLane(data?.timeline ?? []);
 
   const items = useMemo(() => {
     if (!data) return [];

@@ -80,11 +80,11 @@ export function useGraphViewport({
     if (leftPercent !== null) focusOnPosition(leftPercent);
   }, [zoom, focusOnPosition]);
 
+  // 고른 노드가 아직 없으면 위치를 모르므로, 그 노드가 생긴 뒤에 다시 맞춘다.
   useEffect(() => {
     if (!selectedKey) return;
-    const leftPercent = selectedLeftPercentRef.current;
-    if (leftPercent !== null) focusOnPosition(leftPercent);
-  }, [selectedKey, focusOnPosition]);
+    if (selectedLeftPercent !== null) focusOnPosition(selectedLeftPercent);
+  }, [selectedKey, selectedLeftPercent, focusOnPosition]);
 
   const onWheel = (event: ReactWheelEvent<HTMLDivElement>) => {
     if (!event.ctrlKey && !event.metaKey) return;

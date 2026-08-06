@@ -51,6 +51,12 @@ export function TaskHeader({ task, timeline, resumeTarget }: TaskHeaderProps) {
         <ViewToggle />
       </div>
 
+      {task.splitFromTaskId ? (
+        <div className="mt-2">
+          <SplitOriginPill taskId={task.id} originTaskId={task.splitFromTaskId} />
+        </div>
+      ) : null}
+
       <div className="flex items-center gap-2.5 flex-wrap mt-2 text-xs text-ink-subtle">
         <ByItem
           label="Started"
@@ -125,9 +131,6 @@ export function TaskHeader({ task, timeline, resumeTarget }: TaskHeaderProps) {
               <ByItem label="Session" value="—" mono />
             )}
             <ByItem label="Agent" value={task.runtimeSource ?? "—"} mono />
-            {task.splitFromTaskId ? (
-              <SplitOriginPill taskId={task.id} originTaskId={task.splitFromTaskId} />
-            ) : null}
             <ByItem label="Status" value={task.status} mono />
           </div>
           <TaskMemoThread taskId={task.id} />
