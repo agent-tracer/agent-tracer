@@ -6,6 +6,7 @@ import type {
     RuleRepository,
     SessionRepository,
     TaskRepository,
+    TurnReassignmentEntity,
     TurnRepository,
 } from "@agent-tracer/tracer-model";
 
@@ -29,6 +30,8 @@ export interface TimelineProjectionRepositories {
     readonly turns: TurnRepository;
     findEventById(id: string): Promise<EventEntity | null>;
     findRunningAsyncAction(taskId: string, asyncTaskId: string): Promise<EventEntity | null>;
+    /** 원장 밖의 사용자 결정이라 투영이 이것을 읽어야 CDC 재전달이 분리를 되돌리지 않는다. */
+    findReassignments(userId: string, sessionId: string): Promise<TurnReassignmentEntity[]>;
 }
 
 /** 규칙 판정과 판정 요약을 투영하는 저장소 경계다. */

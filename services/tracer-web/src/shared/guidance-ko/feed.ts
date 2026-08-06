@@ -44,6 +44,31 @@ export const KO_FEED = {
     verify: createGuidanceMessage("규칙 판정으로 확인된 작업입니다."),
     coordinate: createGuidanceMessage("서브에이전트 생성과 인계입니다."),
   },
+  splitOnlyThis: createGuidanceMessage("이 턴 하나만 별도 태스크로 옮깁니다."),
+  splitModalTitle: (span: string) =>
+    createGuidanceMessage(`턴 ${span}을 별도 태스크로 옮깁니다`),
+  splitReversible: createGuidanceMessage("나중에 되돌릴 수 있습니다."),
+  splitPickEnd: createGuidanceMessage("마지막 턴을 고르세요"),
+  splitTurnBand: createGuidanceMessage("이 세션의 턴 경계입니다."),
+  splitTurnsAction: createGuidanceMessage(
+    "이 턴과 함께 고른 턴을 별도 태스크로 옮깁니다.",
+  ),
+  splitLiveSession: createGuidanceMessage(
+    "이 세션은 아직 실행 중입니다. 세션이 끝난 뒤 턴을 나눌 수 있습니다.",
+  ),
+  splitNoRules: createGuidanceMessage(
+    "새 태스크는 규칙 없이 시작합니다. 이 태스크에서 승인한 규칙은 넘어가지 않습니다.",
+  ),
+  splitMovedTurns: (from: number, to: number) =>
+    createGuidanceMessage(
+      from === to
+        ? `턴 ${from}이 다른 태스크로 옮겨졌습니다.`
+        : `턴 ${from}\u2013${to}이 다른 태스크로 옮겨졌습니다.`,
+    ),
+  splitOrigin: createGuidanceMessage("이 태스크는 다른 태스크에서 분리됐습니다."),
+  revertSplit: createGuidanceMessage(
+    "이 턴들을 원래 자리로 되돌리고 이 태스크를 없앱니다.",
+  ),
 } as const;
 
 export const KO_TASKS = {

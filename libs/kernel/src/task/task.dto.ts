@@ -11,6 +11,8 @@ export interface TaskListItemDto {
     readonly origin: TaskOrigin;
     readonly workspacePath?: string;
     readonly parentTaskId?: string;
+    /** 이 태스크가 턴 분리로 갈라져 나온 원본이다. */
+    readonly splitFromTaskId?: string;
     readonly archived: boolean;
     readonly createdAt: string;
     readonly updatedAt: string;

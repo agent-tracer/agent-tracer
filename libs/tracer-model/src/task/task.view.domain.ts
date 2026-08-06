@@ -42,6 +42,7 @@ export class TaskView {
             origin: this.task.origin,
             ...(this.task.workspacePath !== null ? { workspacePath: this.task.workspacePath } : {}),
             ...(this.task.parentTaskId !== null ? { parentTaskId: this.task.parentTaskId } : {}),
+            ...(this.task.splitFromTaskId !== null ? { splitFromTaskId: this.task.splitFromTaskId } : {}),
             archived: this.isArchived(),
             createdAt: this.task.createdAt.toISOString(),
             updatedAt: this.task.updatedAt.toISOString(),

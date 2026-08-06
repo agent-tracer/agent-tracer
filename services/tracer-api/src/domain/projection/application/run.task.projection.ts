@@ -79,6 +79,7 @@ export class RunTaskProjection {
         task.parentTaskId = parentTaskId ?? null;
         task.parentSessionId = parentSessionId ?? null;
         task.backgroundOfTaskId = backgroundOfTaskId ?? null;
+        task.splitFromTaskId = null;
         task.createdAt = record.occurredAt;
         task.updatedAt = record.occurredAt;
         task.lastSessionStartedAt = null;

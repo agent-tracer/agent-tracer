@@ -7,12 +7,14 @@ import {
     SearchOutboxEntity,
     TaskUserStateEntity,
 } from "@agent-tracer/tracer-model";
+import type { TaskEntity } from "@agent-tracer/tracer-model";
 import { SearchOutboxDrainUseCase } from "~tracer-api/domain/index/application/search.outbox.drain.usecase.js";
 import { InMemoryAdvisoryLock } from "~tracer-api/domain/index/port/__fakes__/in-memory.advisory.lock.js";
 import {
     InMemorySearchOutboxMemoRepository,
     InMemorySearchOutboxRecipeRepository,
     InMemorySearchOutboxRepository,
+    InMemorySearchOutboxTaskRepository,
     InMemorySearchOutboxTaskUserStateRepository,
 } from "~tracer-api/domain/index/port/__fakes__/in-memory.search.outbox.repositories.js";
 import { InMemorySearchIndex } from "~tracer-api/domain/index/port/__fakes__/in-memory.search.index.js";
@@ -71,6 +73,7 @@ function makeService(args: {
     readonly rows: readonly SearchOutboxEntity[];
     readonly recipes?: readonly RecipeEntity[];
     readonly taskStates?: readonly TaskUserStateEntity[];
+    readonly tasks?: readonly TaskEntity[];
     readonly memos?: readonly MemoEntity[];
     readonly indexFails?: boolean;
     readonly updateFails?: boolean;
@@ -83,7 +86,9 @@ function makeService(args: {
     taskUserStates.seed(...args.taskStates ?? []);
     const memos = new InMemorySearchOutboxMemoRepository();
     memos.seed(...args.memos ?? []);
-    const lock = new InMemoryAdvisoryLock({ searchOutbox: outbox, recipes, taskUserStates, memos });
+    const tasks = new InMemorySearchOutboxTaskRepository();
+    tasks.seed(...args.tasks ?? []);
+    const lock = new InMemoryAdvisoryLock({ searchOutbox: outbox, recipes, tasks, taskUserStates, memos });
     const searchIndex = new InMemorySearchIndex();
     searchIndex.indexFails = args.indexFails === true;
     searchIndex.updateFails = args.updateFails === true;

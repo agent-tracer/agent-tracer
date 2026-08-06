@@ -34,7 +34,7 @@ export class GetTaskVerificationsUseCase {
         const task = await this.tasks.findById(taskId);
         if (task === null || !task.isOwnedBy(userId)) return null;
 
-        const turns = await this.turns.findByTask(taskId);
+        const turns = await this.turns.findByTask(userId, taskId);
         const verdicts = await this.verdicts.findByTurns(turns.map((turn) => turn.id));
         const verified = verdicts.filter((verdict) => verdict.status === VERDICT_STATUS.satisfied);
         if (verified.length === 0) return [];

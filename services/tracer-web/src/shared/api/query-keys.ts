@@ -25,6 +25,7 @@ export const monitorQueryKeys = {
   taskDetail: (taskId: TaskId) => ["monitor", "task", taskId] as const,
   taskScopedPrefix: () => ["monitor", "task"] as const,
   taskChildren: (taskId: TaskId) => ["monitor", "task", taskId, "children"] as const,
+  taskBoundaries: (taskId: TaskId) => ["monitor", "task", taskId, "boundaries"] as const,
   taskOpenInference: (taskId: TaskId) =>
     ["monitor", "task", taskId, "openinference"] as const,
   rules: () => ["monitor", "rules"] as const,

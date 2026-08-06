@@ -1,6 +1,6 @@
 import { AGENT_TRACER_ATTR, KIND } from "@agent-tracer/kernel";
 import type { TimelineEventRecord } from "~tracer-web/entities/task/model/timeline/event.js";
-import type { TaskTurnSummary } from "~tracer-web/entities/task/model/task-query.js";
+import type { TaskSplitRange, TaskTurnSummary } from "~tracer-web/entities/task/model/task-query.js";
 import type { VerdictStatus } from "~tracer-web/entities/rule/model/rule.js";
 import { classifyEvent, type ActVm } from "~tracer-web/widgets/feed/lib/timeline/act-classification.js";
 import { formatHHmmss } from "~tracer-web/shared/lib/formatting/time.js";
@@ -32,9 +32,19 @@ export type FeedItem =
       /** 마지막으로 표시한 마크 대비 부호가 있는 증감(퍼센트 포인트). */
       readonly deltaPct: number;
     }
+  | {
+      readonly kind: "split-mark";
+      readonly fromTurnIndex: number;
+      readonly toTurnIndex: number;
+      readonly taskId: string;
+    }
   | { readonly kind: "act"; readonly vm: ActVm };
 
 const CONTEXT_DELTA_THRESHOLD = 5;
+
+function lastTurnIndexOrZero(lastTurnIndex: number | null): number {
+  return lastTurnIndex ?? 0;
+}
 
 const MODEL_KEYS = ["modelId", "model_id", "model"] as const;
 
@@ -50,6 +60,7 @@ export function buildFeed(
   events: readonly TimelineEventRecord[],
   baseMs: number,
   turns: readonly TaskTurnSummary[] = [],
+  splits: readonly TaskSplitRange[] = [],
 ): readonly FeedItem[] {
   const sorted = orderEventsForFeed(events);
 
@@ -123,6 +134,17 @@ export function buildFeed(
       ? turns.find((candidate) => candidate.id === event.turnId)
       : findTurnAtMs(Date.parse(event.createdAt), turns);
     if (turn && turn.turnIndex !== lastTurnIndex) {
+      // 옮겨 간 구간이 통째로 빠져 턴 번호가 뛰므로, 그 자리를 유실이 아니라 분리로 읽히게 한다.
+      for (const range of splits) {
+        if (range.fromTurnIndex <= lastTurnIndexOrZero(lastTurnIndex)) continue;
+        if (range.fromTurnIndex >= turn.turnIndex) continue;
+        items.push({
+          kind: "split-mark",
+          fromTurnIndex: range.fromTurnIndex,
+          toTurnIndex: range.toTurnIndex,
+          taskId: range.taskId,
+        });
+      }
       items.push({
         kind: "turn-mark",
         turnIndex: turn.turnIndex,

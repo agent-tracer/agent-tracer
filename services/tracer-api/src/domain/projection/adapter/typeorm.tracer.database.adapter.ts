@@ -15,6 +15,8 @@ import {
     TaskEntity,
     TaskRepository,
     TurnEntity,
+    TurnReassignmentEntity,
+    TurnReassignmentRepository,
     TurnRepository,
     VerdictEntity,
     VerdictRepository,
@@ -51,7 +53,9 @@ export class TypeOrmTracerDatabaseAdapter implements TracerDatabase {
 
     private build(manager: EntityManager): LedgerProjectionRepositories {
         const events = manager.getRepository(EventEntity);
+        const reassignments = new TurnReassignmentRepository(manager.getRepository(TurnReassignmentEntity));
         return {
+            findReassignments: (userId, sessionId) => reassignments.findBySession(userId, sessionId),
             tasks: new TaskRepository(manager.getRepository(TaskEntity)),
             sessions: new SessionRepository(manager.getRepository(SessionEntity)),
             events: new EventRepository(events),

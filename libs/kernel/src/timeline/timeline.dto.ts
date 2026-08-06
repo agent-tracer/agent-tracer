@@ -33,6 +33,23 @@ export interface TurnVerdictDto {
     readonly status: string;
 }
 
+/** 이 태스크에서 다른 태스크로 옮겨 간 턴 구간이며, 원본 피드가 구멍을 설명할 때 읽는다. */
+export interface TurnSplitRangeDto {
+    readonly fromTurnIndex: number;
+    readonly toTurnIndex: number;
+    readonly taskId: string;
+    readonly movedAt: string;
+}
+
+/** 실행 중에 남긴 경계 마커가 가리키는, 사후 분리가 쓸 수 있는 턴 구간이다. */
+export interface TurnBoundaryDto {
+    readonly sessionId: string;
+    readonly fromTurnIndex: number;
+    readonly toTurnIndex: number;
+    readonly label: string;
+    readonly markedAt: string;
+}
+
 export interface TurnDto {
     readonly id: string;
     readonly taskId: string;

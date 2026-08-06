@@ -2,12 +2,14 @@ import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import type { TaskId } from "~tracer-web/shared/identity.js";
 import type { TaskOpenInferenceResponse } from "~tracer-web/entities/task/model/openinference.js";
 import type {
+  TaskBoundarySuggestion,
   TaskChildrenResponse,
   TaskDetailResponse,
   TaskUserInput,
 } from "~tracer-web/entities/task/model/task-query.js";
 import type { TaskVerification } from "~tracer-web/entities/task/model/timeline/verification.js";
 import {
+  fetchTaskBoundaries,
   fetchTaskChildren,
   fetchTaskDetail,
   fetchTaskOpenInference,
@@ -37,7 +39,25 @@ export function useTaskDetailQuery(taskId: TaskId | null): UseQueryResult<TaskDe
         timeline: timeline.timeline,
         olderCursor: timeline.olderCursor,
         turns: turns.turns,
+        splits: turns.splits,
       };
+    },
+    enabled: taskId !== null,
+  });
+}
+
+export function useTaskBoundariesQuery(
+  taskId: TaskId | null,
+): UseQueryResult<readonly TaskBoundarySuggestion[]> {
+  return useQuery({
+    queryKey: taskId
+      ? monitorQueryKeys.taskBoundaries(taskId)
+      : monitorQueryKeys.taskBoundaries("__disabled__" as TaskId),
+    queryFn: () => {
+      if (!taskId) {
+        throw new Error("useTaskBoundariesQuery called without a taskId");
+      }
+      return fetchTaskBoundaries(taskId);
     },
     enabled: taskId !== null,
   });

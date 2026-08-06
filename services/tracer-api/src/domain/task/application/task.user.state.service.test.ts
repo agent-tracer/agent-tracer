@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { TaskUserStateEntity } from "@agent-tracer/tracer-model";
 import { FixedClock } from "~tracer-api/domain/task/port/__fakes__/fixed.clock.js";
 import { InMemoryTaskUserStateRepository } from "~tracer-api/domain/task/port/__fakes__/in-memory.task.user.state.repository.js";
-import type { TaskSearchIndexPort } from "~tracer-api/domain/task/port/task.search.index.port.js";
+import { InMemoryTaskSearchIndex } from "~tracer-api/domain/task/port/__fakes__/in-memory.task.search.index.js";
 import { TaskUserStateService } from "./task.user.state.service.js";
 
 const NOW = new Date("2026-07-01T00:00:00.000Z");
@@ -16,16 +16,11 @@ interface Harness {
 function makeService(seed: readonly TaskUserStateEntity[] = []): Harness {
     const repo = new InMemoryTaskUserStateRepository();
     repo.seed(...seed);
-    const indexed: Record<string, unknown>[] = [];
-    const search = {
-        partialUpdate: async (userId: string, taskId: string, doc: Record<string, unknown>) => {
-            indexed.push({ userId, taskId, ...doc });
-        },
-    } satisfies TaskSearchIndexPort;
+    const search = new InMemoryTaskSearchIndex();
     return {
         service: new TaskUserStateService(repo, search, new FixedClock(NOW)),
         stored: (taskId) => repo.all().find((state) => state.taskId === taskId),
-        indexed,
+        indexed: search.updates,
     };
 }
 

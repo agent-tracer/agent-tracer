@@ -45664,7 +45664,9 @@ var AGENT_TRACER_ATTR = {
   /** 늦게 도착한 commentary를 이미 닫힌 턴에 귀속시키는 상관키이며, 인과 부모와 별개다. */
   turnResponseEventId: "agent_tracer.turn.response_event_id",
   /** 직전 턴의 ID이며, 트레이스가 턴 단위로 갈리므로 OTLP span link로 이어 붙인다. */
-  turnPreviousId: "agent_tracer.turn.previous_id"
+  turnPreviousId: "agent_tracer.turn.previous_id",
+  boundaryLabel: "agent_tracer.boundary.label",
+  boundaryBack: "agent_tracer.boundary.back"
 };
 var GEN_AI_OPERATION = {
   invokeAgent: "invoke_agent",
@@ -45730,7 +45732,8 @@ var KIND = {
   worktreeRemove: "agent_tracer.worktree.remove",
   permissionRequest: "agent_tracer.permission.request",
   setupTriggered: "agent_tracer.setup.triggered",
-  recipeInjected: "agent_tracer.recipe.injected"
+  recipeInjected: "agent_tracer.recipe.injected",
+  boundaryLogged: "agent_tracer.boundary.logged"
 };
 var TERMINAL_COMMAND_TOOL_NAME = "Bash";
 var POWERSHELL_TOOL_NAME = "PowerShell";
@@ -45755,7 +45758,8 @@ var WORKFLOW_EVENT_KINDS = [
   KIND.permissionRequest,
   KIND.worktreeRemove,
   KIND.setupTriggered,
-  KIND.fileChanged
+  KIND.fileChanged,
+  KIND.boundaryLogged
 ];
 var CONVERSATION_EVENT_KINDS = [
   KIND.userMessage,
@@ -46277,6 +46281,79 @@ function readNumber(metadata, key) {
   return typeof value === "number" && Number.isFinite(value) ? value : void 0;
 }
 
+// src/domain/hint/model/topic.shift.model.ts
+var MIN_TURNS = 3;
+var LOOKBACK_TURNS = 2;
+var COOLDOWN_TURNS = 2;
+var MIN_TOKEN_LENGTH = 2;
+function turnIdsOf(recent) {
+  const seen = [];
+  for (const event of recent) {
+    if (event.turnId === void 0) continue;
+    if (seen[seen.length - 1] === event.turnId) continue;
+    if (!seen.includes(event.turnId)) seen.push(event.turnId);
+  }
+  return seen;
+}
+function tokensOf(text) {
+  const out = /* @__PURE__ */ new Set();
+  for (const token of text.toLowerCase().split(/[^\p{L}\p{N}]+/gu)) {
+    if (token.length >= MIN_TOKEN_LENGTH) out.add(token);
+  }
+  return out;
+}
+function footprintOf(recent, turnIds) {
+  const out = /* @__PURE__ */ new Set();
+  for (const event of recent) {
+    if (event.turnId === void 0 || !turnIds.has(event.turnId)) continue;
+    for (const path6 of event.filePaths ?? []) {
+      for (const token of tokensOf(path6)) out.add(token);
+    }
+    if (event.toolName !== void 0) {
+      for (const token of tokensOf(event.toolName)) out.add(token);
+    }
+    if (event.title !== void 0) {
+      for (const token of tokensOf(event.title)) out.add(token);
+    }
+  }
+  return out;
+}
+function overlaps(left, right) {
+  for (const token of left) {
+    if (right.has(token)) return true;
+  }
+  return false;
+}
+function turnsSinceLastBoundary(recent, turnIds) {
+  for (let index = recent.length - 1; index >= 0; index -= 1) {
+    const event = recent[index];
+    if (event === void 0 || event.kind !== KIND.boundaryLogged) continue;
+    const at2 = event.turnId === void 0 ? -1 : turnIds.indexOf(event.turnId);
+    return at2 < 0 ? Number.POSITIVE_INFINITY : turnIds.length - 1 - at2;
+  }
+  return null;
+}
+function detectTopicShift(recent, prompt) {
+  const trimmed2 = prompt.trim();
+  if (trimmed2 === "") return [];
+  const turnIds = turnIdsOf(recent);
+  if (turnIds.length < MIN_TURNS) return [];
+  const sinceBoundary = turnsSinceLastBoundary(recent, turnIds);
+  if (sinceBoundary !== null && sinceBoundary < COOLDOWN_TURNS) return [];
+  const lookback = new Set(turnIds.slice(-LOOKBACK_TURNS));
+  const footprint = footprintOf(recent, lookback);
+  if (footprint.size === 0) return [];
+  const promptTokens = tokensOf(trimmed2);
+  if (promptTokens.size === 0) return [];
+  if (overlaps(promptTokens, footprint)) return [];
+  return [{
+    type: "topic_shift",
+    severity: "info",
+    title: "This looks like different work",
+    message: "This request does not touch anything the last few turns did. If it is a different piece of work, call mark_boundary so it can be split into its own task after the session ends. If it is a continuation, ignore this."
+  }];
+}
+
 // src/domain/hint/application/compute.hints.usecase.ts
 var COMMAND_TOOLS = /* @__PURE__ */ new Set([TERMINAL_COMMAND_TOOL_NAME, POWERSHELL_TOOL_NAME]);
 var ComputeHintsUsecase = class {
@@ -46287,7 +46364,10 @@ var ComputeHintsUsecase = class {
   execute(recent, request) {
     const now = this.clock.now();
     const hints = [...detectContextPressure(recent, now)];
-    if (request.trigger !== "pre_tool") return hints;
+    if (request.trigger !== "pre_tool") {
+      if (request.prompt !== void 0) hints.push(...detectTopicShift(recent, request.prompt));
+      return hints;
+    }
     const toolName = request.toolName ?? "";
     if (COMMAND_TOOLS.has(toolName) && request.command) {
       hints.push(...detectCommandRepetition(recent, request.command, now));

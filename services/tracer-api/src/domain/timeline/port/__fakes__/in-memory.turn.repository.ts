@@ -17,8 +17,8 @@ export class InMemoryTurnRepository implements TurnRepositoryPort {
         return Promise.resolve(this.rows.get(id) ?? null);
     }
 
-    findByTask(taskId: string): Promise<TurnEntity[]> {
-        return Promise.resolve(this.all().filter((turn) => turn.taskId === taskId));
+    findByTask(userId: string, taskId: string): Promise<TurnEntity[]> {
+        return Promise.resolve(this.all().filter((turn) => turn.userId === userId && turn.taskId === taskId));
     }
 
     upsert(turn: TurnEntity): Promise<void> {

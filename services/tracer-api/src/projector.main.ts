@@ -16,6 +16,7 @@ import { TypeOrmTracerDatabaseAdapter } from "~tracer-api/domain/projection/adap
 import { DbConsumer } from "~tracer-api/domain/projection/inbound/db.consumer.js";
 import { OpenSearchIndexAdapter } from "~tracer-api/domain/index/adapter/open.search.index.adapter.js";
 import { TypeOrmSearchOutboxLockAdapter } from "~tracer-api/domain/index/adapter/typeorm.search.outbox.lock.adapter.js";
+import { TypeOrmSplitTaskReaderAdapter } from "~tracer-api/domain/index/adapter/typeorm.split.task.reader.adapter.js";
 import { SearchOutboxDrainUseCase } from "~tracer-api/domain/index/application/search.outbox.drain.usecase.js";
 import { SearchConsumer } from "~tracer-api/domain/index/inbound/search.consumer.js";
 import { OtlpConsumer } from "~tracer-api/domain/export/inbound/otlp.consumer.js";
@@ -36,6 +37,7 @@ async function bootstrap(): Promise<void> {
     const dataSource = createDataSource({ db: config.tracerDb, entities: TRACER_ENTITIES, migrations: [], migrationsRun: false });
     const database = new TypeOrmTracerDatabaseAdapter(dataSource);
     const indexLock = new TypeOrmSearchOutboxLockAdapter(dataSource);
+    const splitTasks = new TypeOrmSplitTaskReaderAdapter(dataSource);
 
     const kafka = createKafka("projector");
     const searchClient = createOpenSearchClient();
@@ -75,6 +77,7 @@ async function bootstrap(): Promise<void> {
         ProjectorModule.forRoot({
             database,
             indexLock,
+            splitTasks,
             producer,
             dbEventConsumer,
             searchEventConsumer,

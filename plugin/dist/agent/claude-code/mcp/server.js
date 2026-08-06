@@ -322,7 +322,9 @@ var AGENT_TRACER_ATTR = {
   /** 늦게 도착한 commentary를 이미 닫힌 턴에 귀속시키는 상관키이며, 인과 부모와 별개다. */
   turnResponseEventId: "agent_tracer.turn.response_event_id",
   /** 직전 턴의 ID이며, 트레이스가 턴 단위로 갈리므로 OTLP span link로 이어 붙인다. */
-  turnPreviousId: "agent_tracer.turn.previous_id"
+  turnPreviousId: "agent_tracer.turn.previous_id",
+  boundaryLabel: "agent_tracer.boundary.label",
+  boundaryBack: "agent_tracer.boundary.back"
 };
 var GEN_AI_OPERATION = {
   invokeAgent: "invoke_agent",
@@ -1354,7 +1356,8 @@ var KIND = {
   worktreeRemove: "agent_tracer.worktree.remove",
   permissionRequest: "agent_tracer.permission.request",
   setupTriggered: "agent_tracer.setup.triggered",
-  recipeInjected: "agent_tracer.recipe.injected"
+  recipeInjected: "agent_tracer.recipe.injected",
+  boundaryLogged: "agent_tracer.boundary.logged"
 };
 var TOOL_ACTIVITY_EVENT_KINDS = [KIND.executeTool];
 var WORKFLOW_EVENT_KINDS = [
@@ -1368,7 +1371,8 @@ var WORKFLOW_EVENT_KINDS = [
   KIND.permissionRequest,
   KIND.worktreeRemove,
   KIND.setupTriggered,
-  KIND.fileChanged
+  KIND.fileChanged,
+  KIND.boundaryLogged
 ];
 var CONVERSATION_EVENT_KINDS = [
   KIND.userMessage,
@@ -1394,6 +1398,21 @@ var TIMELINE_EVENT_KINDS = [
 ];
 var SPAN_EVENT_KINDS = [KIND.executeTool, KIND.invokeAgent, KIND.planLogged];
 var SPAN_KIND_SET = new Set(SPAN_EVENT_KINDS);
+
+// src/domain/ingest/model/event.model.ts
+var LANE = {
+  user: "user",
+  assistant: "assistant",
+  exploration: "exploration",
+  planning: "planning",
+  implementation: "implementation",
+  rule: "rule",
+  questions: "questions",
+  todos: "todos",
+  background: "background",
+  coordination: "coordination",
+  telemetry: "telemetry"
+};
 
 // src/domain/ingest/model/recipe.injection.event.model.ts
 function recipeInjectedEvent(target, input) {
@@ -1572,6 +1591,52 @@ function parseSetTaskTitleArgs(value) {
   return typeof title === "string" && title.trim() !== "" ? { title: title.trim() } : null;
 }
 
+// src/domain/session/model/mark.boundary.tool.model.ts
+var MARK_BOUNDARY_TOOL = {
+  name: "mark_boundary",
+  description: "Mark the point where this session's work changes to a different piece of work, or comes back from one. Agent Tracer records tasks as one unit per session, so a detour recorded inside another task blurs both. You cannot split a task while its session is running \u2014 this mark is how the boundary survives until it can be split afterwards. Call it when the request in front of you is not a continuation of what you were doing: different feature, different bug, an aside the user asked for mid-flight. Pass back=true when returning to what you were doing before. Do not mark ordinary progress within the same piece of work, and do not mark a boundary you already marked. The tool identifies its own session, so you pass no ids.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      label: {
+        type: "string",
+        description: "Short name for the work that starts here (a few words)."
+      },
+      back: {
+        type: "boolean",
+        description: "True when this returns to the work that was interrupted."
+      }
+    },
+    required: ["label"]
+  }
+};
+function parseMarkBoundaryArgs(value) {
+  if (!isRecord(value)) return null;
+  const label = value["label"];
+  if (typeof label !== "string" || label.trim() === "") return null;
+  return { label: label.trim(), back: value["back"] === true };
+}
+
+// src/domain/session/model/boundary.event.model.ts
+var LABEL_MAX = 120;
+function boundaryLoggedEvent(target, input) {
+  const label = input.label.trim().slice(0, LABEL_MAX);
+  return {
+    kind: KIND.boundaryLogged,
+    taskId: target.taskId,
+    sessionId: target.sessionId,
+    ...target.turnId ? { turnId: target.turnId } : {},
+    payload: {
+      lane: LANE.planning,
+      title: input.back ? `\u21A9 ${label}` : `\u21E5 ${label}`,
+      metadata: {
+        [AGENT_TRACER_ATTR.boundaryLabel]: label,
+        [AGENT_TRACER_ATTR.boundaryBack]: input.back
+      }
+    }
+  };
+}
+
 // src/agent/claude-code/mcp/tool.dispatch.ts
 var MCP_RECIPE_SCAN_PROMPT = "/recipe";
 var UNKNOWN_SESSION = "unknown_session";
@@ -1580,6 +1645,7 @@ var ALWAYS_AVAILABLE_TOOLS = [
   SEARCH_RECIPES_TOOL,
   REPORT_RECIPE_OUTCOME_TOOL,
   SET_TASK_TITLE_TOOL,
+  MARK_BOUNDARY_TOOL,
   CREATE_MEMO_TOOL,
   SEARCH_MEMOS_TOOL
 ];
@@ -1677,6 +1743,19 @@ async function callTool(name, args) {
       const ok = await onSetTaskTitleRequested(mcpRuntime.session, target.taskId, parsed.title);
       return ok ? { text: "Task title updated.", isError: false } : { text: "Could not update title.", isError: true };
     }
+    case MARK_BOUNDARY_TOOL.name: {
+      const parsed = parseMarkBoundaryArgs(args);
+      if (!parsed) return invalidArgs();
+      const target = resolveTarget();
+      if (target === void 0) {
+        return { text: `Could not mark boundary (${UNKNOWN_SESSION}).`, isError: true };
+      }
+      await appendIngestEvents.execute([boundaryLoggedEvent(target, parsed)]);
+      return {
+        text: parsed.back ? `Marked return to "${parsed.label}".` : `Marked boundary "${parsed.label}".`,
+        isError: false
+      };
+    }
     case CREATE_MEMO_TOOL.name: {
       const parsed = parseCreateMemoArgs(args);
       if (!parsed) return invalidArgs();
@@ -1752,7 +1831,7 @@ function writeJsonRpcMessage(stream, message) {
 // src/agent/claude-code/mcp/server.ts
 var SERVER_NAME = "agent-tracer";
 var DEFAULT_PROTOCOL_VERSION = "2024-11-05";
-var INSTRUCTIONS = "This workspace's activity is observed by Agent Tracer. A menu of saved recipes (reusable workflows distilled from past tasks in this workspace) arrives in your context on every prompt; get_recipe fetches the full workflow for one you saw there, report_recipe_outcome feeds back whether a recipe you used actually helped \u2014 the only signal recipe quality is judged by \u2014 request_recipe_scan asks for this task itself to be distilled into a new recipe candidate, and set_task_title corrects this task's crude auto-generated title once its real scope is clear. Each tool's own description states exactly when to call it; this note is only the overall picture.";
+var INSTRUCTIONS = "This workspace's activity is observed by Agent Tracer. A menu of saved recipes (reusable workflows distilled from past tasks in this workspace) arrives in your context on every prompt; get_recipe fetches the full workflow for one you saw there, report_recipe_outcome feeds back whether a recipe you used actually helped \u2014 the only signal recipe quality is judged by \u2014 request_recipe_scan asks for this task itself to be distilled into a new recipe candidate, and set_task_title corrects this task's crude auto-generated title once its real scope is clear, and mark_boundary records the point where the work in this session turns into a different piece of work so it can be split into its own task later. Each tool's own description states exactly when to call it; this note is only the overall picture.";
 function protocolVersionOf(params) {
   return isRecord(params) && typeof params["protocolVersion"] === "string" ? params["protocolVersion"] : DEFAULT_PROTOCOL_VERSION;
 }

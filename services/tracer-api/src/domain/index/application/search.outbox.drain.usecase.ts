@@ -9,9 +9,9 @@ import type {
     SearchOutboxDrainRepositories,
     SearchOutboxMemoRepository,
     SearchOutboxRecipeRepository,
-    SearchOutboxTaskUserStateRepository,
 } from "~tracer-api/domain/index/port/search.outbox.drain.repository.port.js";
 import { taskDocumentId } from "~tracer-api/domain/index/model/search.document.id.js";
+import { buildTaskDocument } from "~tracer-api/support/task.document.js";
 import { MEMOS_ALIAS } from "~tracer-api/domain/index/model/search.index.definitions.js";
 import {
     SEARCH_INDEX_WRITER,
@@ -89,7 +89,7 @@ export class SearchOutboxDrainUseCase {
     private async apply(row: SearchOutboxEntity, repos: SearchOutboxDrainRepositories): Promise<boolean> {
         if (row.isRecipe()) return this.applyRecipe(row, repos.recipes);
         if (row.isMemo()) return this.applyMemo(row, repos.memos);
-        return this.applyTask(row, repos.taskUserStates);
+        return this.applyTask(row, repos);
     }
 
     // 소프트삭제된(또는 삭제된) 레시피는 조회에 잡히지 않으므로 못 찾은 것과 지워야 할 것을 구분하지 않는다.
@@ -123,17 +123,17 @@ export class SearchOutboxDrainUseCase {
         }
     }
 
-    private async applyTask(
-        row: SearchOutboxEntity,
-        taskUserStates: SearchOutboxTaskUserStateRepository,
-    ): Promise<boolean> {
+    // 분리로 태어난 태스크는 원장에 없어 색인 문서도 없으므로 읽기 모델에서 전체 문서를 만들어 덮는다.
+    private async applyTask(row: SearchOutboxEntity, repos: SearchOutboxDrainRepositories): Promise<boolean> {
         try {
-            const state = await taskUserStates.findById(row.userId, row.targetId);
-            await this.searchIndex.updateDocument(
-                TASKS_ALIAS,
-                taskDocumentId(row.userId, row.targetId),
-                { archived: state?.isArchived() ?? false },
-            );
+            const archived = (await repos.taskUserStates.findById(row.userId, row.targetId))?.isArchived() ?? false;
+            const documentId = taskDocumentId(row.userId, row.targetId);
+            const task = await repos.tasks.findById(row.userId, row.targetId);
+            if (task === null) {
+                await this.searchIndex.updateDocument(TASKS_ALIAS, documentId, { archived });
+                return true;
+            }
+            await this.searchIndex.indexDocument(TASKS_ALIAS, documentId, buildTaskDocument(task, archived));
             return true;
         } catch (error) {
             this.logFailure(row, error);

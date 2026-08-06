@@ -13,7 +13,9 @@ const INSTRUCTIONS =
     + "get_recipe fetches the full workflow for one you saw there, report_recipe_outcome feeds back "
     + "whether a recipe you used actually helped — the only signal recipe quality is judged by — "
     + "request_recipe_scan asks for this task itself to be distilled into a new recipe candidate, and "
-    + "set_task_title corrects this task's crude auto-generated title once its real scope is clear. "
+    + "set_task_title corrects this task's crude auto-generated title once its real scope is clear, and "
+    + "mark_boundary records the point where the work in this session turns into a different piece of "
+    + "work so it can be split into its own task later. "
     + "Each tool's own description states exactly when to call it; this note is only the overall "
     + "picture.";
 

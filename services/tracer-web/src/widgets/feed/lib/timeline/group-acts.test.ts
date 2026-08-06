@@ -46,6 +46,7 @@ describe("buildFeed", () => {
       endedAt: "2026-07-10T00:00:02.001Z",
       aggregateVerdict: null,
       rulesEvaluatedCount: 0,
+      askedText: null,
     };
 
     const feed = buildFeed([
@@ -76,5 +77,60 @@ describe("buildFeed", () => {
 
     expect(feed.filter((item) => item.kind === "act").map((item) => item.vm.event.id))
       .toEqual(["commentary", "tool", "response"]);
+  });
+});
+
+describe("buildFeed 분리 마크", () => {
+  function turnAt(index: number, id: string, startedAt: string): TaskTurnSummary {
+    return {
+      id,
+      taskId: "task-1",
+      sessionId: "session-1",
+      turnIndex: index,
+      status: "closed",
+      startedAt,
+      endedAt: null,
+      aggregateVerdict: null,
+      rulesEvaluatedCount: 0,
+      askedText: null,
+    };
+  }
+
+  function eventInTurn(id: string, turnId: string, createdAt: string): TimelineEventRecord {
+    return { ...event(id, KIND.userMessage, createdAt), turnId };
+  }
+
+  // 구간이 통째로 빠져 턴 번호가 뛰므로, 설명이 없으면 이벤트가 유실된 것으로 읽힌다.
+  it("옮겨 간 구간 자리에 분리 마크를 넣는다", () => {
+    const turns = [
+      turnAt(1, "t1", "2026-07-10T00:00:00.000Z"),
+      turnAt(4, "t4", "2026-07-10T00:00:10.000Z"),
+    ];
+    const feed = buildFeed(
+      [
+        eventInTurn("a", "t1", "2026-07-10T00:00:00.000Z"),
+        eventInTurn("b", "t4", "2026-07-10T00:00:10.000Z"),
+      ],
+      Date.parse(BASE),
+      turns,
+      [{ fromTurnIndex: 2, toTurnIndex: 3, taskId: "task-2", movedAt: BASE }],
+    );
+
+    const marks = feed.filter((item) => item.kind === "split-mark");
+    expect(marks).toEqual([
+      expect.objectContaining({ fromTurnIndex: 2, toTurnIndex: 3, taskId: "task-2" }),
+    ]);
+  });
+
+  it("옮겨 간 구간이 없으면 마크를 넣지 않는다", () => {
+    const turns = [turnAt(1, "t1", "2026-07-10T00:00:00.000Z")];
+    const feed = buildFeed(
+      [eventInTurn("a", "t1", "2026-07-10T00:00:00.000Z")],
+      Date.parse(BASE),
+      turns,
+      [],
+    );
+
+    expect(feed.some((item) => item.kind === "split-mark")).toBe(false);
   });
 });

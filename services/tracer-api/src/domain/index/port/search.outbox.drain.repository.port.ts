@@ -1,4 +1,10 @@
-import type { MemoEntity, RecipeEntity, SearchOutboxEntity, TaskUserStateEntity } from "@agent-tracer/tracer-model";
+import type {
+    MemoEntity,
+    RecipeEntity,
+    SearchOutboxEntity,
+    TaskEntity,
+    TaskUserStateEntity,
+} from "@agent-tracer/tracer-model";
 
 /** 검색 반영 요청 큐를 배출자가 읽고 지우는 포트다. */
 export interface SearchOutboxRepositoryPort {
@@ -17,6 +23,11 @@ export interface SearchOutboxTaskUserStateRepository {
     findById(userId: string, taskId: string): Promise<TaskUserStateEntity | null>;
 }
 
+/** 배출 시점의 태스크 본문을 다시 읽는 포트이며, 분리 태스크는 색인 문서가 없어 부분 갱신 대신 전체 색인이 필요하다. */
+export interface SearchOutboxTaskRepository {
+    findById(userId: string, id: string): Promise<TaskEntity | null>;
+}
+
 /** 배출 시점의 메모 본문을 다시 읽는 포트다. */
 export interface SearchOutboxMemoRepository {
     findById(id: string): Promise<MemoEntity | null>;
@@ -26,6 +37,7 @@ export interface SearchOutboxMemoRepository {
 export interface SearchOutboxDrainRepositories {
     readonly searchOutbox: SearchOutboxRepositoryPort;
     readonly recipes: SearchOutboxRecipeRepository;
+    readonly tasks: SearchOutboxTaskRepository;
     readonly taskUserStates: SearchOutboxTaskUserStateRepository;
     readonly memos: SearchOutboxMemoRepository;
 }

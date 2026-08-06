@@ -1,9 +1,15 @@
 import { useMemo, useState } from "react";
 import { useGuidance, useSelectedTaskId } from "~tracer-web/shared/store/index.js";
-import { useTaskOpenInferenceQuery } from "~tracer-web/entities/task/api/detail-queries.js";
+import {
+  useTaskDetailQuery,
+  useTaskOpenInferenceQuery,
+} from "~tracer-web/entities/task/api/detail-queries.js";
+import { TurnSplitModal, useTurnSplit } from "~tracer-web/features/turn-split/index.js";
 import { EmptyView } from "~tracer-web/shared/ui/index.js";
 import { buildSpanTree, type SpanTreeRow } from "~tracer-web/widgets/inspector/tabs/trace/lib/build-span-tree.js";
 import { SpanRow } from "~tracer-web/widgets/inspector/tabs/trace/SpanRow.js";
+import { TurnHeaderRow } from "~tracer-web/widgets/inspector/tabs/trace/TurnHeaderRow.js";
+import { groupSpansByTurn } from "~tracer-web/widgets/inspector/tabs/trace/lib/group-spans-by-turn.js";
 import { cn } from "~tracer-web/shared/ui/lib/cn.js";
 
 /** Trace 탭. */
@@ -11,7 +17,10 @@ export function TraceTab() {
   const guidance = useGuidance();
   const taskId = useSelectedTaskId();
   const { data, isLoading, isError } = useTaskOpenInferenceQuery(taskId);
+  const detail = useTaskDetailQuery(taskId);
   const [showTelemetry, setShowTelemetry] = useState(false);
+  const turns = detail.data?.turns ?? [];
+  const split = useTurnSplit(turns, detail.data?.sessions ?? []);
 
   const allRows = useMemo(() => {
     if (!data) return [];
@@ -92,9 +101,21 @@ export function TraceTab() {
           </button>
         )}
       </div>
-      {rows.map((row) => (
-        <SpanRow key={row.span.spanId} row={row} />
-      ))}
+      {groupSpansByTurn(rows, turns).map((entry) =>
+        entry.kind === "turn" ? (
+          <TurnHeaderRow key={`turn-${entry.turn.id}`} turn={entry.turn} splitSelection={split} />
+        ) : (
+          <SpanRow key={entry.row.span.spanId} row={entry.row} />
+        ),
+      )}
+      {taskId ? (
+        <TurnSplitModal
+          taskId={taskId}
+          target={split.target}
+          turns={turns}
+          onClose={split.reset}
+        />
+      ) : null}
     </div>
   );
 }

@@ -35,5 +35,6 @@ export function toTurnSummary(turn: TurnDto): TaskTurnSummary {
     endedAt: turn.endedAt,
     aggregateVerdict: turn.aggregateVerdict as TaskTurnSummary["aggregateVerdict"],
     rulesEvaluatedCount: turn.rulesEvaluatedCount,
+    askedText: turn.askedText,
   };
 }

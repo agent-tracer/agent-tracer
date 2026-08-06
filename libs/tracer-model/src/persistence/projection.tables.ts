@@ -13,6 +13,8 @@ export const REBUILDABLE_TABLES = [
 // 원장에 대응 이벤트가 없어 재생할 수 없는 소유 상태이며 리빌드가 절대 건드리지 않는다.
 export const OWNED_TABLES = [
     "rules",
+    // 턴 분리는 원장에 대응 이벤트가 없는 사용자 결정이라 리빌드가 지우면 되살릴 길이 없다.
+    "turn_reassignments",
     "rule_generations",
     "rule_generation_settings",
     "recipes",

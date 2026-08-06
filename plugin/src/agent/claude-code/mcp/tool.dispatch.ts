@@ -37,6 +37,11 @@ import {
     SET_TASK_TITLE_TOOL,
     parseSetTaskTitleArgs,
 } from "~plugin/domain/session/model/set.task.title.tool.model.js";
+import {
+    MARK_BOUNDARY_TOOL,
+    parseMarkBoundaryArgs,
+} from "~plugin/domain/session/model/mark.boundary.tool.model.js";
+import {boundaryLoggedEvent} from "~plugin/domain/session/model/boundary.event.model.js";
 import type {McpToolSpec} from "~plugin/support/mcp.tool.js";
 
 /** 사용자의 /recipe 발화와 같은 명령 접두사를 합성해 기존 스캔 경로를 그대로 태운다. */
@@ -49,6 +54,7 @@ const ALWAYS_AVAILABLE_TOOLS: readonly McpToolSpec[] = [
     SEARCH_RECIPES_TOOL,
     REPORT_RECIPE_OUTCOME_TOOL,
     SET_TASK_TITLE_TOOL,
+    MARK_BOUNDARY_TOOL,
     CREATE_MEMO_TOOL,
     SEARCH_MEMOS_TOOL,
 ];
@@ -172,6 +178,21 @@ export async function callTool(name: string, args: unknown): Promise<ToolCallRes
             return ok
                 ? {text: "Task title updated.", isError: false}
                 : {text: "Could not update title.", isError: true};
+        }
+        case MARK_BOUNDARY_TOOL.name: {
+            const parsed = parseMarkBoundaryArgs(args);
+            if (!parsed) return invalidArgs();
+            const target = resolveTarget();
+            if (target === undefined) {
+                return {text: `Could not mark boundary (${UNKNOWN_SESSION}).`, isError: true};
+            }
+            await appendIngestEvents.execute([boundaryLoggedEvent(target, parsed)]);
+            return {
+                text: parsed.back
+                    ? `Marked return to "${parsed.label}".`
+                    : `Marked boundary "${parsed.label}".`,
+                isError: false,
+            };
         }
         case CREATE_MEMO_TOOL.name: {
             const parsed = parseCreateMemoArgs(args);

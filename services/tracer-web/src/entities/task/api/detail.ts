@@ -1,9 +1,10 @@
-import type { TurnDto } from "@agent-tracer/kernel";
+import type { TurnDto, TurnSplitRangeDto } from "@agent-tracer/kernel";
 import type { TaskId } from "~tracer-web/shared/identity.js";
 import type { TaskOpenInferenceResponse } from "~tracer-web/entities/task/model/openinference.js";
 import type {
   TaskChildrenResponse,
   TaskDetailResponse,
+  TaskBoundarySuggestion,
   TaskTurnsResponse,
   TaskUserInput,
 } from "~tracer-web/entities/task/model/task-query.js";
@@ -32,10 +33,20 @@ export async function fetchTaskChildren(taskId: TaskId): Promise<TaskChildrenRes
 }
 
 export async function fetchTaskTurns(taskId: TaskId): Promise<TaskTurnsResponse> {
-  const response = await getJson<{ readonly items: readonly TurnDto[] }>(
-    `/api/v1/tasks/${taskId}/turns`,
+  const response = await getJson<{
+    readonly items: readonly TurnDto[];
+    readonly splits?: readonly TurnSplitRangeDto[];
+  }>(`/api/v1/tasks/${taskId}/turns`);
+  return { turns: response.items.map(toTurnSummary), splits: response.splits ?? [] };
+}
+
+export async function fetchTaskBoundaries(
+  taskId: TaskId,
+): Promise<readonly TaskBoundarySuggestion[]> {
+  const response = await getJson<{ readonly items: readonly TaskBoundarySuggestion[] }>(
+    `/api/v1/tasks/${taskId}/boundaries`,
   );
-  return { turns: response.items.map(toTurnSummary) };
+  return response.items;
 }
 
 export async function fetchTaskVerifications(

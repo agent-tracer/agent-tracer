@@ -18,6 +18,7 @@ import { formatHHmm } from "~tracer-web/shared/lib/formatting/time.js";
 import { extractLatestModel } from "~tracer-web/widgets/feed/lib/extraction/extract-model.js";
 import { MetricRail } from "~tracer-web/widgets/feed/header/MetricRail.js";
 import { SessionIdPill } from "~tracer-web/widgets/feed/header/SessionIdPill.js";
+import { SplitOriginPill } from "~tracer-web/widgets/feed/header/SplitOriginPill.js";
 import { EditableTitle } from "~tracer-web/widgets/feed/header/title/EditableTitle.js";
 import { StatusPill } from "~tracer-web/widgets/feed/header/StatusPill.js";
 import { LaneFilter } from "~tracer-web/widgets/feed/LaneFilter.js";
@@ -49,6 +50,12 @@ export function TaskHeader({ task, timeline, resumeTarget }: TaskHeaderProps) {
         <StatusPill task={task} />
         <ViewToggle />
       </div>
+
+      {task.splitFromTaskId ? (
+        <div className="mt-2">
+          <SplitOriginPill taskId={task.id} originTaskId={task.splitFromTaskId} />
+        </div>
+      ) : null}
 
       <div className="flex items-center gap-2.5 flex-wrap mt-2 text-xs text-ink-subtle">
         <ByItem

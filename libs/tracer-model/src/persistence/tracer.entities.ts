@@ -15,6 +15,7 @@ import { TagEntity } from "../tag/tag.entity.js";
 import { TaskTagEntity } from "../tag/task-tag.entity.js";
 import { EventEntity } from "../timeline/event/event.entity.js";
 import { TurnEntity } from "../timeline/turn/turn.entity.js";
+import { TurnReassignmentEntity } from "../timeline/turn/turn.reassignment.entity.js";
 import { UserEntity } from "../user/user.entity.js";
 
 // DataSource 등록용 전체 엔티티 목록.
@@ -24,6 +25,7 @@ export const TRACER_ENTITIES = [
     SessionEntity,
     EventEntity,
     TurnEntity,
+    TurnReassignmentEntity,
     RuleEntity,
     RuleGenerationEntity,
     RuleGenerationSettingsEntity,

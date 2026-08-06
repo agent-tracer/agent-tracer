@@ -38,7 +38,7 @@ function deriveLane(kind: EventKind): EventLane {
     if (kind === KIND.questionLogged) return LANE.questions;
     if (kind === KIND.todoLogged) return LANE.todos;
     if (kind === KIND.ruleLogged) return LANE.rule;
-    if (kind === KIND.planLogged) return LANE.planning;
+    if (kind === KIND.planLogged || kind === KIND.boundaryLogged) return LANE.planning;
     return LANE.background;
 }
 

@@ -1,17 +1,20 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useVisibleLanes } from "~tracer-web/shared/store/index.js";
+import type { TurnSplitSelection } from "~tracer-web/features/turn-split/index.js";
 import type { FeedItem } from "~tracer-web/widgets/feed/lib/timeline/group-acts.js";
 import { ActCard } from "~tracer-web/widgets/feed/timeline/ActCard.js";
 import { TimeMark } from "~tracer-web/widgets/feed/timeline/TimeMark.js";
 import { TurnMark } from "~tracer-web/widgets/feed/timeline/TurnMark.js";
+import { SplitMark } from "~tracer-web/widgets/feed/timeline/SplitMark.js";
 import { ContextMark } from "~tracer-web/widgets/feed/timeline/ContextMark.js";
 
 interface ActListProps {
   readonly items: readonly FeedItem[];
+  readonly splitSelection?: TurnSplitSelection;
 }
 
 /** 세로 타임라인 본문. */
-export function ActList({ items }: ActListProps) {
+export function ActList({ items, splitSelection }: ActListProps) {
   const tailRef = useRef<HTMLDivElement>(null);
   const lastLengthRef = useRef(0);
   const visibleLanes = useVisibleLanes();
@@ -68,6 +71,17 @@ export function ActList({ items }: ActListProps) {
               turnIndex={item.turnIndex}
               verdict={item.verdict}
               status={item.status}
+              {...(splitSelection ? { splitSelection } : {})}
+            />
+          );
+        }
+        if (item.kind === "split-mark") {
+          return (
+            <SplitMark
+              key={`split-${item.fromTurnIndex}-${idx}`}
+              fromTurnIndex={item.fromTurnIndex}
+              toTurnIndex={item.toTurnIndex}
+              taskId={item.taskId}
             />
           );
         }

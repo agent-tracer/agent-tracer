@@ -1,10 +1,13 @@
 import type { VerdictStatus } from "~tracer-web/entities/rule/model/rule.js";
+import type { TurnSplitSelection } from "~tracer-web/features/turn-split/index.js";
+import { TurnSplitButton } from "~tracer-web/features/turn-split/index.js";
 import { Hairline } from "~tracer-web/widgets/feed/timeline/Hairline.js";
 
 interface TurnMarkProps {
   readonly turnIndex: number;
   readonly verdict: VerdictStatus | null;
   readonly status: "open" | "closed";
+  readonly splitSelection?: TurnSplitSelection;
 }
 
 const VERDICT_TONE: Record<
@@ -18,7 +21,7 @@ const VERDICT_TONE: Record<
 };
 
 /** 새 턴 밴드를 여는 구분선. */
-export function TurnMark({ turnIndex, verdict, status }: TurnMarkProps) {
+export function TurnMark({ turnIndex, verdict, status, splitSelection }: TurnMarkProps) {
   const tone = verdict ? VERDICT_TONE[verdict] : null;
   const accent = tone?.color ?? "var(--ink-tertiary)";
   const verdictLabel =
@@ -26,15 +29,17 @@ export function TurnMark({ turnIndex, verdict, status }: TurnMarkProps) {
 
   return (
     <div
-      className="flex items-center gap-2.5 py-3 font-mono text-[10.5px] uppercase tracking-[0.04em]"
+      className="group flex items-center gap-2.5 py-3 font-mono text-[10.5px] uppercase tracking-[0.04em]"
       style={{ color: accent }}
     >
       <Hairline color={`color-mix(in srgb, ${accent} 45%, transparent)`} />
       <span>
-        — Turn {turnIndex + 1} · {verdictLabel} —
+        — Turn {turnIndex} · {verdictLabel} —
       </span>
+      {splitSelection ? (
+        <TurnSplitButton turnIndex={turnIndex} selection={splitSelection} />
+      ) : null}
       <Hairline color={`color-mix(in srgb, ${accent} 45%, transparent)`} />
     </div>
   );
 }
-
