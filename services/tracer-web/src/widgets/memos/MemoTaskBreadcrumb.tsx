@@ -16,7 +16,7 @@ export function MemoTaskBreadcrumb({
       <Link
         to={`/tasks/${taskId}`}
         title={task ? `Open ${task.title}` : `Open task ${taskId}`}
-        className="text-ink-muted underline decoration-dotted underline-offset-2 max-w-60 truncate inline-block align-bottom"
+        className="inline-flex min-h-6 items-center rounded-xs px-1 focus-ring text-ink-muted underline decoration-dotted underline-offset-2 max-w-60 truncate"
       >
         {label}
       </Link>

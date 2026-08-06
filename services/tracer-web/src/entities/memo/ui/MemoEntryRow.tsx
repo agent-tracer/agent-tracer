@@ -87,7 +87,7 @@ export function MemoEntryRow({
               type="button"
               onClick={startEdit}
               disabled={isPending}
-              className="text-ink-muted hover:text-ink"
+              className="inline-flex min-h-6 items-center rounded-xs px-1 focus-ring text-ink-muted hover:text-ink"
             >
               Edit
             </button>
@@ -95,7 +95,10 @@ export function MemoEntryRow({
               type="button"
               onClick={confirmDelete.trigger}
               disabled={isPending}
-              className={cn(confirmDelete.armed ? "text-err" : "text-ink-muted hover:text-ink")}
+              className={cn(
+                "inline-flex min-h-6 items-center rounded-xs px-1 focus-ring",
+                confirmDelete.armed ? "text-err" : "text-ink-muted hover:text-ink",
+              )}
             >
               {confirmDelete.armed ? "Confirm delete" : "Delete"}
             </button>

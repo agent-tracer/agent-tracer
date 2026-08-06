@@ -31,7 +31,7 @@ export function MemoListItem({ memo, task }: MemoListItemProps) {
             <Link
               to={`/tasks/${memo.taskId}`}
               onClick={() => setSelectedEventId(EventId(memo.eventId ?? ""))}
-              className="text-ink-muted underline decoration-dotted underline-offset-2"
+              className="inline-flex min-h-6 items-center rounded-xs px-1 focus-ring text-ink-muted underline decoration-dotted underline-offset-2"
             >
               event · {memo.eventId.slice(0, 8)}…
             </Link>
