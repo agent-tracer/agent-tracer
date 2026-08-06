@@ -83,11 +83,23 @@ function formatMemoSearchResult(items: readonly MemoSearchResultItem[]): string 
         .join("\n\n---\n\n");
 }
 
+/** get_recipe가 적용을 원장에 기록하므로 적용 여부를 가르는 정보는 본문이 아니라 이 결과에 실려야 한다. */
 function formatRecipeSearchResult(items: readonly RecipeSearchResultItem[]): string {
     if (items.length === 0) return "Nothing saved here fits that.";
-    return items
-        .map((item) => `## ${item.title} (recipeId: ${item.recipeId})\nintent: ${item.intent}\n${item.description}`)
-        .join("\n\n---\n\n");
+    return items.map(formatRecipeSearchItem).join("\n\n---\n\n");
+}
+
+function formatRecipeSearchItem(item: RecipeSearchResultItem): string {
+    const lines = [
+        `## ${item.title} (recipeId: ${item.recipeId}, score: ${item.score.toFixed(2)})`,
+        `intent: ${item.intent}`,
+        item.description,
+    ];
+    if (item.useWhen.length > 0) {
+        lines.push("use when:");
+        for (const condition of item.useWhen) lines.push(`- ${condition}`);
+    }
+    return lines.join("\n");
 }
 
 /** 이 MCP 서버 프로세스가 딸린 세션의 바인딩을 스스로 찾으며, 못 찾으면 추정하지 않고 undefined를 낸다. */

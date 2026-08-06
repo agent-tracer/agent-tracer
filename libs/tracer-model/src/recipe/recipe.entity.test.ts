@@ -15,8 +15,11 @@ function makeInput(overrides: Partial<RecipeCandidateInput> = {}): RecipeCandida
         title: "제목",
         intent: "intent",
         description: "설명",
+        useWhen: ["인증 실패를 고치는 요청일 때"],
         summaryMd: "요약",
         request: "사용자가 인증 실패를 고쳐달라고 요청했다.",
+        inputs: ["실패한 요청의 이벤트 로그"],
+        outputs: ["인증 경로의 수정과 통과한 테스트"],
         corrections: [
             {
                 whatAgentDid: "처음에는 로그 확인 없이 구현을 수정했다.",
@@ -29,6 +32,14 @@ function makeInput(overrides: Partial<RecipeCandidateInput> = {}): RecipeCandida
                 pitfall: "같은 에러가 여러 레이어에서 발생한다.",
                 whyNonObvious: "표면 메시지만 보면 라우터 문제처럼 보인다.",
                 evidence: ["event-2"],
+            },
+        ],
+        recovery: [
+            {
+                symptom: "되돌린 뒤에도 옛 스키마가 남았다.",
+                action: "down 경로를 고치고 격리된 migration 검사를 다시 돌렸다.",
+                evidence: ["event-3"],
+                stepOrder: 1,
             },
         ],
         governingRules: ["rule-1"],

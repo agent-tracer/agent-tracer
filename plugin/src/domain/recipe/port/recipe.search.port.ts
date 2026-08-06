@@ -6,6 +6,8 @@ export interface RecipeSearchResultItem {
     readonly title: string;
     readonly intent: string;
     readonly description: string;
+    /** get_recipe는 적용을 원장에 기록하므로 적용 여부 판단은 이 칸까지만 보고 끝나야 한다. */
+    readonly useWhen: readonly string[];
     readonly score: number;
 }
 

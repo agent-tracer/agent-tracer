@@ -803,10 +803,14 @@ function toCachedRecipe(value) {
     title,
     intent: readString(value, "intent"),
     description: readString(value, "description"),
+    useWhen: readStringArray(value["useWhen"]),
     summaryMd: readString(value, "summaryMd"),
+    inputs: readStringArray(value["inputs"]),
+    outputs: readStringArray(value["outputs"]),
     steps: readSteps(value["steps"]),
     pitfalls: readPitfalls(value["pitfalls"]),
     corrections: readCorrections(value["corrections"]),
+    recovery: readRecovery(value["recovery"]),
     touchedFiles: readTouchedFiles(value["touchedFiles"]),
     governingRules: readStringArray(value["governingRules"])
   };
@@ -820,9 +824,41 @@ function readSteps(value) {
     const action = readString(entry, "action");
     if (typeof order !== "number" || !action) continue;
     const rationale = readString(entry, "rationale");
-    steps.push({ order, action, ...rationale ? { rationale } : {} });
+    const verify = readVerify(entry["verify"]);
+    steps.push({ order, action, ...rationale ? { rationale } : {}, ...verify ? { verify } : {} });
   }
   return steps;
+}
+function readVerify(value) {
+  if (!isRecord(value)) return null;
+  const kind = value["kind"];
+  if (kind === "command") {
+    const commandMatches = readStringArray(value["commandMatches"]);
+    return commandMatches.length > 0 ? { kind, commandMatches } : null;
+  }
+  if (kind === "pattern") {
+    const pattern = readString(value, "pattern");
+    return pattern ? { kind, pattern } : null;
+  }
+  if (kind === "action") {
+    const tool = value["tool"];
+    const known = tool === "command" || tool === "file-read" || tool === "file-write" || tool === "web";
+    return known ? { kind, tool } : null;
+  }
+  return null;
+}
+function readRecovery(value) {
+  if (!Array.isArray(value)) return [];
+  const recovery = [];
+  for (const entry of value) {
+    if (!isRecord(entry)) continue;
+    const symptom = readString(entry, "symptom");
+    const action = readString(entry, "action");
+    if (!symptom || !action) continue;
+    const stepOrder = entry["stepOrder"];
+    recovery.push({ symptom, action, ...typeof stepOrder === "number" ? { stepOrder } : {} });
+  }
+  return recovery;
 }
 function readPitfalls(value) {
   if (!Array.isArray(value)) return [];
@@ -853,7 +889,10 @@ function readTouchedFiles(value) {
     if (!isRecord(entry)) continue;
     const path5 = readString(entry, "path");
     const role = entry["role"];
-    if (path5 && (role === "read" || role === "write" || role === "both")) files.push({ path: path5, role });
+    if (!path5 || role !== "read" && role !== "write" && role !== "both") continue;
+    const why = readString(entry, "why");
+    const loadWhen = readString(entry, "loadWhen");
+    files.push({ path: path5, role, ...why ? { why } : {}, ...loadWhen ? { loadWhen } : {} });
   }
   return files;
 }
@@ -1001,12 +1040,14 @@ function toItem(value) {
   if (typeof recipeId !== "string" || typeof title !== "string") return null;
   const intent = value["intent"];
   const description = value["description"];
+  const useWhen = value["useWhen"];
   const score = value["score"];
   return {
     recipeId,
     title,
     intent: typeof intent === "string" ? intent : "",
     description: typeof description === "string" ? description : "",
+    useWhen: Array.isArray(useWhen) ? useWhen.filter((entry) => typeof entry === "string") : [],
     score: typeof score === "number" ? score : 0
   };
 }
@@ -1057,15 +1098,11 @@ var ClearRecipeMarkUsecase = class {
 // src/domain/recipe/model/recipe.body.model.ts
 function buildRecipeBody(recipe2) {
   const lines = [`# ${recipe2.title}`, "", `intent: ${recipe2.intent}`, recipe2.description];
+  pushBullets(lines, "## When to use", recipe2.useWhen);
+  pushBullets(lines, "## Before you start", recipe2.inputs);
   const summary = recipe2.summaryMd.trim();
   if (summary) lines.push("", summary);
-  if (recipe2.steps.length > 0) {
-    lines.push("", "## Steps");
-    for (const step of [...recipe2.steps].sort((left, right) => left.order - right.order)) {
-      const rationale = step.rationale ? ` (${step.rationale})` : "";
-      lines.push(`${step.order}. ${step.action}${rationale}`);
-    }
-  }
+  pushWorkflow(lines, recipe2);
   if (recipe2.pitfalls.length > 0) {
     lines.push("", "## Pitfalls");
     for (const pitfall of recipe2.pitfalls) lines.push(`- ${pitfall.pitfall} \u2014 ${pitfall.whyNonObvious}`);
@@ -1076,12 +1113,49 @@ function buildRecipeBody(recipe2) {
       lines.push(`- ${correction.whatAgentDid} \u2192 ${correction.howCorrected}`);
     }
   }
+  const looseRecovery = recipe2.recovery.filter((entry) => entry.stepOrder === void 0);
+  if (looseRecovery.length > 0) {
+    lines.push("", "## Recovery");
+    for (const entry of looseRecovery) lines.push(`- ${recoveryText(entry)}`);
+  }
+  pushBullets(lines, "## When you are done", recipe2.outputs);
   if (recipe2.touchedFiles.length > 0) {
-    const files = recipe2.touchedFiles.map((file) => `${file.path} (${file.role})`).join(", ");
-    lines.push("", `touched files: ${files}`);
+    lines.push("", "## References");
+    for (const file of recipe2.touchedFiles) {
+      const notes = [file.why, file.loadWhen ? `read when ${file.loadWhen}` : ""].filter(Boolean).join("; ");
+      lines.push(`- ${file.path} (${file.role})${notes ? ` \u2014 ${notes}` : ""}`);
+    }
   }
   if (recipe2.governingRules.length > 0) lines.push("", `governing rules: ${recipe2.governingRules.join(", ")}`);
   return lines.join("\n");
+}
+function pushBullets(lines, heading, entries) {
+  if (entries.length === 0) return;
+  lines.push("", heading);
+  for (const entry of entries) lines.push(`- ${entry}`);
+}
+function pushWorkflow(lines, recipe2) {
+  if (recipe2.steps.length === 0) return;
+  lines.push("", "## Workflow");
+  for (const step of [...recipe2.steps].sort((left, right) => left.order - right.order)) {
+    const rationale = step.rationale ? ` (${step.rationale})` : "";
+    lines.push(`${step.order}. ${step.action}${rationale}`);
+    pushStepDetail(lines, step, recipe2.recovery);
+  }
+}
+function pushStepDetail(lines, step, recovery) {
+  if (step.verify !== void 0) lines.push(`   - verify: ${verifyText(step.verify)}`);
+  for (const entry of recovery) {
+    if (entry.stepOrder === step.order) lines.push(`   - recovery: ${recoveryText(entry)}`);
+  }
+}
+function verifyText(verify) {
+  if (verify.kind === "command") return `run a command matching ${verify.commandMatches.join(", ")}`;
+  if (verify.kind === "pattern") return `output matches ${verify.pattern}`;
+  return `observed as ${verify.tool}`;
+}
+function recoveryText(entry) {
+  return `${entry.symptom} \u2192 ${entry.action}`;
 }
 
 // src/domain/recipe/application/get.recipe.usecase.ts
@@ -1524,7 +1598,7 @@ var REQUEST_RECIPE_SCAN_TOOL = {
 // src/domain/recipe/model/search.recipes.tool.model.ts
 var SEARCH_RECIPES_TOOL = {
   name: "search_recipes",
-  description: "Search this workspace's saved recipes \u2014 workflows distilled from how past tasks here were actually solved \u2014 by describing the current task in your own words. Returns decision-level info only (recipeId, title, intent, description, relevance score), not the steps, pitfalls, or corrections. Call this before starting work whenever the request plausibly repeats something already solved here. If a result looks like a fit, call get_recipe(recipeId) next to pull its full workflow before you act on it.",
+  description: "Search this workspace's saved recipes \u2014 workflows distilled from how past tasks here were actually solved \u2014 by describing the current task in your own words. Returns decision-level info only (recipeId, title, intent, description, the conditions the recipe applies under, and a relevance score), not the steps, pitfalls, or corrections. Decide from that: get_recipe records the recipe as applied to this task, so it is not a free preview. Call this before starting work whenever the request plausibly repeats something already solved here. If a result looks like a fit, call get_recipe(recipeId) next to pull its full workflow before you act on it.",
   inputSchema: {
     type: "object",
     properties: {
@@ -1663,9 +1737,19 @@ ${item.body}`).join("\n\n---\n\n");
 }
 function formatRecipeSearchResult(items) {
   if (items.length === 0) return "Nothing saved here fits that.";
-  return items.map((item) => `## ${item.title} (recipeId: ${item.recipeId})
-intent: ${item.intent}
-${item.description}`).join("\n\n---\n\n");
+  return items.map(formatRecipeSearchItem).join("\n\n---\n\n");
+}
+function formatRecipeSearchItem(item) {
+  const lines = [
+    `## ${item.title} (recipeId: ${item.recipeId}, score: ${item.score.toFixed(2)})`,
+    `intent: ${item.intent}`,
+    item.description
+  ];
+  if (item.useWhen.length > 0) {
+    lines.push("use when:");
+    for (const condition of item.useWhen) lines.push(`- ${condition}`);
+  }
+  return lines.join("\n");
 }
 function resolveTarget() {
   const sessionId = resolveClaudeSessionId();

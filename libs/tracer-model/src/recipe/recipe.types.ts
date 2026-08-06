@@ -19,19 +19,32 @@ export interface RecipePitfall {
     readonly evidence: readonly string[];
 }
 
+export interface RecipeRecovery {
+    readonly symptom: string;
+    readonly action: string;
+    readonly evidence: readonly string[];
+    readonly stepOrder?: number | null;
+}
+
 export interface RecipeTouchedFile {
     readonly path: string;
     readonly role: "read" | "write" | "both";
+    readonly why?: string | null;
+    readonly loadWhen?: string | null;
 }
 
 export interface RecipeRevisionInput {
     readonly title?: string;
     readonly intent?: string;
     readonly description?: string;
+    readonly useWhen?: readonly string[];
     readonly summaryMd?: string;
     readonly request?: string;
+    readonly inputs?: readonly string[];
+    readonly outputs?: readonly string[];
     readonly corrections?: readonly RecipeCorrection[];
     readonly pitfalls?: readonly RecipePitfall[];
+    readonly recovery?: readonly RecipeRecovery[];
     readonly governingRules?: readonly string[];
     readonly steps?: readonly unknown[];
     readonly touchedFiles?: readonly RecipeTouchedFile[];
@@ -51,10 +64,14 @@ export interface RecipeCandidateInput {
     readonly title: string;
     readonly intent: string;
     readonly description: string;
+    readonly useWhen: readonly string[];
     readonly summaryMd: string;
     readonly request: string;
+    readonly inputs: readonly string[];
+    readonly outputs: readonly string[];
     readonly corrections: readonly RecipeCorrection[];
     readonly pitfalls: readonly RecipePitfall[];
+    readonly recovery: readonly RecipeRecovery[];
     readonly governingRules: readonly string[];
     readonly steps: readonly unknown[];
     readonly touchedFiles: readonly RecipeTouchedFile[];

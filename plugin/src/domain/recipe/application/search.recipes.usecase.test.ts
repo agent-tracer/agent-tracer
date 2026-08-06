@@ -4,7 +4,14 @@ import {InMemoryRecipeSearch} from "~plugin/domain/recipe/port/__fakes__/in-memo
 import type {RecipeSearchResultItem} from "~plugin/domain/recipe/port/recipe.search.port.js";
 
 function item(id: string): RecipeSearchResultItem {
-    return {recipeId: id, title: `title-${id}`, intent: `intent-${id}`, description: `description-${id}`, score: 1};
+    return {
+        recipeId: id,
+        title: `title-${id}`,
+        intent: `intent-${id}`,
+        description: `description-${id}`,
+        useWhen: [`use-when-${id}`],
+        score: 1,
+    };
 }
 
 describe("SearchRecipesUsecase", () => {

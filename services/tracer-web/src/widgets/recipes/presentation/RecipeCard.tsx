@@ -2,7 +2,18 @@ import type { ReactNode } from "react";
 import { cn } from "~tracer-web/shared/ui/lib/cn.js";
 import { formatAbsoluteHHmmss } from "~tracer-web/shared/lib/formatting/time.js";
 import { SectionLabel } from "~tracer-web/shared/ui/index.js";
-import type { Recipe } from "~tracer-web/entities/recipe/model/recipe.js";
+import type {
+  Recipe,
+  RecipeStep,
+  RecipeTouchedFile,
+  RecipeVerify,
+} from "~tracer-web/entities/recipe/model/recipe.js";
+import {
+  Corrections,
+  Evidence,
+  Pitfalls,
+  Recovery,
+} from "~tracer-web/widgets/recipes/presentation/RecipeEvidenceSections.js";
 
 interface RecipeCardProps {
   readonly recipe: Recipe;
@@ -53,16 +64,39 @@ export function RecipeCard({
         {actions && <div className="flex gap-1.5 shrink-0">{actions}</div>}
       </div>
       <Description text={recipe.description} />
+      {recipe.useWhen.length > 0 && <Bullets label="Use when" entries={recipe.useWhen} />}
       <SummaryMd md={recipe.summaryMd} />
       {recipe.request.trim() && <Request text={recipe.request} />}
+      {recipe.inputs.length > 0 && <Bullets label="Inputs" entries={recipe.inputs} />}
       {recipe.corrections.length > 0 && <Corrections rows={recipe.corrections} />}
       {recipe.pitfalls.length > 0 && <Pitfalls rows={recipe.pitfalls} />}
+      {recipe.recovery.length > 0 && <Recovery rows={recipe.recovery} />}
       {recipe.governingRules.length > 0 && <GoverningRules ruleIds={recipe.governingRules} />}
       {recipe.steps.length > 0 && <Steps steps={recipe.steps} />}
+      {recipe.outputs.length > 0 && <Bullets label="Outputs" entries={recipe.outputs} />}
       {recipe.touchedFiles.length > 0 && <TouchedFiles files={recipe.touchedFiles} />}
       <Slices slices={recipe.contributingSlices} taskTitleById={taskTitleById} />
       {showRationale && recipe.rationale && <Rationale text={recipe.rationale} />}
       <FootMeta language={recipe.language} createdAt={footMetaAt} />
+    </div>
+  );
+}
+
+function Bullets({
+  label,
+  entries,
+}: {
+  readonly label: string;
+  readonly entries: readonly string[];
+}) {
+  return (
+    <div className="mt-2.5">
+      <SectionLabel>{label}</SectionLabel>
+      <ul className="m-0 mt-1 pl-[18px] text-meta text-ink">
+        {entries.map((entry, i) => (
+          <li key={`${entry}-${i}`}>{entry}</li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -101,72 +135,6 @@ function Request({ text }: { readonly text: string }) {
   );
 }
 
-function Corrections({
-  rows,
-}: {
-  readonly rows: readonly {
-    readonly whatAgentDid: string;
-    readonly howCorrected: string;
-    readonly evidence: readonly string[];
-  }[];
-}) {
-  return (
-    <div className="mt-2.5">
-      <SectionLabel>Corrections</SectionLabel>
-      <div className="mt-1 flex flex-col gap-1.5 text-meta text-ink">
-        {rows.map((row, i) => (
-          <div key={`${row.whatAgentDid}-${i}`} className="leading-normal">
-            <div>
-              <span className="text-ink-muted">Did:</span> {row.whatAgentDid}
-            </div>
-            <div>
-              <span className="text-ink-muted">Corrected:</span> {row.howCorrected}
-            </div>
-            {row.evidence.length > 0 && <Evidence ids={row.evidence} />}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function Pitfalls({
-  rows,
-}: {
-  readonly rows: readonly {
-    readonly pitfall: string;
-    readonly whyNonObvious: string;
-    readonly evidence: readonly string[];
-  }[];
-}) {
-  return (
-    <div className="mt-2.5">
-      <SectionLabel>Pitfalls</SectionLabel>
-      <div className="mt-1 flex flex-col gap-1.5 text-meta text-ink">
-        {rows.map((row, i) => (
-          <div key={`${row.pitfall}-${i}`} className="leading-normal">
-            <div>{row.pitfall}</div>
-            <div className="text-ink-muted">{row.whyNonObvious}</div>
-            {row.evidence.length > 0 && <Evidence ids={row.evidence} />}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function Evidence({ ids }: { readonly ids: readonly string[] }) {
-  return (
-    <div className="mt-0.5 flex flex-wrap gap-1 text-mini font-mono text-ink-tertiary">
-      {ids.map((id) => (
-        <span key={id} className="py-px px-1.5 rounded-pill bg-s1">
-          {id}
-        </span>
-      ))}
-    </div>
-  );
-}
-
 function SummaryMd({ md }: { readonly md: string }) {
   if (!md.trim()) return null;
   return (
@@ -176,11 +144,13 @@ function SummaryMd({ md }: { readonly md: string }) {
   );
 }
 
-function Steps({
-  steps,
-}: {
-  readonly steps: readonly { readonly order: number; readonly action: string; readonly rationale?: string }[];
-}) {
+function verifyText(verify: RecipeVerify): string {
+  if (verify.kind === "command") return `runs ${verify.commandMatches.join(", ")}`;
+  if (verify.kind === "pattern") return `output matches ${verify.pattern}`;
+  return `observed as ${verify.tool}`;
+}
+
+function Steps({ steps }: { readonly steps: readonly RecipeStep[] }) {
   return (
     <div className="mt-2.5">
       <SectionLabel>Steps</SectionLabel>
@@ -191,6 +161,10 @@ function Steps({
             {s.rationale && (
               <div className="text-ink-muted text-meta">{s.rationale}</div>
             )}
+            {s.verify && (
+              <div className="text-ink-tertiary text-mini font-mono">verify: {verifyText(s.verify)}</div>
+            )}
+            {s.evidence && s.evidence.length > 0 && <Evidence ids={s.evidence} />}
           </li>
         ))}
       </ol>
@@ -198,20 +172,22 @@ function Steps({
   );
 }
 
-function TouchedFiles({
-  files,
-}: {
-  readonly files: readonly { readonly path: string; readonly role: "read" | "write" | "both" }[];
-}) {
+function TouchedFiles({ files }: { readonly files: readonly RecipeTouchedFile[] }) {
   return (
     <div className="mt-2.5">
       <SectionLabel>Touched files</SectionLabel>
-      <div className="mt-1 flex flex-wrap gap-1 text-meta font-mono">
+      <div className="mt-1 flex flex-col gap-1 text-meta">
         {files.map((f, i) => (
-          <span key={`${f.path}-${i}`} className="py-px px-1.5 rounded-pill bg-s1 text-ink-tertiary font-mono text-mini">
-            {f.role === "read" ? "R " : f.role === "write" ? "W " : "RW "}
-            {f.path}
-          </span>
+          <div key={`${f.path}-${i}`}>
+            <span className="py-px px-1.5 rounded-pill bg-s1 text-ink-tertiary font-mono text-mini">
+              {f.role === "read" ? "R " : f.role === "write" ? "W " : "RW "}
+              {f.path}
+            </span>
+            {f.why && <span className="ml-1.5 text-ink-muted">{f.why}</span>}
+            {f.loadWhen && (
+              <div className="text-ink-tertiary text-mini">read when {f.loadWhen}</div>
+            )}
+          </div>
         ))}
       </div>
     </div>

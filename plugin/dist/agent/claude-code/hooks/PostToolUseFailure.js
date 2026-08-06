@@ -3183,10 +3183,14 @@ function toCachedRecipe(value) {
     title,
     intent: readString2(value, "intent"),
     description: readString2(value, "description"),
+    useWhen: readStringArray2(value["useWhen"]),
     summaryMd: readString2(value, "summaryMd"),
+    inputs: readStringArray2(value["inputs"]),
+    outputs: readStringArray2(value["outputs"]),
     steps: readSteps(value["steps"]),
     pitfalls: readPitfalls(value["pitfalls"]),
     corrections: readCorrections(value["corrections"]),
+    recovery: readRecovery(value["recovery"]),
     touchedFiles: readTouchedFiles(value["touchedFiles"]),
     governingRules: readStringArray2(value["governingRules"])
   };
@@ -3200,9 +3204,41 @@ function readSteps(value) {
     const action = readString2(entry, "action");
     if (typeof order !== "number" || !action) continue;
     const rationale = readString2(entry, "rationale");
-    steps.push({ order, action, ...rationale ? { rationale } : {} });
+    const verify = readVerify(entry["verify"]);
+    steps.push({ order, action, ...rationale ? { rationale } : {}, ...verify ? { verify } : {} });
   }
   return steps;
+}
+function readVerify(value) {
+  if (!isRecord(value)) return null;
+  const kind = value["kind"];
+  if (kind === "command") {
+    const commandMatches = readStringArray2(value["commandMatches"]);
+    return commandMatches.length > 0 ? { kind, commandMatches } : null;
+  }
+  if (kind === "pattern") {
+    const pattern = readString2(value, "pattern");
+    return pattern ? { kind, pattern } : null;
+  }
+  if (kind === "action") {
+    const tool = value["tool"];
+    const known = tool === "command" || tool === "file-read" || tool === "file-write" || tool === "web";
+    return known ? { kind, tool } : null;
+  }
+  return null;
+}
+function readRecovery(value) {
+  if (!Array.isArray(value)) return [];
+  const recovery = [];
+  for (const entry of value) {
+    if (!isRecord(entry)) continue;
+    const symptom = readString2(entry, "symptom");
+    const action = readString2(entry, "action");
+    if (!symptom || !action) continue;
+    const stepOrder = entry["stepOrder"];
+    recovery.push({ symptom, action, ...typeof stepOrder === "number" ? { stepOrder } : {} });
+  }
+  return recovery;
 }
 function readPitfalls(value) {
   if (!Array.isArray(value)) return [];
@@ -3233,7 +3269,10 @@ function readTouchedFiles(value) {
     if (!isRecord(entry)) continue;
     const path13 = readString2(entry, "path");
     const role = entry["role"];
-    if (path13 && (role === "read" || role === "write" || role === "both")) files.push({ path: path13, role });
+    if (!path13 || role !== "read" && role !== "write" && role !== "both") continue;
+    const why = readString2(entry, "why");
+    const loadWhen = readString2(entry, "loadWhen");
+    files.push({ path: path13, role, ...why ? { why } : {}, ...loadWhen ? { loadWhen } : {} });
   }
   return files;
 }
@@ -3381,12 +3420,14 @@ function toItem(value) {
   if (typeof recipeId !== "string" || typeof title !== "string") return null;
   const intent = value["intent"];
   const description = value["description"];
+  const useWhen = value["useWhen"];
   const score = value["score"];
   return {
     recipeId,
     title,
     intent: typeof intent === "string" ? intent : "",
     description: typeof description === "string" ? description : "",
+    useWhen: Array.isArray(useWhen) ? useWhen.filter((entry) => typeof entry === "string") : [],
     score: typeof score === "number" ? score : 0
   };
 }
@@ -3422,15 +3463,11 @@ var ClearRecipeMarkUsecase = class {
 // src/domain/recipe/model/recipe.body.model.ts
 function buildRecipeBody(recipe2) {
   const lines = [`# ${recipe2.title}`, "", `intent: ${recipe2.intent}`, recipe2.description];
+  pushBullets(lines, "## When to use", recipe2.useWhen);
+  pushBullets(lines, "## Before you start", recipe2.inputs);
   const summary = recipe2.summaryMd.trim();
   if (summary) lines.push("", summary);
-  if (recipe2.steps.length > 0) {
-    lines.push("", "## Steps");
-    for (const step of [...recipe2.steps].sort((left, right) => left.order - right.order)) {
-      const rationale = step.rationale ? ` (${step.rationale})` : "";
-      lines.push(`${step.order}. ${step.action}${rationale}`);
-    }
-  }
+  pushWorkflow(lines, recipe2);
   if (recipe2.pitfalls.length > 0) {
     lines.push("", "## Pitfalls");
     for (const pitfall of recipe2.pitfalls) lines.push(`- ${pitfall.pitfall} \u2014 ${pitfall.whyNonObvious}`);
@@ -3441,12 +3478,49 @@ function buildRecipeBody(recipe2) {
       lines.push(`- ${correction.whatAgentDid} \u2192 ${correction.howCorrected}`);
     }
   }
+  const looseRecovery = recipe2.recovery.filter((entry) => entry.stepOrder === void 0);
+  if (looseRecovery.length > 0) {
+    lines.push("", "## Recovery");
+    for (const entry of looseRecovery) lines.push(`- ${recoveryText(entry)}`);
+  }
+  pushBullets(lines, "## When you are done", recipe2.outputs);
   if (recipe2.touchedFiles.length > 0) {
-    const files = recipe2.touchedFiles.map((file) => `${file.path} (${file.role})`).join(", ");
-    lines.push("", `touched files: ${files}`);
+    lines.push("", "## References");
+    for (const file of recipe2.touchedFiles) {
+      const notes = [file.why, file.loadWhen ? `read when ${file.loadWhen}` : ""].filter(Boolean).join("; ");
+      lines.push(`- ${file.path} (${file.role})${notes ? ` \u2014 ${notes}` : ""}`);
+    }
   }
   if (recipe2.governingRules.length > 0) lines.push("", `governing rules: ${recipe2.governingRules.join(", ")}`);
   return lines.join("\n");
+}
+function pushBullets(lines, heading, entries) {
+  if (entries.length === 0) return;
+  lines.push("", heading);
+  for (const entry of entries) lines.push(`- ${entry}`);
+}
+function pushWorkflow(lines, recipe2) {
+  if (recipe2.steps.length === 0) return;
+  lines.push("", "## Workflow");
+  for (const step of [...recipe2.steps].sort((left, right) => left.order - right.order)) {
+    const rationale = step.rationale ? ` (${step.rationale})` : "";
+    lines.push(`${step.order}. ${step.action}${rationale}`);
+    pushStepDetail(lines, step, recipe2.recovery);
+  }
+}
+function pushStepDetail(lines, step, recovery) {
+  if (step.verify !== void 0) lines.push(`   - verify: ${verifyText(step.verify)}`);
+  for (const entry of recovery) {
+    if (entry.stepOrder === step.order) lines.push(`   - recovery: ${recoveryText(entry)}`);
+  }
+}
+function verifyText(verify) {
+  if (verify.kind === "command") return `run a command matching ${verify.commandMatches.join(", ")}`;
+  if (verify.kind === "pattern") return `output matches ${verify.pattern}`;
+  return `observed as ${verify.tool}`;
+}
+function recoveryText(entry) {
+  return `${entry.symptom} \u2192 ${entry.action}`;
 }
 
 // src/domain/recipe/application/get.recipe.usecase.ts

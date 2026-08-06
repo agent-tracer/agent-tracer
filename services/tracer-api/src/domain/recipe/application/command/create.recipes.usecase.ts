@@ -11,11 +11,15 @@ export interface RecipeDraftInput {
     readonly title: string;
     readonly intent: string;
     readonly description: string;
+    readonly useWhen: readonly string[];
     readonly summaryMd: string;
     readonly request: string;
+    readonly inputs: readonly string[];
+    readonly outputs: readonly string[];
     readonly rationale: string;
     readonly corrections: readonly unknown[];
     readonly pitfalls: readonly unknown[];
+    readonly recovery: readonly unknown[];
     readonly governingRules: readonly string[];
     readonly steps: readonly unknown[];
     readonly touchedFiles: readonly unknown[];
@@ -74,11 +78,15 @@ export class CreateRecipesUseCase {
                     title: draft.title,
                     intent: draft.intent,
                     description: draft.description,
+                    useWhen: draft.useWhen,
                     summaryMd: draft.summaryMd,
                     request: draft.request,
+                    inputs: draft.inputs,
+                    outputs: draft.outputs,
                     rationale: draft.rationale,
                     corrections: draft.corrections as RecipeCandidateInput["corrections"],
                     pitfalls: draft.pitfalls as RecipeCandidateInput["pitfalls"],
+                    recovery: draft.recovery as RecipeCandidateInput["recovery"],
                     governingRules: draft.governingRules,
                     steps: draft.steps,
                     touchedFiles: draft.touchedFiles as RecipeCandidateInput["touchedFiles"],

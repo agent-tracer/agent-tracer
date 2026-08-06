@@ -14,6 +14,8 @@ export interface RecipeSearchResultItem {
     readonly title: string;
     readonly intent: string;
     readonly description: string;
+    /** get_recipe가 적용을 기록하므로 적용 조건은 본문이 아니라 이 자리에 있어야 판단에 쓰인다. */
+    readonly useWhen: readonly string[];
     readonly score: number;
 }
 
@@ -33,5 +35,12 @@ export class SearchRecipesUseCase {
 }
 
 function toItem(hit: RecipeSearchHit): RecipeSearchResultItem {
-    return { recipeId: hit.id, title: hit.title, intent: hit.intent, description: hit.description, score: hit.score };
+    return {
+        recipeId: hit.id,
+        title: hit.title,
+        intent: hit.intent,
+        description: hit.description,
+        useWhen: hit.useWhen,
+        score: hit.score,
+    };
 }

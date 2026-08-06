@@ -15,8 +15,10 @@ import { TRACER_DATABASE, type TracerDatabase } from "~tracer-api/domain/project
 import { KafkaNotificationPublisher } from "~tracer-api/domain/projection/adapter/kafka.notification.publisher.adapter.js";
 import { IndexSearchUseCase } from "~tracer-api/domain/index/application/index.search.usecase.js";
 import { RestoreSplitTaskDocsUseCase } from "~tracer-api/domain/index/application/restore.split.task.docs.usecase.js";
+import { RefreshRecipeDocsUseCase } from "~tracer-api/domain/index/application/refresh.recipe.docs.usecase.js";
 import { SearchOutboxDrainUseCase } from "~tracer-api/domain/index/application/search.outbox.drain.usecase.js";
 import { SPLIT_TASK_READER, type SplitTaskReaderPort } from "~tracer-api/domain/index/port/split.task.reader.port.js";
+import { RECIPE_DOC_READER, type RecipeDocReaderPort } from "~tracer-api/domain/index/port/recipe.doc.reader.port.js";
 import { SearchConsumer } from "~tracer-api/domain/index/inbound/search.consumer.js";
 import { ADVISORY_LOCK as INDEX_ADVISORY_LOCK, type AdvisoryLockPort as IndexAdvisoryLockPort } from "~tracer-api/domain/index/port/advisory.lock.port.js";
 import { SEARCH_INDEX_WRITER, type SearchIndexWriterPort } from "~tracer-api/domain/index/port/search.index.writer.port.js";
@@ -46,6 +48,7 @@ export interface ProjectorDeps {
     readonly searchEventConsumer: KafkaConsumer;
     readonly searchIndex: SearchIndexWriterPort;
     readonly splitTasks: SplitTaskReaderPort;
+    readonly recipeDocs: RecipeDocReaderPort;
     readonly clock: IClock;
     readonly otlp?: OtlpExportDeps | undefined;
 }
@@ -85,10 +88,12 @@ export class ProjectorModule {
                 IndexSearchUseCase,
                 SearchOutboxDrainUseCase,
                 RestoreSplitTaskDocsUseCase,
+                RefreshRecipeDocsUseCase,
                 SearchConsumer,
                 { provide: INDEX_ADVISORY_LOCK, useValue: deps.indexLock },
                 { provide: SEARCH_INDEX_WRITER, useValue: deps.searchIndex },
                 { provide: SPLIT_TASK_READER, useValue: deps.splitTasks },
+                { provide: RECIPE_DOC_READER, useValue: deps.recipeDocs },
 
                 { provide: DB_EVENT_CONSUMER, useValue: deps.dbEventConsumer },
                 { provide: SEARCH_EVENT_CONSUMER, useValue: deps.searchEventConsumer },

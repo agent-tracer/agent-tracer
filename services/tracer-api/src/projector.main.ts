@@ -17,6 +17,7 @@ import { DbConsumer } from "~tracer-api/domain/projection/inbound/db.consumer.js
 import { OpenSearchIndexAdapter } from "~tracer-api/domain/index/adapter/open.search.index.adapter.js";
 import { TypeOrmSearchOutboxLockAdapter } from "~tracer-api/domain/index/adapter/typeorm.search.outbox.lock.adapter.js";
 import { TypeOrmSplitTaskReaderAdapter } from "~tracer-api/domain/index/adapter/typeorm.split.task.reader.adapter.js";
+import { TypeOrmRecipeDocReaderAdapter } from "~tracer-api/domain/index/adapter/typeorm.recipe.doc.reader.adapter.js";
 import { SearchOutboxDrainUseCase } from "~tracer-api/domain/index/application/search.outbox.drain.usecase.js";
 import { SearchConsumer } from "~tracer-api/domain/index/inbound/search.consumer.js";
 import { OtlpConsumer } from "~tracer-api/domain/export/inbound/otlp.consumer.js";
@@ -38,6 +39,7 @@ async function bootstrap(): Promise<void> {
     const database = new TypeOrmTracerDatabaseAdapter(dataSource);
     const indexLock = new TypeOrmSearchOutboxLockAdapter(dataSource);
     const splitTasks = new TypeOrmSplitTaskReaderAdapter(dataSource);
+    const recipeDocs = new TypeOrmRecipeDocReaderAdapter(dataSource);
 
     const kafka = createKafka("projector");
     const searchClient = createOpenSearchClient();
@@ -78,6 +80,7 @@ async function bootstrap(): Promise<void> {
             database,
             indexLock,
             splitTasks,
+            recipeDocs,
             producer,
             dbEventConsumer,
             searchEventConsumer,

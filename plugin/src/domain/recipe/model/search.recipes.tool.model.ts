@@ -7,10 +7,12 @@ export const SEARCH_RECIPES_TOOL: McpToolSpec = {
     description:
         "Search this workspace's saved recipes — workflows distilled from how past tasks here were "
         + "actually solved — by describing the current task in your own words. Returns decision-level "
-        + "info only (recipeId, title, intent, description, relevance score), not the steps, pitfalls, "
-        + "or corrections. Call this before starting work whenever the request plausibly repeats "
-        + "something already solved here. If a result looks like a fit, call get_recipe(recipeId) next "
-        + "to pull its full workflow before you act on it.",
+        + "info only (recipeId, title, intent, description, the conditions the recipe applies under, "
+        + "and a relevance score), not the steps, pitfalls, or corrections. Decide from that: "
+        + "get_recipe records the recipe as applied to this task, so it is not a free preview. "
+        + "Call this before starting work whenever the request plausibly repeats something already "
+        + "solved here. If a result looks like a fit, call get_recipe(recipeId) next to pull its full "
+        + "workflow before you act on it.",
     inputSchema: {
         type: "object",
         properties: {

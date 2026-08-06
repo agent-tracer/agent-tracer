@@ -36,6 +36,9 @@ export class RecipeEntity {
     @Column({ type: "text" })
     description!: string;
 
+    @Column({ name: "use_when", type: jsonColumnType(), default: jsonColumnDefault([]) })
+    useWhen!: string[];
+
     @Column({ name: "summary_md", type: "text" })
     summaryMd!: string;
 
@@ -43,10 +46,19 @@ export class RecipeEntity {
     request!: string;
 
     @Column({ type: jsonColumnType(), default: jsonColumnDefault([]) })
+    inputs!: string[];
+
+    @Column({ type: jsonColumnType(), default: jsonColumnDefault([]) })
+    outputs!: string[];
+
+    @Column({ type: jsonColumnType(), default: jsonColumnDefault([]) })
     corrections!: unknown[];
 
     @Column({ type: jsonColumnType(), default: jsonColumnDefault([]) })
     pitfalls!: unknown[];
+
+    @Column({ type: jsonColumnType(), default: jsonColumnDefault([]) })
+    recovery!: unknown[];
 
     @Column({ name: "governing_rules", type: jsonColumnType(), default: jsonColumnDefault([]) })
     governingRules!: string[];
@@ -104,10 +116,14 @@ export class RecipeEntity {
         recipe.title = input.title;
         recipe.intent = input.intent;
         recipe.description = input.description;
+        recipe.useWhen = [...input.useWhen];
         recipe.summaryMd = input.summaryMd;
         recipe.request = input.request;
+        recipe.inputs = [...input.inputs];
+        recipe.outputs = [...input.outputs];
         recipe.corrections = [...input.corrections];
         recipe.pitfalls = [...input.pitfalls];
+        recipe.recovery = [...input.recovery];
         recipe.governingRules = [...input.governingRules];
         recipe.steps = [...input.steps];
         recipe.touchedFiles = [...input.touchedFiles];
@@ -191,10 +207,14 @@ export class RecipeEntity {
         if (input.title !== undefined) this.title = input.title;
         if (input.intent !== undefined) this.intent = input.intent;
         if (input.description !== undefined) this.description = input.description;
+        if (input.useWhen !== undefined) this.useWhen = [...input.useWhen];
         if (input.summaryMd !== undefined) this.summaryMd = input.summaryMd;
         if (input.request !== undefined) this.request = input.request;
+        if (input.inputs !== undefined) this.inputs = [...input.inputs];
+        if (input.outputs !== undefined) this.outputs = [...input.outputs];
         if (input.corrections !== undefined) this.corrections = [...input.corrections];
         if (input.pitfalls !== undefined) this.pitfalls = [...input.pitfalls];
+        if (input.recovery !== undefined) this.recovery = [...input.recovery];
         if (input.governingRules !== undefined) this.governingRules = [...input.governingRules];
         if (input.steps !== undefined) this.steps = [...input.steps];
         if (input.touchedFiles !== undefined) this.touchedFiles = [...input.touchedFiles];

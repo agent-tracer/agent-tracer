@@ -13,6 +13,10 @@ const RECIPE: CachedRecipe = {
     pitfalls: [],
     corrections: [],
     touchedFiles: [],
+    useWhen: [],
+    inputs: [],
+    outputs: [],
+    recovery: [],
     governingRules: [],
 };
 

@@ -35,7 +35,7 @@ export class OpenSearchRecipeSearch implements RecipeSearchPort {
                             {
                                 multi_match: {
                                     query: q,
-                                    fields: ["title", "intent", "description", "summaryMd"],
+                                    fields: ["title", "intent", "description", "useWhen", "summaryMd"],
                                     minimum_should_match: MINIMUM_SHOULD_MATCH,
                                 },
                             },
@@ -63,11 +63,18 @@ function toRecipeHit(id: string, source: Record<string, unknown>, score: number)
         title: readString(source["title"]) ?? "",
         intent: readString(source["intent"]) ?? "",
         description: readString(source["description"]) ?? "",
+        useWhen: readStringArray(source["useWhen"]),
         status: readString(source["status"]) ?? "",
         userEdited: source["userEdited"] === true,
         score,
         ...(readString(source["updatedAt"]) !== undefined ? { updatedAt: readString(source["updatedAt"])! } : {}),
     };
+}
+
+/** 재색인 이전에 쓰인 문서에는 useWhen이 없으므로 없는 것과 빈 것을 구분하지 않는다. */
+function readStringArray(value: unknown): readonly string[] {
+    if (!Array.isArray(value)) return [];
+    return value.filter((entry): entry is string => typeof entry === "string" && entry.length > 0);
 }
 
 function readString(value: unknown): string | undefined {

@@ -38,12 +38,14 @@ function toItem(value: unknown): RecipeSearchResultItem | null {
     if (typeof recipeId !== "string" || typeof title !== "string") return null;
     const intent = value["intent"];
     const description = value["description"];
+    const useWhen = value["useWhen"];
     const score = value["score"];
     return {
         recipeId,
         title,
         intent: typeof intent === "string" ? intent : "",
         description: typeof description === "string" ? description : "",
+        useWhen: Array.isArray(useWhen) ? useWhen.filter((entry): entry is string => typeof entry === "string") : [],
         score: typeof score === "number" ? score : 0,
     };
 }

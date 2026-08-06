@@ -6,6 +6,8 @@ export interface RecipeSearchHit {
     readonly title: string;
     readonly intent: string;
     readonly description: string;
+    /** get_recipe가 적용을 기록하므로 적용 여부 판단에 필요한 조건은 검색 결과가 이미 실어야 한다. */
+    readonly useWhen: readonly string[];
     readonly status: string;
     readonly userEdited: boolean;
     readonly score: number;

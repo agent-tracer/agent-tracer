@@ -13,7 +13,7 @@ export const EVENTS_INDEX = "events-v1";
 export const TASKS_ALIAS = "tasks";
 export const TASKS_INDEX = "tasks-v2";
 export const RECIPES_ALIAS = "recipes";
-export const RECIPES_INDEX = "recipes-v1";
+export const RECIPES_INDEX = "recipes-v2";
 export const MEMOS_ALIAS = "memos";
 export const MEMOS_INDEX = "memos-v1";
 
@@ -85,6 +85,8 @@ export const SEARCH_INDEX_DEFINITIONS: readonly SearchIndexDefinition[] = [
                 title: TEXT,
                 intent: TEXT,
                 description: TEXT,
+                // get_recipe가 적용을 기록하므로 적용 조건은 검색 단계에서 이미 걸리고 보여야 한다.
+                useWhen: TEXT,
                 summaryMd: TEXT,
                 touchedFiles: { type: "keyword" },
                 status: { type: "keyword" },

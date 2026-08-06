@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { MemoEntity, RecipeEntity, SearchOutboxEntity } from "@agent-tracer/tracer-model";
+import type { MemoEntity, SearchOutboxEntity } from "@agent-tracer/tracer-model";
 import { ADVISORY_LOCK_KEY } from "~tracer-api/domain/index/port/advisory.lock.keys.js";
 import {
     ADVISORY_LOCK,
@@ -12,6 +12,7 @@ import type {
 } from "~tracer-api/domain/index/port/search.outbox.drain.repository.port.js";
 import { taskDocumentId } from "~tracer-api/domain/index/model/search.document.id.js";
 import { buildTaskDocument } from "~tracer-api/support/task.document.js";
+import { buildRecipeDocument } from "~tracer-api/support/recipe.document.js";
 import { MEMOS_ALIAS } from "~tracer-api/domain/index/model/search.index.definitions.js";
 import {
     SEARCH_INDEX_WRITER,
@@ -22,28 +23,6 @@ import { errorMessage, logError, logInfo } from "~tracer-api/support/log.js";
 const RECIPES_ALIAS = "recipes";
 const TASKS_ALIAS = "tasks";
 const DRAIN_BATCH_SIZE = 100;
-
-function recipeDocument(recipe: RecipeEntity): Record<string, unknown> {
-    return {
-        userId: recipe.userId,
-        title: recipe.title,
-        intent: recipe.intent,
-        description: recipe.description,
-        summaryMd: recipe.summaryMd,
-        touchedFiles: touchedFilePaths(recipe.touchedFiles),
-        status: recipe.status,
-        userEdited: recipe.userEdited,
-        rev: recipe.rev,
-        updatedAt: recipe.updatedAt.toISOString(),
-    };
-}
-
-/** touchedFiles는 {path, role} 객체 배열이지만 검색 색인은 경로만 키워드로 걸러 쓴다. */
-function touchedFilePaths(touchedFiles: readonly unknown[]): string[] {
-    return touchedFiles
-        .map((entry) => (entry !== null && typeof entry === "object" ? (entry as { path?: unknown }).path : undefined))
-        .filter((path): path is string => typeof path === "string");
-}
 
 function memoDocument(memo: MemoEntity): Record<string, unknown> {
     return {
@@ -100,7 +79,7 @@ export class SearchOutboxDrainUseCase {
                 await this.searchIndex.deleteDocument(RECIPES_ALIAS, row.targetId);
                 return true;
             }
-            await this.searchIndex.indexDocument(RECIPES_ALIAS, recipe.id, recipeDocument(recipe));
+            await this.searchIndex.indexDocument(RECIPES_ALIAS, recipe.id, buildRecipeDocument(recipe));
             return true;
         } catch (error) {
             this.logFailure(row, error);

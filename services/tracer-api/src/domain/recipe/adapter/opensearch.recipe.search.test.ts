@@ -33,7 +33,7 @@ describe("OpenSearchRecipeSearch.search", () => {
             {
                 multi_match: {
                     query: "린트",
-                    fields: ["title", "intent", "description", "summaryMd"],
+                    fields: ["title", "intent", "description", "useWhen", "summaryMd"],
                     minimum_should_match: "30%",
                 },
             },
@@ -53,12 +53,19 @@ describe("OpenSearchRecipeSearch.search", () => {
         expect(hits.map((hit) => hit.id)).toEqual(["r1", "r2"]);
     });
 
-    it("히트를 recipeId·title·intent·description·score로 매핑한다", async () => {
+    it("히트를 recipeId·title·intent·description·useWhen·score로 매핑한다", async () => {
         const { client } = clientReturning([
             {
                 _id: "r1",
                 _score: 4.2,
-                _source: { title: "lint pipeline", intent: "린트 전에 부른다", description: "설명", status: "active", userEdited: true },
+                _source: {
+                    title: "lint pipeline",
+                    intent: "린트 전에 부른다",
+                    description: "설명",
+                    useWhen: ["커밋 전에 린트를 돌릴 때"],
+                    status: "active",
+                    userEdited: true,
+                },
             },
         ]);
         const adapter = new OpenSearchRecipeSearch(client);
@@ -71,10 +78,21 @@ describe("OpenSearchRecipeSearch.search", () => {
                 title: "lint pipeline",
                 intent: "린트 전에 부른다",
                 description: "설명",
+                useWhen: ["커밋 전에 린트를 돌릴 때"],
                 status: "active",
                 userEdited: true,
                 score: 4.2,
             },
         ]);
+    });
+
+    // 재색인 이전에 쓰인 문서에는 useWhen이 없으므로 그 문서도 결과를 만들 수 있어야 한다.
+    it("useWhen이 없는 옛 문서는 빈 목록으로 읽는다", async () => {
+        const { client } = clientReturning([{ _id: "r1", _score: 1, _source: { title: "a", status: "active" } }]);
+        const adapter = new OpenSearchRecipeSearch(client);
+
+        const hits = await adapter.search("u1", "q", 3);
+
+        expect(hits[0]?.useWhen).toEqual([]);
     });
 });

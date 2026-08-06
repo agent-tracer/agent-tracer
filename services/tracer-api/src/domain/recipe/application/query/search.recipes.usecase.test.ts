@@ -52,6 +52,7 @@ describe("SearchRecipesUseCase", () => {
             title: "lint pipeline",
             intent: "린트 전에 부른다",
             description: "설명",
+            useWhen: ["커밋 전에 린트를 돌릴 때"],
             status: "active",
             userEdited: false,
             score: 4.2,
@@ -61,7 +62,14 @@ describe("SearchRecipesUseCase", () => {
         const result = await useCase.execute({ userId: "u1", q: "린트" });
 
         expect(result.items).toEqual([
-            { recipeId: "r1", title: "lint pipeline", intent: "린트 전에 부른다", description: "설명", score: 4.2 },
+            {
+                recipeId: "r1",
+                title: "lint pipeline",
+                intent: "린트 전에 부른다",
+                description: "설명",
+                useWhen: ["커밋 전에 린트를 돌릴 때"],
+                score: 4.2,
+            },
         ]);
     });
 });
