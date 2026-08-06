@@ -48,7 +48,7 @@ export function TaskListFooter({ runtimeCaption }: TaskListFooterProps) {
               new KeyboardEvent("keydown", { key: "?", bubbles: true }),
             );
           }}
-          className="ml-auto inline-flex items-center justify-center rounded-xs h-4 w-4 hover:bg-s1 border border-hair text-ink-tertiary cursor-help text-micro leading-none"
+          className="ml-auto inline-flex h-6 w-6 items-center justify-center rounded-xs hover:bg-s1 text-ink-tertiary cursor-help text-micro leading-none focus-ring"
         >
           ?
         </button>

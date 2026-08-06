@@ -26,7 +26,7 @@ export function IconButton({
     <button
       type={type}
       className={cn(
-        "inline-flex items-center justify-center h-[22px] w-[22px] rounded-xs border focus-ring",
+        "inline-flex items-center justify-center h-6 w-6 rounded-xs border focus-ring",
         TRANSITION,
         DISABLED,
         armed ? "bg-err/14 text-err border-err" : toneClass[tone],

@@ -155,7 +155,7 @@ export function LlmProviderSection() {
             <Button
               variant="ghost"
               onClick={() => void remove(SETTING_KEYS.outputLanguage)}
-              className="text-body border-0 p-0 underline"
+              className="text-body border-0 px-1 py-1 min-h-6 underline"
             >
               Reset
             </Button>

@@ -85,7 +85,7 @@ export function LaneFilter() {
               onClick={() => toggle(lane)}
               aria-pressed={isOn}
               className={cn(
-                "inline-flex items-center gap-1 py-0.5 px-2 rounded-pill cursor-pointer transition-all duration-150 border",
+                "inline-flex h-6 items-center gap-1 px-2 rounded-pill cursor-pointer transition-all duration-150 border focus-ring",
                 isOn
                   ? "border-hair-strong bg-s2 text-ink opacity-100"
                   : "border-hair bg-transparent text-ink-tertiary opacity-55",
@@ -108,7 +108,7 @@ export function LaneFilter() {
 /** All·None처럼 이미 그 상태일 때 눌러도 바뀌지 않는 일괄 버튼의 표시. */
 function bulkButtonClass(active: boolean) {
   return cn(
-    "py-0.5 px-2.5 rounded-pill transition-all duration-150 uppercase tracking-label border",
+    "inline-flex h-6 items-center px-2.5 rounded-pill transition-all duration-150 uppercase tracking-label border focus-ring",
     active
       ? "border-hair-strong bg-s2 text-ink cursor-default opacity-100"
       : "border-hair bg-transparent text-ink-muted cursor-pointer opacity-85",

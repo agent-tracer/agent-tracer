@@ -75,7 +75,7 @@ export function IdentitySection() {
               <span className="text-ink-tertiary text-meta whitespace-nowrap">
                 id {userId}
               </span>
-              <Button variant="ghost" onClick={() => setResetOpen(true)} className="text-body border-0 p-0 underline">
+              <Button variant="ghost" onClick={() => setResetOpen(true)} className="text-body border-0 px-1 py-1 min-h-6 underline">
                 Reset
               </Button>
             </>

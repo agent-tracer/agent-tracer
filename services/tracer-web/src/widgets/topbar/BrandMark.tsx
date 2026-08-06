@@ -12,7 +12,7 @@ export function BrandMark({ viewport = "wide" }: BrandMarkProps) {
     <Link
       to="/tasks"
       aria-label="Go to task list"
-      className="flex items-center gap-2.5 shrink-0 no-underline"
+      className="flex min-h-6 items-center gap-2.5 shrink-0 rounded-sm no-underline focus-ring"
       // 248은 넓은 셸의 첫 열에 맞추는 폭이며, 그 열이 없는 화면에서는 자리만 먹는다.
       style={viewport === "wide" ? { minWidth: 248 } : undefined}
     >

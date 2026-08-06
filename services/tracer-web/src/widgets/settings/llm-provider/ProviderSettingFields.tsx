@@ -47,7 +47,7 @@ export function SecretSettingField({
           <span className="text-ink-tertiary text-meta whitespace-nowrap">
             saved {formatAbsoluteHHmmss(current.updatedAt)}
           </span>
-          <Button variant="ghost" onClick={onClear} className="text-body border-0 p-0 underline">
+          <Button variant="ghost" onClick={onClear} className="text-body border-0 px-1 py-1 min-h-6 underline">
             Clear
           </Button>
         </div>
@@ -111,7 +111,7 @@ export function ModelSettingField({
           Save
         </Button>
         {current ? (
-          <Button variant="ghost" onClick={onClear} className="text-body border-0 p-0 underline">
+          <Button variant="ghost" onClick={onClear} className="text-body border-0 px-1 py-1 min-h-6 underline">
             Clear
           </Button>
         ) : null}

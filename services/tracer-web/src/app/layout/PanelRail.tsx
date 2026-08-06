@@ -38,7 +38,7 @@ export function CollapsePanelTab({ side, label, onAction }: PanelActionProps) {
       onClick={onAction}
       aria-label={label}
       title={label}
-      className="absolute top-1/2 -translate-y-1/2 z-[12] inline-flex items-center justify-center h-7 w-5 rounded-xs bg-s1 border border-hair text-ink-tertiary cursor-pointer"
+      className="absolute top-1/2 -translate-y-1/2 z-[12] inline-flex items-center justify-center h-7 w-6 rounded-xs bg-s1 border border-hair text-ink-tertiary cursor-pointer focus-ring"
       style={{
         left: side === "left" ? "auto" : 4,
         right: side === "left" ? 4 : "auto",

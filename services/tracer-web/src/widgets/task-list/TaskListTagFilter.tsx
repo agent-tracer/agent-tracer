@@ -41,7 +41,7 @@ export function TaskListTagFilter() {
             aria-pressed={isOn}
             aria-label={`Filter by ${tag.name}`}
             className={cn(
-              "rounded-xs transition-opacity duration-150 focus-ring",
+              "inline-flex min-h-6 items-center rounded-xs px-1 transition-opacity duration-150 focus-ring",
               isOn
                 ? "opacity-100 ring-1 ring-hair-strong"
                 : "opacity-50 hover:opacity-100",

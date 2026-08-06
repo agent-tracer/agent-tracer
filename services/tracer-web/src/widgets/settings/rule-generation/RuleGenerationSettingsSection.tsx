@@ -98,7 +98,7 @@ export function RuleGenerationSettingsSection() {
           </Button>
           <Button
             variant="ghost"
-            className="text-body border-0 p-0 underline"
+            className="text-body border-0 px-1 py-1 min-h-6 underline"
             onClick={() => void apply({ model: null }, "Model")}
           >
             Reset
