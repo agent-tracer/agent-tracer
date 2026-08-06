@@ -31,7 +31,7 @@ export class RuleBackfillService {
             turns: this.turns,
             verdicts: this.verdicts,
         });
-        const turns = await this.turns.findByTask(taskId);
+        const turns = await this.turns.findByTask(rule.userId, taskId);
         const evaluated = new Set<string>();
         for (const turn of turns) {
             const target = await evaluator.evaluate(rule, turn, now);

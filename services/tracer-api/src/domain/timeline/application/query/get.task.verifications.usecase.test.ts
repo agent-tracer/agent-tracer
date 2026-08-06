@@ -87,7 +87,7 @@ function makeUseCase(args: {
 
 describe("GetTaskVerificationsUseCase", () => {
     it("verified 판정만 골라 트리거와 이행 이벤트를 연결한다", async () => {
-        const turn = TurnEntity.open("s1", "t1", 0, "배포해줘", NOW);
+        const turn = TurnEntity.open("s1", "t1", 0, "배포해줘", NOW, "u1");
         turn.id = "turn-1";
         const verified = makeVerdict("rule-1", "turn-1", VERDICT_STATUS.satisfied,
             evidence("ev-trigger", ["ev-ok"]),
@@ -121,7 +121,7 @@ describe("GetTaskVerificationsUseCase", () => {
     });
 
     it("verified 판정이 없으면 빈 목록을 낸다", async () => {
-        const turn = TurnEntity.open("s1", "t1", 0, "배포해줘", NOW);
+        const turn = TurnEntity.open("s1", "t1", 0, "배포해줘", NOW, "u1");
         turn.id = "turn-1";
         const useCase = makeUseCase({
             tasks: [makeTask("t1", "u1")],
