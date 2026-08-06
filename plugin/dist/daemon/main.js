@@ -47096,7 +47096,6 @@ var CLEANUP_SUGGESTION_STATUSES = [
 var APP_SETTING_KEYS = {
   anthropicApiKey: "anthropic.api_key",
   anthropicModel: "anthropic.model",
-  ruleGenMaxRulesPerTask: "ruleGen.maxRulesPerTask",
   taskCleanupMaxSuggestions: "taskCleanup.maxSuggestions",
   claudeOutputLanguage: "claude.outputLanguage"
 };
@@ -47123,8 +47122,7 @@ function normalizeRuleGenerationIntent(value) {
   return trimmed2.slice(0, RULE_GENERATION_INTENT_MAX_LENGTH);
 }
 
-// ../libs/kernel/src/rule/generation/rule.generation.settings.ts
-var RULE_GENERATION_SETTINGS_PATH = "/api/v1/settings/rule-generation";
+// ../libs/kernel/src/rule/generation/rule.generation.languages.ts
 var RULE_GENERATION_LANGUAGE = {
   auto: "auto",
   ko: "ko",
@@ -47132,7 +47130,17 @@ var RULE_GENERATION_LANGUAGE = {
   ja: "ja",
   zh: "zh"
 };
-var RULE_GENERATION_LANGUAGES = Object.values(RULE_GENERATION_LANGUAGE);
+var RULE_GENERATION_LANGUAGES = [
+  RULE_GENERATION_LANGUAGE.auto,
+  RULE_GENERATION_LANGUAGE.ko,
+  RULE_GENERATION_LANGUAGE.en,
+  RULE_GENERATION_LANGUAGE.ja,
+  RULE_GENERATION_LANGUAGE.zh
+];
+var RULE_GENERATION_LANGUAGE_FALLBACK = RULE_GENERATION_LANGUAGE.auto;
+
+// ../libs/kernel/src/rule/generation/rule.generation.settings.ts
+var RULE_GENERATION_SETTINGS_PATH = "/api/v1/settings/rule-generation";
 var RULE_GENERATION_EFFORT = {
   low: "low",
   medium: "medium",
@@ -47144,7 +47152,7 @@ var RULE_GENERATION_EFFORTS = Object.values(RULE_GENERATION_EFFORT);
 var RULE_GENERATION_SETTINGS_DEFAULT = {
   maxRulesPerTask: 5,
   model: "claude-sonnet-5",
-  outputLanguage: RULE_GENERATION_LANGUAGE.auto,
+  outputLanguage: RULE_GENERATION_LANGUAGE_FALLBACK,
   effort: RULE_GENERATION_EFFORT.high
 };
 
@@ -47726,13 +47734,17 @@ var GUIDELINE_CLAUSE = {
 };
 var LANGUAGE_DIRECTIVES = {
   auto: "Mirror the language of the request (Korean \u2192 Korean, English \u2192 English, etc.).",
-  ko: "Write every rule name and rationale in Korean (\uD55C\uAD6D\uC5B4).",
-  en: "Write every rule name and rationale in English.",
-  ja: "Write every rule name and rationale in Japanese (\u65E5\u672C\u8A9E).",
-  zh: "Write every rule name and rationale in Simplified Chinese (\u7B80\u4F53\u4E2D\u6587)."
+  ko: "Write every rule name and rationale in Korean (\uD55C\uAD6D\uC5B4). Translate source text written in another language rather than echoing it.",
+  en: "Write every rule name and rationale in English. Translate source text written in another language rather than echoing it.",
+  ja: "Write every rule name and rationale in Japanese (\u65E5\u672C\u8A9E). Translate source text written in another language rather than echoing it.",
+  zh: "Write every rule name and rationale in Simplified Chinese (\u7B80\u4F53\u4E2D\u6587). Translate source text written in another language rather than echoing it."
 };
+function isRuleGenerationLanguage(value) {
+  return RULE_GENERATION_LANGUAGES.includes(value);
+}
 function resolveRuleLanguageDirective(language) {
-  return LANGUAGE_DIRECTIVES[language] ?? LANGUAGE_DIRECTIVES["auto"];
+  const named = isRuleGenerationLanguage(language) ? language : RULE_GENERATION_LANGUAGE_FALLBACK;
+  return LANGUAGE_DIRECTIVES[named];
 }
 function countClause(maxRules) {
   return `  - Output AT MOST ${maxRules} rules, one per distinct obligation. Fewer is better than padded.`;

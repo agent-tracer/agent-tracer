@@ -1,4 +1,9 @@
 import {RULE_EXPECTED_ACTIONS, RULE_SEVERITIES} from "@agent-tracer/kernel/rule/definition/rule.vocabulary.js";
+import {
+    RULE_GENERATION_LANGUAGES,
+    RULE_GENERATION_LANGUAGE_FALLBACK,
+    type RuleGenerationLanguage,
+} from "@agent-tracer/kernel/rule/generation/rule.generation.settings.js";
 import {buildSeverityGuidance} from "~plugin/domain/rulegen/model/severity.clause.model.js";
 import {RULEGEN_TOOL} from "~plugin/domain/rulegen/model/rulegen.tool.model.js";
 
@@ -36,16 +41,22 @@ export const GUIDELINE_CLAUSE = {
     zeroIsCorrect: "  - Returning zero rules is correct and common. A request carrying no verifiable obligation gets an empty array.",
 } as const;
 
-const LANGUAGE_DIRECTIVES: Readonly<Record<string, string>> = {
+// 지시문의 문장은 이 실행기가 내는 필드의 이름을 담으므로 여기가 갖고, 덮어야 할 언어는 계약이 정한다.
+const LANGUAGE_DIRECTIVES: Readonly<Record<RuleGenerationLanguage, string>> = {
     auto: "Mirror the language of the request (Korean → Korean, English → English, etc.).",
-    ko: "Write every rule name and rationale in Korean (한국어).",
-    en: "Write every rule name and rationale in English.",
-    ja: "Write every rule name and rationale in Japanese (日本語).",
-    zh: "Write every rule name and rationale in Simplified Chinese (简体中文).",
+    ko: "Write every rule name and rationale in Korean (한국어). Translate source text written in another language rather than echoing it.",
+    en: "Write every rule name and rationale in English. Translate source text written in another language rather than echoing it.",
+    ja: "Write every rule name and rationale in Japanese (日本語). Translate source text written in another language rather than echoing it.",
+    zh: "Write every rule name and rationale in Simplified Chinese (简体中文). Translate source text written in another language rather than echoing it.",
 };
 
+function isRuleGenerationLanguage(value: string): value is RuleGenerationLanguage {
+    return (RULE_GENERATION_LANGUAGES as readonly string[]).includes(value);
+}
+
 export function resolveRuleLanguageDirective(language: string): string {
-    return LANGUAGE_DIRECTIVES[language] ?? LANGUAGE_DIRECTIVES["auto"]!;
+    const named = isRuleGenerationLanguage(language) ? language : RULE_GENERATION_LANGUAGE_FALLBACK;
+    return LANGUAGE_DIRECTIVES[named];
 }
 
 /** 상한만 두고 하한을 두지 않아야 없는 의무를 지어내지 않는다. */
