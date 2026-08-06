@@ -1,4 +1,5 @@
 import { commentLanguage } from "./comment-language.mjs";
+import { designTokens } from "./design-tokens.mjs";
 import { koreanTestTitle } from "./korean-test-title.mjs";
 import { noDeepRelativeImport } from "./no-deep-relative-import.mjs";
 import { preferBarrelIndex } from "./prefer-barrel-index.mjs";
@@ -12,5 +13,6 @@ export const localPlugin = {
     "prefer-barrel-index": preferBarrelIndex,
     "comment-language": commentLanguage,
     "korean-test-title": koreanTestTitle,
+    "design-tokens": designTokens,
   },
 };

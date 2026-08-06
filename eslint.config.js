@@ -89,6 +89,13 @@ export default tseslint.config([
 
   ...ambientRuleConfigs,
 
+  // 디자인 눈금의 정본은 tracer-web의 tokens.css이며 그 밖에서는 임의값을 쓰지 않는다.
+  {
+    files: [`${ALIASES["~tracer-web"]}/**/*.tsx`],
+    plugins: { local: localPlugin },
+    rules: { "local/design-tokens": "error" },
+  },
+
   {
     files: ["**/*.test.{ts,tsx,mjs}", "**/__fakes__/**/*.{ts,tsx}"],
     plugins: { local: localPlugin },

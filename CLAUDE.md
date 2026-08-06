@@ -43,6 +43,8 @@ npm run migrate
 - `model/`과 `port/`에 프레임워크 의존성을 추가하지 않습니다.
 - `event-db` 원장과 `tracer-db`·OpenSearch 조회 모델을 한 경로에서 섞지 않습니다.
 - 게이트웨이의 `/api/agent/*`와 `/agent/*`는 상류가 선언된 경우에만 활성화합니다.
+- 웹의 디자인 눈금은 `services/tracer-web/src/app/styles/tokens.css`가 정본이고 화면은 그 눈금이 만든 유틸리티로만 읽습니다. 눈금에 없는 값이 필요하면 호출부에 임의값을 적지 말고 정본을 먼저 넓힙니다. `local/design-tokens` 규칙이 이를 강제합니다.
+- 웹의 버튼·칩·필·폼 컨트롤·빈 상태는 `shared/ui`가 이미 갖고 있으므로 화면에서 다시 만들지 않습니다.
 
 ## 변경 규칙
 
