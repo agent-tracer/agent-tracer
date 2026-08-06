@@ -27,10 +27,16 @@ export class HttpRecipeFetchAdapter implements RecipeFetchPort {
             REQUEST_TIMEOUT_MS,
         );
         if (fetched.kind !== "found") return fetched;
-        const payload = "data" in fetched.value ? fetched.value["data"] : fetched.value;
-        const recipe = toCachedRecipe(payload);
+        const recipe = toCachedRecipe(unwrapRecipe(fetched.value));
         return recipe === null ? {kind: "unavailable"} : {kind: "found", value: recipe};
     }
+}
+
+/** 조회 창구는 레시피를 통계·적용 이력과 함께 봉투에 담으므로 레시피 자리를 지목해 꺼낸다. */
+function unwrapRecipe(value: Record<string, unknown>): unknown {
+    const payload = "data" in value ? value["data"] : value;
+    if (isRecord(payload) && isRecord(payload["recipe"])) return payload["recipe"];
+    return payload;
 }
 
 function toCachedRecipe(value: unknown): CachedRecipe | null {

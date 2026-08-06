@@ -4,11 +4,13 @@ import type {CachedRecipe} from "~plugin/domain/recipe/model/recipe.model.js";
 
 const BASE_URL = "http://127.0.0.1:3847";
 
+// 조회 창구는 레시피를 통계·적용 이력과 나란히 담아 보내므로 그 모양 그대로 흉내낸다.
 function serving(payload: Record<string, unknown>): void {
+    const body = {data: {recipe: payload, stats: {applied: 0}, applications: []}};
     vi.stubGlobal(
         "fetch",
         vi.fn(async () =>
-            new Response(JSON.stringify({data: payload}), {status: 200, headers: {"content-type": "application/json"}}),
+            new Response(JSON.stringify(body), {status: 200, headers: {"content-type": "application/json"}}),
         ),
     );
 }
