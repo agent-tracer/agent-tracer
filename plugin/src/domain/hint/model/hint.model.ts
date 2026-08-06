@@ -1,6 +1,6 @@
 export type PreprocessingHintTrigger = "user_prompt" | "pre_tool";
 export type PreprocessingHintSeverity = "info" | "warning" | "critical";
-type PreprocessingHintType = "context_pressure" | "command_repetition";
+type PreprocessingHintType = "context_pressure" | "command_repetition" | "topic_shift";
 
 /** 다음 턴 앞에 주입되는 전처리 힌트 하나다. */
 export interface PreprocessingHint {
@@ -13,6 +13,8 @@ export interface PreprocessingHint {
 /** 어떤 계기로 어떤 도구 앞에서 힌트를 묻는지다. */
 export interface PreprocessingHintsRequest {
     readonly trigger: PreprocessingHintTrigger;
+    /** 작업이 바뀌었는지는 이번 발화를 직전 턴들이 다룬 파일·도구와 대조해야 알 수 있다. */
+    readonly prompt?: string;
     readonly toolName?: string;
     readonly command?: string;
     readonly questions?: readonly string[];

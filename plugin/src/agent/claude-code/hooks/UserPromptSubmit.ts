@@ -68,7 +68,10 @@ await runHook("UserPromptSubmit", {
             prompt: payload.prompt,
         });
 
-        const {rules, hints} = await queryDaemonPromptContext(target.taskId);
+        const {rules, hints} = await queryDaemonPromptContext(
+            target.taskId,
+            systemNotification ? undefined : payload.prompt,
+        );
         // 시스템 알림 프롬프트에는 사용자가 볼 일이 없는 레시피 넛지를 싣지 않는다.
         const pendingMark = systemNotification
             ? undefined

@@ -111,7 +111,10 @@ export async function queryDaemonDelivery(): Promise<DaemonDeliveryResponse | nu
 }
 
 /** 프롬프트 앞에서 규칙과 힌트를 한 번의 왕복으로 함께 조회한다. */
-export async function queryDaemonPromptContext(taskId: string): Promise<DaemonPromptContextResponse> {
+export async function queryDaemonPromptContext(
+    taskId: string,
+    prompt?: string,
+): Promise<DaemonPromptContextResponse> {
     if (!taskId) return EMPTY_PROMPT_CONTEXT;
     const paths = resolveAgentTracerPaths();
     try {
@@ -120,7 +123,7 @@ export async function queryDaemonPromptContext(taskId: string): Promise<DaemonPr
             {
                 type: "prompt-context",
                 taskId,
-                request: {trigger: "user_prompt"},
+                request: {trigger: "user_prompt", ...(prompt === undefined ? {} : {prompt})},
             } satisfies DaemonPromptContextRequest,
             HINTS_TIMEOUT_MS,
             (parsed) => parseDaemonPromptContextResponse(parsed) ?? EMPTY_PROMPT_CONTEXT,

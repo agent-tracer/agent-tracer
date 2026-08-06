@@ -948,7 +948,9 @@ var AGENT_TRACER_ATTR = {
   /** 늦게 도착한 commentary를 이미 닫힌 턴에 귀속시키는 상관키이며, 인과 부모와 별개다. */
   turnResponseEventId: "agent_tracer.turn.response_event_id",
   /** 직전 턴의 ID이며, 트레이스가 턴 단위로 갈리므로 OTLP span link로 이어 붙인다. */
-  turnPreviousId: "agent_tracer.turn.previous_id"
+  turnPreviousId: "agent_tracer.turn.previous_id",
+  boundaryLabel: "agent_tracer.boundary.label",
+  boundaryBack: "agent_tracer.boundary.back"
 };
 var TURN_ACTIVITY_TYPE = "turn";
 function toGenAiMessage(role, text) {
@@ -1172,7 +1174,8 @@ var KIND = {
   worktreeRemove: "agent_tracer.worktree.remove",
   permissionRequest: "agent_tracer.permission.request",
   setupTriggered: "agent_tracer.setup.triggered",
-  recipeInjected: "agent_tracer.recipe.injected"
+  recipeInjected: "agent_tracer.recipe.injected",
+  boundaryLogged: "agent_tracer.boundary.logged"
 };
 var TERMINAL_COMMAND_TOOL_NAME = "Bash";
 var POWERSHELL_TOOL_NAME = "PowerShell";
@@ -1197,7 +1200,8 @@ var WORKFLOW_EVENT_KINDS = [
   KIND.permissionRequest,
   KIND.worktreeRemove,
   KIND.setupTriggered,
-  KIND.fileChanged
+  KIND.fileChanged,
+  KIND.boundaryLogged
 ];
 var CONVERSATION_EVENT_KINDS = [
   KIND.userMessage,
