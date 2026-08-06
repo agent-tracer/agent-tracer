@@ -1,4 +1,6 @@
 export const LANE_HEIGHT = 60;
+/** 턴 경계와 NOW 표식의 라벨이 첫 레인의 노드 라벨과 자리를 다투지 않도록 얹는 띠다. */
+export const TURN_STRIP_HEIGHT = 20;
 export const AXIS_HEIGHT = 28;
 export const LANE_LABEL_WIDTH = 90;
 export const TRACK_LEFT_PADDING = 16;

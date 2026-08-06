@@ -5,7 +5,10 @@ import type { LaneKey } from "~tracer-web/entities/task/model/lane-theme.js";
 import type { TimeRange } from "~tracer-web/widgets/feed/graph/model/time-range.js";
 import type { FeedEdge } from "~tracer-web/widgets/feed/graph/model/edges.js";
 import type { PositionedNode } from "~tracer-web/widgets/feed/graph/model/node-layout.js";
-import { LANE_HEIGHT } from "~tracer-web/widgets/feed/graph/model/track-geometry.js";
+import {
+  LANE_HEIGHT,
+  TURN_STRIP_HEIGHT,
+} from "~tracer-web/widgets/feed/graph/model/track-geometry.js";
 import { CompactBand } from "~tracer-web/widgets/feed/graph/plot/CompactBand.js";
 import { GraphEdges } from "~tracer-web/widgets/feed/graph/plot/GraphEdges.js";
 import { GraphLanes } from "~tracer-web/widgets/feed/graph/plot/GraphLanes.js";
@@ -36,17 +39,26 @@ export function GraphPlot({
   splitSelection,
 }: GraphPlotProps) {
   return (
-    <div className="relative" style={{ height: lanes.length * LANE_HEIGHT }}>
-      <GraphLanes lanes={lanes} />
-      <CompactBand events={events} range={range} />
-      <GraphEdges
-        edges={edges}
-        nodes={nodes}
-        visibleLaneCount={lanes.length}
-      />
-      {nodes.map((node) => (
-        <GraphNode key={node.id} node={node} />
-      ))}
+    <div
+      className="relative"
+      style={{ height: lanes.length * LANE_HEIGHT + TURN_STRIP_HEIGHT }}
+    >
+      {/* 레인 좌표계는 띠 아래에서 시작하므로 노드와 엣지의 계산은 그대로 둔다. */}
+      <div
+        className="absolute inset-x-0 bottom-0"
+        style={{ top: TURN_STRIP_HEIGHT }}
+      >
+        <GraphLanes lanes={lanes} />
+        <CompactBand events={events} range={range} />
+        <GraphEdges
+          edges={edges}
+          nodes={nodes}
+          visibleLaneCount={lanes.length}
+        />
+        {nodes.map((node) => (
+          <GraphNode key={node.id} node={node} />
+        ))}
+      </div>
       <TurnBands
         turns={turns}
         range={range}

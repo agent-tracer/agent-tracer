@@ -6,7 +6,11 @@ import {
   useTaskDetailQuery,
   useTaskVerificationsQuery,
 } from "~tracer-web/entities/task/api/detail-queries.js";
-import { useGuidance, useMainView } from "~tracer-web/shared/store/index.js";
+import {
+  useGuidance,
+  useMainView,
+  useSelectedEventId,
+} from "~tracer-web/shared/store/index.js";
 import { isNotFoundError } from "~tracer-web/shared/api/client/response.js";
 import { DISABLED, EmptyView, loadFailedTitle } from "~tracer-web/shared/ui/index.js";
 import { cn } from "~tracer-web/shared/ui/lib/cn.js";
@@ -32,6 +36,7 @@ export function FeedPanel({ taskId }: FeedPanelProps) {
   const guidance = useGuidance();
   const { data, isLoading, isError, error } = useTaskDetailQuery(taskId);
   const loadOlderTimeline = useLoadOlderTimelineMutation(taskId);
+  const selectedEventId = useSelectedEventId();
   const mainView = useMainView();
   // VERI 레인은 Graph에서만 렌더링하므로 Feed에서는 추가 왕복을 생략한다.
   const { data: verifications } = useTaskVerificationsQuery(taskId, {
@@ -84,6 +89,10 @@ export function FeedPanel({ taskId }: FeedPanelProps) {
 
   const resumeTarget = selectResumeTarget(data);
 
+  const selectionOutsideWindow =
+    selectedEventId !== null &&
+    !data.timeline.some((event) => event.id === selectedEventId);
+
   return (
     <div className="flex flex-col min-h-0">
       <TaskHeader
@@ -97,7 +106,7 @@ export function FeedPanel({ taskId }: FeedPanelProps) {
         splitFromIndexes={new Set((data.splits ?? []).map((range) => range.fromTurnIndex))}
       />
       {data.olderCursor && (
-        <div className="px-gutter pb-2">
+        <div className="px-gutter pb-2 flex items-center gap-2 flex-wrap">
           <button
             type="button"
             onClick={() => loadOlderTimeline.mutate(data.olderCursor as string)}
@@ -106,6 +115,13 @@ export function FeedPanel({ taskId }: FeedPanelProps) {
           >
             {loadOlderTimeline.isPending ? "Loading…" : "Load older"}
           </button>
+          {/* 트레이스는 태스크 전체를 담고 여기는 불러온 창만 담으므로, 창 밖을 고르면
+              아무 표시도 나지 않는 이유를 말해 준다. */}
+          {selectionOutsideWindow && (
+            <span className="text-meta text-ink-subtle">
+              The selected action is older than what is loaded here.
+            </span>
+          )}
         </div>
       )}
       {data.timeline.length === 0 ? (

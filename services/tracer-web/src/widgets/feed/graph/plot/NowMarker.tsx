@@ -1,6 +1,9 @@
 import type { TimeRange } from "~tracer-web/widgets/feed/graph/model/time-range.js";
 import { msToLeftPercent } from "~tracer-web/widgets/feed/graph/model/time-range.js";
-import { trackLeftCss } from "~tracer-web/widgets/feed/graph/model/track-geometry.js";
+import {
+  TURN_STRIP_HEIGHT,
+  trackLeftCss,
+} from "~tracer-web/widgets/feed/graph/model/track-geometry.js";
 
 interface NowMarkerProps {
   readonly nowMs: number;
@@ -18,7 +21,10 @@ export function NowMarker({ nowMs, range }: NowMarkerProps) {
       className="absolute top-0 bottom-0 pointer-events-none w-px bg-ink z-[6]"
       style={{ left: trackLeftCss(leftPercent) }}
     >
-      <span className="absolute left-1/2 -translate-x-1/2 top-1.5 py-px px-1.5 bg-ink text-canvas font-mono text-nano font-bold tracking-eyebrow rounded-xs">
+      <span
+        className="absolute left-1/2 -translate-x-1/2 z-[13] py-px px-1.5 bg-ink text-canvas font-mono text-nano font-bold tracking-eyebrow rounded-xs"
+        style={{ top: (TURN_STRIP_HEIGHT - 15) / 2 }}
+      >
         NOW
       </span>
     </div>
