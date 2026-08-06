@@ -36,10 +36,10 @@ export function TurnSplitButton({
           selection.pick(turnIndex);
         }}
         className={cn(
-          "rounded-xs border px-1.5 py-px font-mono text-[10px] normal-case tracking-normal transition-colors",
+          "inline-flex items-center rounded-pill border px-2 py-[2px] font-mono text-[10.5px] normal-case tracking-normal transition-colors",
           picking
-            ? "border-primary text-ink bg-s2"
-            : "border-hair text-ink-muted hover:text-ink hover:bg-s2",
+            ? "border-primary text-ink"
+            : "border-hair text-ink-subtle hover:text-ink hover:border-hair-strong",
           !picking && revealOnGroupHover && !awaitingEnd
             ? "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
             : "opacity-100",
@@ -47,7 +47,6 @@ export function TurnSplitButton({
       >
         {label}
       </button>
-      {awaitingEnd && !picking ? null : null}
     </span>
   );
 }

@@ -49,8 +49,6 @@ export const EN_FEED = {
   splitOnlyThis: createGuidanceMessage("Move only this turn into a task of its own."),
   splitModalTitle: (span: string) =>
     createGuidanceMessage(`Move turn ${span} into a task of its own`),
-  splitTitleLabel: createGuidanceMessage("New task title"),
-  splitMovingLabel: createGuidanceMessage("Turns that move"),
   splitReversible: createGuidanceMessage("You can undo this later."),
   splitPickEnd: createGuidanceMessage("pick the last turn"),
   splitTurnBand: createGuidanceMessage("Turn boundaries in this session."),

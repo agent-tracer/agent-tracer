@@ -47,8 +47,6 @@ export const KO_FEED = {
   splitOnlyThis: createGuidanceMessage("이 턴 하나만 별도 태스크로 옮깁니다."),
   splitModalTitle: (span: string) =>
     createGuidanceMessage(`턴 ${span}을 별도 태스크로 옮깁니다`),
-  splitTitleLabel: createGuidanceMessage("새 태스크 제목"),
-  splitMovingLabel: createGuidanceMessage("옮겨질 턴"),
   splitReversible: createGuidanceMessage("나중에 되돌릴 수 있습니다."),
   splitPickEnd: createGuidanceMessage("마지막 턴을 고르세요"),
   splitTurnBand: createGuidanceMessage("이 세션의 턴 경계입니다."),
