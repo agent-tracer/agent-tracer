@@ -56,7 +56,7 @@ export function RuleGenerationDialog({
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 p-4">
       <Field label="Task">
         <Select value={taskId} onChange={(e) => setTaskId(e.target.value as TaskId)}>
           <option value="">Select a task</option>

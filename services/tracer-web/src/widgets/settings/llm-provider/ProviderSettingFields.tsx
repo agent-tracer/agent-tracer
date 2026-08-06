@@ -36,7 +36,7 @@ export function SecretSettingField({
   onClear,
 }: SecretSettingFieldProps) {
   return (
-    <Field label={label} help={help} helpLocale={locale}>
+    <Field separated label={label} help={help} helpLocale={locale}>
       {loading ? (
         <span className="text-ink-muted text-lead">Loading…</span>
       ) : current ? (
@@ -99,7 +99,7 @@ export function ModelSettingField({
   onClear,
 }: ModelSettingFieldProps) {
   return (
-    <Field label={label} help={help} helpLocale={locale}>
+    <Field separated label={label} help={help} helpLocale={locale}>
       <div className="flex items-center gap-2">
         <Select value={draft || current?.masked || ""} onChange={(event) => onDraftChange(event.target.value)}>
           <option value="">{current ? current.masked : "(default)"}</option>

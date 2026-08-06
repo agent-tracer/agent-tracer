@@ -15,6 +15,7 @@ import {
   loadingLabel,
 } from "~tracer-web/shared/ui/index.js";
 import { useRuleGenerationsQuery } from "~tracer-web/entities/rule/api/rule-generation-queries.js";
+import { NewRuleDialog } from "~tracer-web/widgets/rules/editor/NewRuleDialog.js";
 import { RuleForm } from "~tracer-web/widgets/rules/editor/RuleForm.js";
 import { RuleGenerationDialog } from "~tracer-web/widgets/rules/generation/RuleGenerationDialog.js";
 import { RuleGenerationHistory } from "~tracer-web/widgets/rules/generation/RuleGenerationHistory.js";
@@ -142,15 +143,24 @@ export function RulesPage() {
         open={creating !== "none"}
         onClose={() => setCreating("none")}
         title={creating === "generate" ? "Generate rules" : "New rule"}
-        description={guidance.messages.rules.editDescription}
+        description={
+          creating === "generate"
+            ? guidance.messages.rules.generation.introduction
+            : guidance.messages.rules.newWorkspaceDescription
+        }
         descriptionLocale={guidance.locale}
       >
-        {creating === "generate" && (
+        {creating === "generate" ? (
           <RuleGenerationDialog
             tasks={tasksQ.data?.tasks ?? []}
             onClose={() => setCreating("none")}
           />
-        )}
+        ) : creating === "manual" ? (
+          <NewRuleDialog
+            tasks={tasksQ.data?.tasks ?? []}
+            onClose={() => setCreating("none")}
+          />
+        ) : null}
       </Modal>
 
       <Modal

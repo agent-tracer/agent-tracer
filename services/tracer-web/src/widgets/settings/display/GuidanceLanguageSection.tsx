@@ -15,6 +15,7 @@ export function GuidanceLanguageSection() {
     <Card surface="canvas" className="py-5 px-6">
       <SectionHeading>Display</SectionHeading>
       <Field
+        separated
         label="Guidance language"
         help={guidance.messages.settings.guidanceLanguage}
         helpLocale={locale}

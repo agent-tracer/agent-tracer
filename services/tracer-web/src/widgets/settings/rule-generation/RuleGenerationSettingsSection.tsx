@@ -77,7 +77,7 @@ export function RuleGenerationSettingsSection() {
         message={guidance.messages.settings.ruleGenerationSection}
       />
 
-      <Field label="Model">
+      <Field separated label="Model">
         <div className="flex items-center gap-2">
           <Input
             placeholder={settings?.model ?? "claude-sonnet-5"}
@@ -106,7 +106,7 @@ export function RuleGenerationSettingsSection() {
         </div>
       </Field>
 
-      <Field label="Effort">
+      <Field separated label="Effort">
         <Select
           value={settings?.effort ?? "high"}
           disabled={save.isPending}
@@ -120,7 +120,7 @@ export function RuleGenerationSettingsSection() {
         </Select>
       </Field>
 
-      <Field label="Rule language">
+      <Field separated label="Rule language">
         <Select
           value={settings?.outputLanguage ?? "auto"}
           disabled={save.isPending}
@@ -134,7 +134,7 @@ export function RuleGenerationSettingsSection() {
         </Select>
       </Field>
 
-      <Field label="Max rules per request">
+      <Field separated label="Max rules per request">
         <div className="flex items-center gap-2">
           <Input
             type="number"

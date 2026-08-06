@@ -53,6 +53,7 @@ export function IdentitySection() {
       />
 
       <Field
+        separated
         label="Current identity"
         help={guidance.messages.settings.identityStorage}
         helpLocale={guidance.locale}

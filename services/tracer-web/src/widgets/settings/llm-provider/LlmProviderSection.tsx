@@ -125,6 +125,7 @@ export function LlmProviderSection() {
       />
 
       <Field
+        separated
         label="Output language"
         help={guidance.messages.settings.outputLanguage}
         helpLocale={guidance.locale}

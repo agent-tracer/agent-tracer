@@ -4,9 +4,12 @@ import type {
   GuidanceMessage,
 } from "~tracer-web/shared/guidance.js";
 import { GuidanceText } from "~tracer-web/shared/GuidanceText.js";
+import { cn } from "~tracer-web/shared/ui/lib/cn.js";
 
 interface FieldPropsBase {
   readonly label: string;
+  /** 설정 화면처럼 항목이 줄줄이 이어질 때만 위에 실선을 긋고 자기 여백을 갖는다. */
+  readonly separated?: boolean;
   readonly children: ReactNode;
 }
 
@@ -22,9 +25,14 @@ type FieldProps = FieldPropsBase &
       }
   );
 
-export function Field({ label, help, helpLocale, children }: FieldProps) {
+export function Field({ label, help, helpLocale, separated = false, children }: FieldProps) {
   return (
-    <div className="flex flex-col gap-1.5 py-4 border-t border-hair">
+    <div
+      className={cn(
+        "flex flex-col gap-1.5",
+        separated && "py-4 border-t border-hair",
+      )}
+    >
       <div>
         <label className="text-body font-medium text-ink tracking-snug">
           {label}
