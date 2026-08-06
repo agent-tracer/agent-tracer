@@ -13,6 +13,9 @@ import { TaskHeader } from "~tracer-web/widgets/feed/header/TaskHeader.js";
 import { ActList } from "~tracer-web/widgets/feed/timeline/ActList.js";
 import { buildFeed } from "~tracer-web/widgets/feed/lib/timeline/group-acts.js";
 import { selectResumeTarget } from "~tracer-web/widgets/feed/lib/resume/resume-target.js";
+import { BoundarySuggestions } from "~tracer-web/widgets/feed/split/BoundarySuggestions.js";
+import { TurnSplitModal } from "~tracer-web/widgets/feed/split/TurnSplitModal.js";
+import { useTurnSplit } from "~tracer-web/widgets/feed/split/use-turn-split.js";
 
 // Feed는 기본 뷰라 즉시 렌더링한다.
 const GraphView = lazy(() =>
@@ -34,12 +37,14 @@ export function FeedPanel({ taskId }: FeedPanelProps) {
     enabled: mainView === "graph",
   });
 
+  const split = useTurnSplit(data?.turns ?? [], data?.sessions ?? []);
+
   const items = useMemo(() => {
     if (!data) return [];
     const baseMs = Date.parse(
       data.task.lastSessionStartedAt ?? data.task.createdAt,
     );
-    return buildFeed(data.timeline, baseMs, data.turns);
+    return buildFeed(data.timeline, baseMs, data.turns, data.splits);
   }, [data]);
 
   if (isLoading) {
@@ -84,6 +89,11 @@ export function FeedPanel({ taskId }: FeedPanelProps) {
         timeline={data.timeline}
         {...(resumeTarget ? { resumeTarget } : {})}
       />
+      <BoundarySuggestions
+        taskId={taskId}
+        sessions={data.sessions ?? []}
+        splitFromIndexes={new Set((data.splits ?? []).map((range) => range.fromTurnIndex))}
+      />
       {data.olderCursor && (
         <div className="px-9 pb-2">
           <button
@@ -116,9 +126,22 @@ export function FeedPanel({ taskId }: FeedPanelProps) {
         </Suspense>
       ) : (
         <div className="px-9">
-          <ActList items={items} />
+          <ActList
+            items={items}
+            splitSelection={{
+              startTurnIndex: split.startTurnIndex,
+              isSplittable: split.isSplittable,
+              pick: split.pick,
+            }}
+          />
         </div>
       )}
+      <TurnSplitModal
+        taskId={taskId}
+        target={split.target}
+        turns={data.turns ?? []}
+        onClose={split.reset}
+      />
     </div>
   );
 }

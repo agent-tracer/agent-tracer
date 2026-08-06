@@ -18,6 +18,7 @@ import { formatHHmm } from "~tracer-web/shared/lib/formatting/time.js";
 import { extractLatestModel } from "~tracer-web/widgets/feed/lib/extraction/extract-model.js";
 import { MetricRail } from "~tracer-web/widgets/feed/header/MetricRail.js";
 import { SessionIdPill } from "~tracer-web/widgets/feed/header/SessionIdPill.js";
+import { SplitOriginPill } from "~tracer-web/widgets/feed/header/SplitOriginPill.js";
 import { EditableTitle } from "~tracer-web/widgets/feed/header/title/EditableTitle.js";
 import { StatusPill } from "~tracer-web/widgets/feed/header/StatusPill.js";
 import { LaneFilter } from "~tracer-web/widgets/feed/LaneFilter.js";
@@ -124,6 +125,9 @@ export function TaskHeader({ task, timeline, resumeTarget }: TaskHeaderProps) {
               <ByItem label="Session" value="—" mono />
             )}
             <ByItem label="Agent" value={task.runtimeSource ?? "—"} mono />
+            {task.splitFromTaskId ? (
+              <SplitOriginPill taskId={task.id} originTaskId={task.splitFromTaskId} />
+            ) : null}
             <ByItem label="Status" value={task.status} mono />
           </div>
           <TaskMemoThread taskId={task.id} />
