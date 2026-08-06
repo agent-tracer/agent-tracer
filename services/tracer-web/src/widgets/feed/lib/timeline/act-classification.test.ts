@@ -1,7 +1,10 @@
 import { KIND } from "@agent-tracer/kernel";
 import { describe, expect, it } from "vitest";
 import type { TimelineEventRecord } from "~tracer-web/entities/task/model/timeline/event.js";
-import { classifyEvent } from "~tracer-web/widgets/feed/lib/timeline/act-classification.js";
+import {
+  classifyEvent,
+  pickBodyText,
+} from "~tracer-web/widgets/feed/lib/timeline/act-classification.js";
 
 describe("classifyEvent", () => {
   it("중간 어시스턴트 발화를 USER 카드 본문으로 만든다", () => {
@@ -22,5 +25,34 @@ describe("classifyEvent", () => {
 
     expect(vm.lane.label).toBe("USER");
     expect(vm.bodyText).toBe("테스트를 실행하고 있습니다.");
+  });
+});
+
+describe("pickBodyText", () => {
+  const eventWith = (title: string, body: string | null): TimelineEventRecord =>
+    ({ title, body }) as TimelineEventRecord;
+
+  it("제목과 본문이 같은 문장이면 본문을 비운다", () => {
+    expect(pickBodyText(eventWith("주소 부탁해", "주소 부탁해"))).toBeNull();
+  });
+
+  it("제목으로 시작하는 본문에서 그 앞부분을 덜어낸다", () => {
+    const vm = pickBodyText(eventWith("Run the test suite", "Run the test suite $ npm test"));
+
+    expect(vm).toBe("$ npm test");
+  });
+
+  it("제목이 앞에 없으면 본문을 그대로 낸다", () => {
+    expect(pickBodyText(eventWith("Read file", "src/index.ts를 읽었다"))).toBe(
+      "src/index.ts를 읽었다",
+    );
+  });
+
+  it("덜어내고 남은 것이 없으면 본문을 비운다", () => {
+    expect(pickBodyText(eventWith("done", "done   "))).toBeNull();
+  });
+
+  it("본문이 없으면 비운 채로 둔다", () => {
+    expect(pickBodyText(eventWith("제목", null))).toBeNull();
   });
 });

@@ -20,6 +20,9 @@ export interface ActVm {
    * (같은 문자열을 두 번 렌더링하지 않는다).
    */
   readonly subtypeLabel: string | null;
+  /**
+   * 카드 본문이며 제목이 이미 말한 부분은 빠진다.
+   */
   readonly bodyText: string | null;
   readonly hasViolation: boolean;
   readonly paths: readonly string[];
@@ -36,7 +39,7 @@ export function classifyEvent(event: TimelineEventRecord, baseMs: number): ActVm
     offsetLabel: formatOffset(eventMs, baseMs),
     toolName: event.title,
     subtypeLabel,
-    bodyText: event.body ?? null,
+    bodyText: pickBodyText(event),
     hasViolation: detectViolation(event),
     paths: extractPaths(event),
     tokens: extractTokens(event),
@@ -47,6 +50,20 @@ export function classifyEvent(event: TimelineEventRecord, baseMs: number): ActVm
 function detectViolation(event: TimelineEventRecord): boolean {
   const tags = event.classification.tags;
   return tags.includes("violation");
+}
+
+/** 제목이 이미 보여 준 앞부분을 본문에서 덜어내 같은 글이 두 번 쌓이지 않게 한다. */
+export function pickBodyText(event: TimelineEventRecord): string | null {
+  const body = event.body?.trim();
+  if (!body) return null;
+
+  const title = event.title.trim();
+  if (!title) return body;
+  if (body === title) return null;
+  if (!body.startsWith(title)) return body;
+
+  const rest = body.slice(title.length).trim();
+  return rest.length > 0 ? rest : null;
 }
 
 /** subtypeLabel이 title과 중복되면 숨긴다. */
