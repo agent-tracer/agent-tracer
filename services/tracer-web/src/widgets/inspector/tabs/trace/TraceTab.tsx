@@ -80,7 +80,7 @@ export function TraceTab() {
         </span>
         {data.openinference.runtimeSource && (
           <>
-            <span className="text-hair-strong">·</span>
+            <span className="text-ink-tertiary">·</span>
             <span className="text-ink-muted">
               {data.openinference.runtimeSource}
             </span>

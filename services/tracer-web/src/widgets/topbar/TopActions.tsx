@@ -154,7 +154,7 @@ function CountBadge({ count }: { readonly count: number | null }) {
     <span
       className={cn(
         "inline-flex items-center justify-center rounded-pill font-mono text-mini font-semibold px-1.5 min-w-5 leading-4",
-        (count ?? 0) > 0 ? "bg-ink-tertiary text-on-primary" : "bg-s1 text-ink-tertiary",
+        (count ?? 0) > 0 ? "bg-ink-tertiary text-canvas" : "bg-s1 text-ink-tertiary",
       )}
     >
       {count === null ? "…" : count}

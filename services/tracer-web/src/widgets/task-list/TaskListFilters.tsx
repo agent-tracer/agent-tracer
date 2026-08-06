@@ -52,7 +52,7 @@ export function TaskListFilters({ counts }: TaskListFiltersProps) {
       />
       {showArchived && (
         <span
-          className="ml-auto inline-flex items-center gap-1.5 text-mini text-primary font-medium tracking-label uppercase"
+          className="ml-auto inline-flex items-center gap-1.5 text-mini text-accent font-medium tracking-label uppercase"
           aria-live="polite"
         >
           Archived view

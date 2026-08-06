@@ -14,7 +14,7 @@ export default function NotFound() {
       action={
         <Link
           to="/tasks"
-          className="inline-block text-body text-primary-hover border-b border-dotted border-primary focus-ring"
+          className="inline-block text-body text-accent border-b border-dotted border-primary focus-ring"
         >
           All tasks
         </Link>

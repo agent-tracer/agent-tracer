@@ -99,7 +99,7 @@ export function TaskTagPicker({ taskId }: TaskTagPickerProps) {
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-label="Edit tags"
-        className="inline-flex items-center gap-1 rounded-xs border border-dashed border-hair-strong px-1.5 py-0.5 text-mini font-medium text-ink-subtle hover:text-ink hover:border-hair-strong"
+        className="inline-flex h-6 items-center gap-1 rounded-xs border border-dashed border-hair-strong px-2 text-mini font-medium text-ink-subtle hover:text-ink hover:border-hair-strong focus-ring"
       >
         + Tag
       </button>
@@ -150,7 +150,7 @@ export function TaskTagPicker({ taskId }: TaskTagPickerProps) {
               type="button"
               onClick={createAndAttach}
               disabled={createMutation.isPending}
-              className="w-full px-3 py-2 text-left text-body text-primary-hover border-t border-hair hover:bg-s1"
+              className="w-full px-3 py-2 text-left text-body text-accent border-t border-hair hover:bg-s1"
             >
               {createMutation.isPending ? "Creating…" : `Create "${trimmedQuery}"`}
             </button>
@@ -181,7 +181,7 @@ function TagOptionRow({
       <TagChip tag={tag} dense />
       <span className="flex-1 truncate text-body text-ink">{tag.name}</span>
       {checked && (
-        <span aria-hidden className="text-primary text-meta">
+        <span aria-hidden className="text-accent text-meta">
           ✓
         </span>
       )}

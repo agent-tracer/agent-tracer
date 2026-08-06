@@ -5,11 +5,21 @@
  *   canvas / s1..s4    — page bg → elevated surfaces (low → high)
  *   hair / hair-strong — separator borders (low / high contrast)
  *   ink / ink-muted / ink-subtle / ink-tertiary — text emphasis ladder
- *   primary            — single saturated accent (lavender)
+ *   primary            — single saturated accent (lavender), for fills and borders
+ *   accent             — the same accent at a lightness that reads AS TEXT on
+ *                        the page, which `primary` does not in the dark theme
  *   ok / warn / err / compact — status semantics
  *   ph-*               — lane phase colors. Used by lib/presentation/lane-theme.ts
  *   elev-1 / elev-2    — popover/dropdown and modal/drawer elevation
  *   focus-ring         — the one focus treatment (see the `focus-ring` utility)
+ *
+ * CONTRAST
+ * --------
+ * Every colour that ends up as text clears WCAG AA (4.5:1) against `canvas`,
+ * against `s1`, and against its own 10% tint, because a Chip paints that tint
+ * behind its own label and the tint pulls the ground toward the text. Fills
+ * and borders are exempt; there the pair is what matters, so the ratio to
+ * check is `on-primary` against `primary`.
  *
  * Theme switching: <html data-theme="dark"> or "light", driven by
  * `useThemeAttrSync` via the user's preference (slice "theme") and the
@@ -42,12 +52,13 @@
   --ink:           #f7f8f8;
   --ink-muted:     #d0d6e0;
   --ink-subtle:    #8a8f98;
-  --ink-tertiary:  #62666d;
+  --ink-tertiary:  #7d828a;  /* 5.4:1 on canvas, 4.9:1 on s1 */
 
   --primary:       #5e6ad2;
-  --primary-hover: #828fff;
+  --primary-hover: #5461c4;  /* 채움의 hover는 깊어진다 (흰 글자 5.4:1) */
   --primary-focus: #5e69d1;
   --on-primary:    #ffffff;
+  --accent:        #828fff;  /* 7.3:1 — 강조색을 글자로 쓸 때 */
 
   --ok:            #27a644;
   --warn:          #caa14a;
@@ -81,34 +92,36 @@
   --hair:          #d8dce2;
   --hair-strong:   #b8bdc7;
 
-  /* Text — inverted emphasis ladder; ratios ≥ 4.5:1 against canvas */
+  /* Text — inverted emphasis ladder; every step ≥ 4.5:1 against canvas AND s1,
+     because most secondary text sits on the elevated surface, not the page */
   --ink:           #0a0b0d;
   --ink-muted:     #1f2127;
   --ink-subtle:    #565b66;
-  --ink-tertiary:  #7d818a;
+  --ink-tertiary:  #676b74;  /* 5.3:1 on canvas, 5.0:1 on s1 */
 
   /* Accent — slightly darker so lavender stays legible on white */
   --primary:       #4a55b8;
-  --primary-hover: #3d4998;
+  --primary-hover: #3d4998;  /* 흰 글자 8.1:1 */
   --primary-focus: #4a55b8;
   --on-primary:    #ffffff;
+  --accent:        #4a55b8;  /* 6.4:1 — 강조색을 글자로 쓸 때 */
 
   /* Status — saturated dark variants for AA contrast on light bg */
-  --ok:            #1e8a3d;
-  --warn:          #b08338;
+  --ok:            #176b30;
+  --warn:          #7f5a13;
   --err:           #c14730;
-  --compact:       #b08338;
+  --compact:       #7f5a13;
 
   /* Lane phase — same hues, lower lightness so they hold the same
      semantic against a bright canvas */
   --ph-user:       #0a0b0d;  /* USER  — near-black (white was the dark-only trick) */
   --ph-asst:       #55606b;
   --ph-plan:       #5b5d99;
-  --ph-expl:       #3d6790;
+  --ph-expl:       #365e86;
   --ph-impl:       #875240;
-  --ph-rule:       #b08338;
-  --ph-veri:       #3a7a52;
-  --ph-coord:      #5e6395;
+  --ph-rule:       #7f5a13;
+  --ph-veri:       #2f6743;
+  --ph-coord:      #545a8c;
 
   /* Elevation — the same shadows at dark-theme opacity turn into grey smudges
      on white, so light carries its own pair tinted toward the ink hue */
@@ -153,6 +166,7 @@
   --color-primary-hover: var(--primary-hover);
   --color-primary-focus: var(--primary-focus);
   --color-on-primary: var(--on-primary);
+  --color-accent: var(--accent);
 
   --color-ok: var(--ok);
   --color-warn: var(--warn);

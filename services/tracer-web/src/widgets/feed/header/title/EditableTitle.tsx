@@ -77,7 +77,7 @@ export function EditableTitle({ task }: EditableTitleProps) {
               className={cn(
                 "inline-flex shrink-0 items-center justify-center gap-1.5 h-6 rounded-xs transition-colors duration-150 text-meta font-medium whitespace-nowrap",
                 suggestions.loading
-                  ? "py-0 px-2.5 w-auto border border-primary bg-primary/14 text-primary cursor-wait"
+                  ? "py-0 px-2.5 w-auto border border-primary bg-primary/14 text-accent cursor-wait"
                   : "p-0 w-6 border border-hair bg-transparent text-ink-tertiary cursor-pointer hover:bg-s2",
               )}
             >

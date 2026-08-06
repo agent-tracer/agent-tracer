@@ -135,7 +135,7 @@ export function TaskRow({
                 className={cn(
                   "font-mono text-mini",
                   unread && !actions.active
-                    ? "text-primary font-semibold"
+                    ? "text-accent font-semibold"
                     : "text-ink-subtle font-normal",
                 )}
               >

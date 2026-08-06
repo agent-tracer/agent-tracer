@@ -80,7 +80,7 @@ export function MemoEntryRow({
           </p>
           <div className="flex items-center gap-2 mt-1.5 font-mono text-mini text-ink-tertiary">
             <span>{memo.author}</span>
-            <span className="text-hair-strong">·</span>
+            <span className="text-ink-tertiary">·</span>
             <span>{memo.lastEditedBy}</span>
             <span className="flex-1" />
             <button

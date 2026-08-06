@@ -27,7 +27,7 @@ export function MemoListItem({ memo, task }: MemoListItemProps) {
         <MemoTaskBreadcrumb taskId={memo.taskId} task={task} />
         {memo.eventId && (
           <>
-            <span className="text-hair-strong">·</span>
+            <span className="text-ink-tertiary">·</span>
             <Link
               to={`/tasks/${memo.taskId}`}
               onClick={() => setSelectedEventId(EventId(memo.eventId ?? ""))}

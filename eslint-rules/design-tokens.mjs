@@ -47,9 +47,9 @@ const VIOLATIONS = [
   {
     // 다른 디자인 시스템에서 쓰던 이름은 여기서 아무 색도 만들지 않고 조용히 사라진다.
     pattern:
-      /\b(?:text|bg|border|ring|fill|stroke)-(?:danger|destructive|success|info|muted|accent|secondary|foreground|background|surface)\b/,
+      /\b(?:text|bg|border|ring|fill|stroke)-(?:danger|destructive|success|info|muted|secondary|foreground|background|surface)\b/,
     message:
-      "이 앱에 없는 색 이름이다. 위험은 err, 성공은 ok, 흐린 글자는 ink-subtle 또는 ink-tertiary다",
+      "이 앱에 없는 색 이름이다. 위험은 err, 성공은 ok, 흐린 글자는 ink-subtle 또는 ink-tertiary, 강조 글자는 accent다",
   },
   {
     pattern: /\bfocus-visible:(?:ring|outline)-/,

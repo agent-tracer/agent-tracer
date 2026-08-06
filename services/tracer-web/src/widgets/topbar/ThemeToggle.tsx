@@ -114,7 +114,7 @@ function MenuItem({
     >
       <span className="text-ink-tertiary">{icon}</span>
       <span className="flex-1 shrink-0">{label}</span>
-      {active && <CheckIcon size={12} className="text-primary" />}
+      {active && <CheckIcon size={12} className="text-accent" />}
     </button>
   );
 }

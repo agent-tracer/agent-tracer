@@ -79,7 +79,7 @@ export function TaskListHeader() {
           aria-label={showArchived ? "Back to active tasks" : "Show archived tasks"}
           className={cn(
             "inline-flex h-[30px] w-[30px] items-center justify-center rounded-sm border hover:bg-s2",
-            showArchived ? "border-primary bg-primary/14 text-primary" : "border-hair bg-s1 text-ink-subtle",
+            showArchived ? "border-primary bg-primary/14 text-accent" : "border-hair bg-s1 text-ink-subtle",
           )}
         >
           <ArchiveGlyph />

@@ -23,7 +23,7 @@ export function ActMeta({ vm }: ActMetaProps) {
         <span key={idx} className="inline-flex items-center gap-2">
           <span>{p}</span>
           {idx < parts.length - 1 && (
-            <span className="text-hair-strong">·</span>
+            <span className="text-ink-tertiary">·</span>
           )}
         </span>
       ))}

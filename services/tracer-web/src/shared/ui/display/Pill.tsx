@@ -16,7 +16,7 @@ const toneText: Record<PillTone, string> = {
   ok: "text-ok",
   warn: "text-warn",
   err: "text-err",
-  primary: "text-primary-hover",
+  primary: "text-accent",
 };
 
 const toneDot: Record<PillTone, string> = {

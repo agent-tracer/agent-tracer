@@ -89,7 +89,7 @@ export function TaskHeader({ task, timeline, resumeTarget }: TaskHeaderProps) {
           type="button"
           onClick={() => setDetailsOpen((open) => !open)}
           aria-expanded={detailsOpen}
-          className="inline-flex items-center gap-1 text-meta font-medium text-ink-subtle hover:text-ink"
+          className="inline-flex min-h-6 items-center gap-1 px-1 -mx-1 rounded-xs text-meta font-medium text-ink-subtle hover:text-ink focus-ring"
         >
           {detailsOpen ? <ChevronDownIcon /> : <ChevronRightIcon />}
           Details
@@ -196,7 +196,7 @@ function ViewToggle() {
 }
 
 function Sep() {
-  return <span className="text-hair-strong">·</span>;
+  return <span className="text-ink-tertiary">·</span>;
 }
 
 function countDistinctPaths(events: readonly TimelineEventRecord[]): number {

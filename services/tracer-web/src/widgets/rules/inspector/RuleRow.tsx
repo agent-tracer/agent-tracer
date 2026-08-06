@@ -90,7 +90,7 @@ export function RuleRow({ rule, contextTaskId, onEdit }: RuleRowProps) {
         <span>source · {rule.source}</span>
         {expectationTool(rule.expect) && (
           <>
-            <span className="text-hair-strong">·</span>
+            <span className="text-ink-tertiary">·</span>
             <span>tool · {expectationTool(rule.expect)}</span>
           </>
         )}

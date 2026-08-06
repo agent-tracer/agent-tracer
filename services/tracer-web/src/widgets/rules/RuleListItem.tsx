@@ -52,17 +52,17 @@ export function RuleListItem({ rule, onEdit, task }: RuleListItemProps) {
         <span>source · {rule.source}</span>
         {expectationTool(rule.expect) && (
           <>
-            <span className="text-hair-strong">·</span>
+            <span className="text-ink-tertiary">·</span>
             <span>tool · {expectationTool(rule.expect)}</span>
           </>
         )}
         {rule.expect.kind === RULE_EXPECTATION_KIND.pattern && (
           <>
-            <span className="text-hair-strong">·</span>
+            <span className="text-ink-tertiary">·</span>
             <span title={rule.expect.pattern}>pattern</span>
           </>
         )}
-        <span className="text-hair-strong">·</span>
+        <span className="text-ink-tertiary">·</span>
         <RuleTaskBreadcrumb taskId={rule.taskId} task={task} />
       </div>
 
@@ -90,7 +90,7 @@ export function RuleListItem({ rule, onEdit, task }: RuleListItemProps) {
                   key={eventId}
                   type="button"
                   onClick={() => setSelectedEventId(EventId(eventId))}
-                  className="text-primary-hover bg-primary/12 py-0.5 px-1.5 rounded-xs cursor-pointer hover:bg-primary/20"
+                  className="text-accent bg-primary/12 py-0.5 px-1.5 rounded-xs cursor-pointer hover:bg-primary/20"
                 >
                   {eventId}
                 </button>

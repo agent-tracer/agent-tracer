@@ -49,7 +49,7 @@ export function ContextMark({
           <>
             <span className="text-ink-tertiary">·</span>
             <span
-              className={modelChanged ? "font-semibold text-primary" : "font-normal text-ink-muted"}
+              className={modelChanged ? "font-semibold text-accent" : "font-normal text-ink-muted"}
             >
               {model}
             </span>

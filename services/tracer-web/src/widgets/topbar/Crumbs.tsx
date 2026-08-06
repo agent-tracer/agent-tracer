@@ -19,7 +19,7 @@ export function Crumbs() {
       />
       {task && (
         <>
-          <span className="text-hair-strong font-mono text-body">
+          <span className="text-ink-tertiary font-mono text-body">
             /
           </span>
           <CrumbItem

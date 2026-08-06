@@ -101,7 +101,7 @@ function EvidenceEventRow({
           event.unfulfilled
             ? "text-warn bg-warn/12"
             : event.matchKind === "trigger"
-              ? "text-primary-hover bg-primary/18"
+              ? "text-accent bg-primary/18"
               : "text-ink-tertiary bg-s2",
         )}
       >
