@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { JOB_KIND, isActiveJobStatus } from "~tracer-web/entities/job/model/job.js";
 import type {
   TitleSuggestion,
@@ -28,12 +28,18 @@ export function useTitleSuggestions(task: MonitoringTask) {
   const [open, setOpen] = useState(false);
   const [enqueueError, setEnqueueError] = useState<GuidanceMessage | null>(null);
   const currentTitle = task.displayTitle ?? task.title;
+  // 패널을 닫았다고 조회를 멈추면 잡이 끝나도 그 끝이 화면에 닿을 길이 없어 요청 표시가 그대로 굳는다.
+  const [watchingJob, setWatchingJob] = useState(false);
   const jobStatus = useJobStatus<TitleSuggestionJobStatus>(
     JOB_KIND.titleSuggestion,
-    { taskId: task.id, enabled: open },
+    { taskId: task.id, enabled: open || watchingJob },
   );
   const job = jobStatus.data?.job ?? null;
-  const loading = enqueue.isPending || isActiveJobStatus(job?.status);
+  const jobActive = isActiveJobStatus(job?.status);
+  useEffect(() => {
+    setWatchingJob(jobActive);
+  }, [jobActive]);
+  const loading = enqueue.isPending || jobActive;
   const suggestions: readonly TitleSuggestion[] =
     job?.status === "completed" ? job.result?.suggestions ?? [] : [];
   // 잡이 남긴 문구는 에이전트가 지은 것이므로 그대로 두고, 요청 오류만 목록의 말로 온다.

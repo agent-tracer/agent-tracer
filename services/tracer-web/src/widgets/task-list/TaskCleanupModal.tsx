@@ -57,15 +57,16 @@ export function TaskCleanupModal({ open, onClose }: TaskCleanupModalProps) {
 
   const job = latestJob.data?.job ?? null;
   const isScanning = isActiveJobStatus(job?.status);
+  // 상태만 보면 연달아 끝난 두 스캔이 같은 값이라 두 번째 제안을 읽지 못한다.
+  const completedScanId = job?.status === "completed" ? job.id : null;
 
   useEffect(() => {
     // 스캔이 끝나면 새로 생성된 제안을 다시 불러온다.
-    if (job?.status === "completed") {
-      void queryClient.invalidateQueries({
-        queryKey: monitorQueryKeys.taskCleanupSuggestionsPrefix(),
-      });
-    }
-  }, [job?.status, queryClient]);
+    if (completedScanId === null) return;
+    void queryClient.invalidateQueries({
+      queryKey: monitorQueryKeys.taskCleanupSuggestionsPrefix(),
+    });
+  }, [completedScanId, queryClient]);
 
   const failureMessage = enqueueMutation.isError
     ? readErrorMessage(enqueueMutation.error)

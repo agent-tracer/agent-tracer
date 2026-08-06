@@ -46,14 +46,15 @@ export function RecipesPage() {
     [candidates.data, active.data, archive.data],
   );
 
-  const scanStatus = job.data?.job?.status;
-  const isScanning = isActiveJobStatus(scanStatus);
+  const latestScan = job.data?.job ?? null;
+  const isScanning = isActiveJobStatus(latestScan?.status);
+  // 상태만 보면 연달아 끝난 두 스캔이 같은 값이라 두 번째 결과를 읽지 못한다.
+  const completedScanId = latestScan?.status === "completed" ? latestScan.id : null;
 
   useEffect(() => {
-    if (scanStatus === "completed") {
-      void queryClient.invalidateQueries({ queryKey: monitorQueryKeys.recipesPrefix() });
-    }
-  }, [scanStatus, queryClient]);
+    if (completedScanId === null) return;
+    void queryClient.invalidateQueries({ queryKey: monitorQueryKeys.recipesPrefix() });
+  }, [completedScanId, queryClient]);
 
   return (
     <div className="flex-1 min-h-0 flex flex-col bg-canvas">

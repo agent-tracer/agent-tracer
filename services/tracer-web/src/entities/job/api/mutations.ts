@@ -1,8 +1,10 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 import type { JobDto } from "@agent-tracer/kernel";
 import type { JobKind } from "~tracer-web/entities/job/model/job.js";
 import { cancelJob, enqueueJob } from "~tracer-web/entities/job/api/api-jobs.js";
+import { toJobStatus } from "~tracer-web/entities/job/api/job.mapper.js";
+import { TaskId } from "~tracer-web/shared/identity.js";
 import { monitorQueryKeys } from "~tracer-web/shared/api/query-keys.js";
 
 export function useEnqueueJob<TInput>(kind: JobKind, backend?: string | null) {
@@ -21,12 +23,22 @@ export function useEnqueueJob<TInput>(kind: JobKind, backend?: string | null) {
         releaseIdempotencyKey(idempotencyKeysRef.current, signature, idempotencyKey);
       }
     },
+    onSuccess: (response) => seedLatestJob(queryClient, kind, response.job),
     onSettled: () => {
       void queryClient.invalidateQueries({
         queryKey: monitorQueryKeys.latestJobPrefix(kind),
       });
     },
   });
+}
+
+/** 다시 물어보는 사이에 직전 잡이 최신으로 남으면 화면이 지난 결과를 잠깐 보이므로, 접수한 잡을 곧바로 그 종류의 최신 자리에 앉힌다. */
+function seedLatestJob(queryClient: QueryClient, kind: JobKind, job: JobDto): void {
+  const seeded = { job: toJobStatus(job) };
+  queryClient.setQueryData(monitorQueryKeys.latestJob(kind), seeded);
+  if (job.taskId !== null) {
+    queryClient.setQueryData(monitorQueryKeys.latestJob(kind, TaskId(job.taskId)), seeded);
+  }
 }
 
 export function useCancelJobMutation() {

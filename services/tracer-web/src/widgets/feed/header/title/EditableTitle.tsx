@@ -65,6 +65,7 @@ export function EditableTitle({ task }: EditableTitleProps) {
             }
             side="top"
           >
+            {/* 요청 중에 잠그면 패널을 닫은 사용자가 진행과 결과를 다시 열 길이 없다. */}
             <button
               ref={sparkleRef}
               type="button"
@@ -73,7 +74,6 @@ export function EditableTitle({ task }: EditableTitleProps) {
                 suggestions.loading ? "Suggesting title…" : "Suggest title"
               }
               aria-busy={suggestions.loading}
-              disabled={suggestions.loading}
               className={cn(
                 "inline-flex shrink-0 items-center justify-center gap-1.5 h-6 rounded-xs transition-colors duration-150 text-[11.5px] font-medium whitespace-nowrap",
                 suggestions.loading
