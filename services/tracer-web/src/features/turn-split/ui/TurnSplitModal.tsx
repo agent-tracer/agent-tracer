@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { TaskId } from "~tracer-web/shared/identity.js";
 import type { TaskTurnSummary } from "~tracer-web/entities/task/model/task-query.js";
 import { useSplitTaskTurnsMutation } from "~tracer-web/entities/task/api/split-mutations.js";
@@ -20,9 +20,10 @@ import {
 import { guidancePlainText } from "~tracer-web/shared/guidance-message.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
 
+/** 고른 구간이 있을 때만 세우므로 제목 초안은 세워질 때 한 번만 짓는다. */
 interface TurnSplitModalProps {
   readonly taskId: TaskId;
-  readonly target: TurnSplitTarget | null;
+  readonly target: TurnSplitTarget;
   readonly turns: readonly TaskTurnSummary[];
   readonly onClose: () => void;
 }
@@ -31,13 +32,8 @@ interface TurnSplitModalProps {
 export function TurnSplitModal({ taskId, target, turns, onClose }: TurnSplitModalProps) {
   const guidance = useGuidance();
   const mutation = useSplitTaskTurnsMutation(taskId);
-  const [title, setTitle] = useState("");
-
-  useEffect(() => {
-    if (target !== null) setTitle(defaultSplitTitle(turns, target));
-  }, [target, turns]);
-
-  if (target === null) return null;
+  // 타임라인이 다시 읽힐 때마다 초안을 다시 지으면 사용자가 적던 제목이 지워진다.
+  const [title, setTitle] = useState(() => defaultSplitTitle(turns, target));
 
   const moved = turnsInSpan(turns, target);
   const submit = () => {

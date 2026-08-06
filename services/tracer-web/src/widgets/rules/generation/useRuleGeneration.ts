@@ -13,6 +13,7 @@ import { apiErrorMessage } from "~tracer-web/shared/api/api-error-message.js";
 import { monitorQueryKeys } from "~tracer-web/shared/api/query-keys.js";
 import type { GuidanceMessage } from "~tracer-web/shared/guidance.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
+import { resolveAnchorEventId } from "~tracer-web/widgets/rules/anchor-event.js";
 import {
   isSettledRuleGeneration,
   readRuleGenerationIntent,
@@ -32,10 +33,9 @@ export function useRuleGeneration(taskId: TaskId, taskStatus: string | null) {
   const [anchorEventId, setAnchorEventId] = useState("");
 
   const userInputs = useMemo(() => userInputsQuery.data ?? [], [userInputsQuery.data]);
-  const latestInputId = userInputs.at(-1)?.eventId ?? "";
   useEffect(() => {
-    if (latestInputId) setAnchorEventId(latestInputId);
-  }, [latestInputId]);
+    setAnchorEventId((current) => resolveAnchorEventId(current, userInputs));
+  }, [userInputs]);
 
   const record: RuleGenerationRecord | null = generationsQuery.data?.[0] ?? null;
   const isInFlight = record !== null && !isSettledRuleGeneration(record.status);

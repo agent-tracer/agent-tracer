@@ -108,14 +108,14 @@ export function TraceTab() {
           <SpanRow key={entry.row.span.spanId} row={entry.row} />
         ),
       )}
-      {taskId ? (
+      {split.target !== null && (
         <TurnSplitModal
           taskId={taskId}
           target={split.target}
           turns={turns}
           onClose={split.reset}
         />
-      ) : null}
+      )}
     </div>
   );
 }

@@ -47,17 +47,23 @@ export function RuleGenerationSettingsSection() {
   const [feedback, setFeedback] = useState<SettingFeedback | null>(null);
   const settings = settingsQuery.data;
 
-  async function apply(patch: Parameters<typeof save.mutateAsync>[0], label: string) {
+  /** 실패한 저장이 적던 값을 지우지 않도록 저장이 실제로 됐는지 알려 준다. */
+  async function apply(
+    patch: Parameters<typeof save.mutateAsync>[0],
+    label: string,
+  ): Promise<boolean> {
     const messages = guidance.messages.settings;
     try {
       await save.mutateAsync(patch);
       setFeedback({ tone: "ok", message: messages.settingSaved(label) });
+      return true;
     } catch (error) {
       setFeedback({
         tone: "err",
         message: messages.settingSaveFailed(label),
         reason: apiErrorMessage(guidance.messages.common, error),
       });
+      return false;
     }
   }
 
@@ -82,7 +88,11 @@ export function RuleGenerationSettingsSection() {
           <Button
             variant="ghost"
             disabled={modelDraft.trim().length === 0 || save.isPending}
-            onClick={() => void apply({ model: modelDraft.trim() }, "Model").then(() => setModelDraft(""))}
+            onClick={() =>
+              void apply({ model: modelDraft.trim() }, "Model").then((saved) => {
+                if (saved) setModelDraft("");
+              })
+            }
           >
             Save
           </Button>
@@ -139,8 +149,10 @@ export function RuleGenerationSettingsSection() {
             variant="ghost"
             disabled={maxRulesDraft.trim().length === 0 || save.isPending}
             onClick={() =>
-              void apply({ maxRulesPerTask: Number(maxRulesDraft) }, "Max rules per request").then(() =>
-                setMaxRulesDraft(""),
+              void apply({ maxRulesPerTask: Number(maxRulesDraft) }, "Max rules per request").then(
+                (saved) => {
+                  if (saved) setMaxRulesDraft("");
+                },
               )
             }
           >

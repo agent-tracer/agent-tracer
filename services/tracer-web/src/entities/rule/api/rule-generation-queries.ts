@@ -81,8 +81,9 @@ export function useSaveRuleGenerationSettingsMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (patch: RuleGenerationSettingsPatch) => saveRuleGenerationSettings(patch),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: monitorQueryKeys.ruleGenerationSettings() });
+    // 다시 물어올 때까지 두면 고른 항목이 잠깐 예전 값으로 되돌아가므로 창구가 돌려준 값을 곧바로 앉힌다.
+    onSuccess: (settings) => {
+      queryClient.setQueryData(monitorQueryKeys.ruleGenerationSettings(), settings);
     },
   });
 }

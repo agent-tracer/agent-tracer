@@ -134,12 +134,14 @@ export function FeedPanel({ taskId }: FeedPanelProps) {
           />
         </div>
       )}
-      <TurnSplitModal
-        taskId={taskId}
-        target={split.target}
-        turns={data.turns ?? []}
-        onClose={split.reset}
-      />
+      {split.target !== null && (
+        <TurnSplitModal
+          taskId={taskId}
+          target={split.target}
+          turns={data.turns ?? []}
+          onClose={split.reset}
+        />
+      )}
     </div>
   );
 }

@@ -86,8 +86,8 @@ function ActiveRecipeCard({
   }));
   const [error, setError] = useState<GuidanceMessage | null>(null);
 
-  function closeEditor() {
-    setEditing(false);
+  // 닫으면서 되돌리면 저장 직후의 낡은 값이 남아 다시 열었을 때 바뀌기 전 글이 보이므로 열 때 지금 값을 싣는다.
+  function openEditor() {
     setError(null);
     setForm({
       title: recipe.title,
@@ -95,6 +95,12 @@ function ActiveRecipeCard({
       description: recipe.description,
       summaryMd: recipe.summaryMd,
     });
+    setEditing(true);
+  }
+
+  function closeEditor() {
+    setEditing(false);
+    setError(null);
   }
 
   function saveEdit() {
@@ -134,7 +140,7 @@ function ActiveRecipeCard({
         actions={
           recipe.status === "active" ? (
             <>
-              <Button variant="ghost" disabled={edit.isPending} onClick={() => setEditing(true)}>
+              <Button variant="ghost" disabled={edit.isPending} onClick={openEditor}>
                 Edit
               </Button>
               <Button variant="ghost" disabled={retire.isPending} onClick={() => retire.mutate(recipe.id)}>

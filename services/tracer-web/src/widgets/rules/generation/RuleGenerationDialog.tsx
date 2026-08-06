@@ -7,6 +7,7 @@ import { apiErrorMessage } from "~tracer-web/shared/api/api-error-message.js";
 import type { GuidanceMessage } from "~tracer-web/shared/guidance.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
 import { Button, Field, GuidanceText, Input, Select } from "~tracer-web/shared/ui/index.js";
+import { resolveAnchorEventId } from "~tracer-web/widgets/rules/anchor-event.js";
 
 const ANCHOR_PREVIEW_MAX = 90;
 
@@ -34,7 +35,7 @@ export function RuleGenerationDialog({
   const inputs = useMemo(() => inputsQuery.data ?? [], [inputsQuery.data]);
 
   useEffect(() => {
-    setAnchorEventId(inputs.at(-1)?.eventId ?? "");
+    setAnchorEventId((current) => resolveAnchorEventId(current, inputs));
   }, [inputs]);
 
   const disabled = taskId === "" || anchorEventId === "" || request.isPending;
