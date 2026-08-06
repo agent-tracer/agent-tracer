@@ -1,4 +1,5 @@
 import type { TaskTurnSummary } from "~tracer-web/entities/task/model/task-query.js";
+import type { TurnSplitSelection } from "~tracer-web/features/turn-split/index.js";
 import type { TimelineEventRecord } from "~tracer-web/entities/task/model/timeline/event.js";
 import type { TaskVerification } from "~tracer-web/entities/task/model/timeline/verification.js";
 import { GraphContextStrip } from "~tracer-web/widgets/feed/graph/context/GraphContextStrip.js";
@@ -19,6 +20,7 @@ interface GraphViewProps {
   readonly verifications: readonly TaskVerification[];
   readonly turns?: readonly TaskTurnSummary[];
   readonly taskStatus?: "running" | "waiting" | "completed" | "errored";
+  readonly splitSelection?: TurnSplitSelection;
 }
 
 /** 그래프 scene, viewport, plot, context와 controls를 조립한다. */
@@ -27,6 +29,7 @@ export function GraphView({
   verifications,
   turns = [],
   taskStatus,
+  splitSelection,
 }: GraphViewProps) {
   const scene = useGraphScene({
     events,
@@ -52,6 +55,8 @@ export function GraphView({
             nodes={scene.nodes}
             edges={scene.edges}
             nowMs={scene.nowMs}
+            turns={turns}
+            {...(splitSelection ? { splitSelection } : {})}
           />
           <GraphContextStrip events={events} range={scene.range} />
           <GraphAxis

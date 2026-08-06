@@ -56,6 +56,7 @@ function turn(
     status: overrides.endedAt === null ? "open" : "closed",
     aggregateVerdict: null,
     rulesEvaluatedCount: 0,
+    askedText: null,
     ...overrides,
   };
 }

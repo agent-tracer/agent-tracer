@@ -46,6 +46,7 @@ describe("buildFeed", () => {
       endedAt: "2026-07-10T00:00:02.001Z",
       aggregateVerdict: null,
       rulesEvaluatedCount: 0,
+      askedText: null,
     };
 
     const feed = buildFeed([
@@ -91,6 +92,7 @@ describe("buildFeed 분리 마크", () => {
       endedAt: null,
       aggregateVerdict: null,
       rulesEvaluatedCount: 0,
+      askedText: null,
     };
   }
 

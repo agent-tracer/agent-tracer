@@ -1,4 +1,6 @@
 import type { TimelineEventRecord } from "~tracer-web/entities/task/model/timeline/event.js";
+import type { TaskTurnSummary } from "~tracer-web/entities/task/model/task-query.js";
+import type { TurnSplitSelection } from "~tracer-web/features/turn-split/index.js";
 import type { LaneKey } from "~tracer-web/entities/task/model/lane-theme.js";
 import type { TimeRange } from "~tracer-web/widgets/feed/graph/model/time-range.js";
 import type { FeedEdge } from "~tracer-web/widgets/feed/graph/model/edges.js";
@@ -9,6 +11,7 @@ import { GraphEdges } from "~tracer-web/widgets/feed/graph/plot/GraphEdges.js";
 import { GraphLanes } from "~tracer-web/widgets/feed/graph/plot/GraphLanes.js";
 import { GraphNode } from "~tracer-web/widgets/feed/graph/plot/GraphNode.js";
 import { NowMarker } from "~tracer-web/widgets/feed/graph/plot/NowMarker.js";
+import { TurnBands } from "~tracer-web/widgets/feed/graph/plot/TurnBands.js";
 
 interface GraphPlotProps {
   readonly events: readonly TimelineEventRecord[];
@@ -17,6 +20,8 @@ interface GraphPlotProps {
   readonly nodes: readonly PositionedNode[];
   readonly edges: readonly FeedEdge[];
   readonly nowMs: number;
+  readonly turns: readonly TaskTurnSummary[];
+  readonly splitSelection?: TurnSplitSelection;
 }
 
 /** 레인·노드·엣지·시간 마커를 하나의 plot 좌표계에 그린다. */
@@ -27,6 +32,8 @@ export function GraphPlot({
   nodes,
   edges,
   nowMs,
+  turns,
+  splitSelection,
 }: GraphPlotProps) {
   return (
     <div className="relative" style={{ height: lanes.length * LANE_HEIGHT }}>
@@ -40,6 +47,11 @@ export function GraphPlot({
       {nodes.map((node) => (
         <GraphNode key={node.id} node={node} />
       ))}
+      <TurnBands
+        turns={turns}
+        range={range}
+        {...(splitSelection ? { splitSelection } : {})}
+      />
       <NowMarker nowMs={nowMs} range={range} />
     </div>
   );
