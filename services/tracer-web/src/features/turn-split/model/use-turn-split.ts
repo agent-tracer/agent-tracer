@@ -1,14 +1,14 @@
 import { useCallback, useMemo, useState } from "react";
 import type { SessionDto } from "@agent-tracer/kernel";
 import type { TaskTurnSummary } from "~tracer-web/entities/task/model/task-query.js";
-import type { TurnSplitTarget } from "~tracer-web/widgets/feed/split/TurnSplitModal.js";
+import type {
+  TurnSplitSelection,
+  TurnSplitTarget,
+} from "~tracer-web/features/turn-split/model/turn-split-target.js";
 
 /** 첫 클릭이 시작 턴을 잡고 두 번째 클릭이 끝을 잡는 구간 선택 상태다. */
-export interface TurnSplitState {
-  readonly startTurnIndex: number | null;
+export interface TurnSplitState extends TurnSplitSelection {
   readonly target: TurnSplitTarget | null;
-  readonly isSplittable: (turnIndex: number) => boolean;
-  readonly pick: (turnIndex: number) => void;
   readonly reset: () => void;
 }
 

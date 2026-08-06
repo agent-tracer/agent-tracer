@@ -59,6 +59,13 @@ export function guidanceStrong(value: string): GuidanceStrongPart {
   return freezePart("strong", value);
 }
 
+/** 제목처럼 React 노드를 받지 못하는 자리가 있어 메시지를 평문으로 편다. */
+export function guidancePlainText(message: GuidanceMessage): string {
+  return getGuidanceMessageParts(message)
+    .map((part) => part.value)
+    .join("");
+}
+
 export function isGuidanceMessage(value: unknown): value is GuidanceMessage {
   return (
     typeof value === "object" &&

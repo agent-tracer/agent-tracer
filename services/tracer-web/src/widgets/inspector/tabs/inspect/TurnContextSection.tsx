@@ -42,7 +42,7 @@ export function TurnContextSection({ turn }: TurnContextSectionProps) {
   return (
     <div className="mt-3 rounded-sm px-3 py-2.5 bg-s2 border border-hair">
       <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.1em] text-ink-tertiary">
-        <span>TURN {turn.turnIndex + 1}</span>
+        <span>TURN {turn.turnIndex}</span>
         <span>·</span>
         <span>
           {startLabel} – {endLabel}

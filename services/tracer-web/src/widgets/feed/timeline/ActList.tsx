@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useVisibleLanes } from "~tracer-web/shared/store/index.js";
+import type { TurnSplitSelection } from "~tracer-web/features/turn-split/index.js";
 import type { FeedItem } from "~tracer-web/widgets/feed/lib/timeline/group-acts.js";
 import { ActCard } from "~tracer-web/widgets/feed/timeline/ActCard.js";
 import { TimeMark } from "~tracer-web/widgets/feed/timeline/TimeMark.js";
@@ -9,11 +10,7 @@ import { ContextMark } from "~tracer-web/widgets/feed/timeline/ContextMark.js";
 
 interface ActListProps {
   readonly items: readonly FeedItem[];
-  readonly splitSelection?: {
-    readonly startTurnIndex: number | null;
-    readonly isSplittable: (turnIndex: number) => boolean;
-    readonly pick: (turnIndex: number) => void;
-  };
+  readonly splitSelection?: TurnSplitSelection;
 }
 
 /** 세로 타임라인 본문. */
@@ -74,16 +71,7 @@ export function ActList({ items, splitSelection }: ActListProps) {
               turnIndex={item.turnIndex}
               verdict={item.verdict}
               status={item.status}
-              {...(splitSelection
-                ? {
-                    splittable: splitSelection.isSplittable(item.turnIndex),
-                    selection:
-                      splitSelection.startTurnIndex === item.turnIndex
-                        ? ("start" as const)
-                        : ("idle" as const),
-                    onSplitFrom: splitSelection.pick,
-                  }
-                : {})}
+              {...(splitSelection ? { splitSelection } : {})}
             />
           );
         }

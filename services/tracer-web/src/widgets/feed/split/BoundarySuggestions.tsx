@@ -14,8 +14,8 @@ interface BoundarySuggestionsProps {
 
 function spanLabel(suggestion: TaskBoundarySuggestion): string {
   return suggestion.fromTurnIndex === suggestion.toTurnIndex
-    ? `Turn ${suggestion.fromTurnIndex + 1}`
-    : `Turns ${suggestion.fromTurnIndex + 1}–${suggestion.toTurnIndex + 1}`;
+    ? `Turn ${suggestion.fromTurnIndex}`
+    : `Turns ${suggestion.fromTurnIndex}–${suggestion.toTurnIndex}`;
 }
 
 /** 실행 중에 남긴 경계 마커를 세션이 끝난 뒤 한 번의 분리로 바꿔 준다. */

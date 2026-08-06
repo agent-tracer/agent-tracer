@@ -14,8 +14,7 @@ import { ActList } from "~tracer-web/widgets/feed/timeline/ActList.js";
 import { buildFeed } from "~tracer-web/widgets/feed/lib/timeline/group-acts.js";
 import { selectResumeTarget } from "~tracer-web/widgets/feed/lib/resume/resume-target.js";
 import { BoundarySuggestions } from "~tracer-web/widgets/feed/split/BoundarySuggestions.js";
-import { TurnSplitModal } from "~tracer-web/widgets/feed/split/TurnSplitModal.js";
-import { useTurnSplit } from "~tracer-web/widgets/feed/split/use-turn-split.js";
+import { TurnSplitModal, useTurnSplit } from "~tracer-web/features/turn-split/index.js";
 
 // Feed는 기본 뷰라 즉시 렌더링한다.
 const GraphView = lazy(() =>
@@ -122,17 +121,14 @@ export function FeedPanel({ taskId }: FeedPanelProps) {
             verifications={verifications ?? []}
             {...(data.turns ? { turns: data.turns } : {})}
             taskStatus={data.task.status}
+            splitSelection={split}
           />
         </Suspense>
       ) : (
         <div className="px-9">
           <ActList
             items={items}
-            splitSelection={{
-              startTurnIndex: split.startTurnIndex,
-              isSplittable: split.isSplittable,
-              pick: split.pick,
-            }}
+            splitSelection={split}
           />
         </div>
       )}

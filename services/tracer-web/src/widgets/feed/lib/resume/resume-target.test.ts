@@ -103,6 +103,7 @@ describe("selectResumeTarget", () => {
           endedAt: null,
           aggregateVerdict: null,
           rulesEvaluatedCount: 0,
+          askedText: null,
         },
       ],
     });

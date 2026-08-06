@@ -46,6 +46,13 @@ export const EN_FEED = {
     verify: createGuidanceMessage("Actions confirmed by rule verdicts."),
     coordinate: createGuidanceMessage("Subagent creation and handoffs."),
   },
+  splitModalTitle: (span: string) =>
+    createGuidanceMessage(`Move turn ${span} into a task of its own`),
+  splitTitleLabel: createGuidanceMessage("New task title"),
+  splitMovingLabel: createGuidanceMessage("Turns that move"),
+  splitReversible: createGuidanceMessage("You can undo this later."),
+  splitPickEnd: createGuidanceMessage("pick the last turn"),
+  splitTurnBand: createGuidanceMessage("Turn boundaries in this session."),
   splitTurnsAction: createGuidanceMessage(
     "Move this turn and the ones you pick with it into a task of their own.",
   ),

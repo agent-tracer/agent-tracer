@@ -83,6 +83,8 @@ export interface TaskTurnSummary {
   readonly endedAt: string | null;
   readonly aggregateVerdict: TaskTurnVerdictStatus | null;
   readonly rulesEvaluatedCount: number;
+  /** 그 턴을 연 사용자 발화이며 분리 대상을 고를 때 무엇을 옮기는지 보인다. */
+  readonly askedText: string | null;
 }
 
 export interface TaskUserInput {
