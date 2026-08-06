@@ -50,6 +50,9 @@ export function createViewSlice(set: SetState): ViewSlice {
     setVisibleLanes: (visibleLanes) => set({ visibleLanes }),
     toggleVisibleLane: (lane) =>
       set((state) => {
+        // 켤 수 없는 레인에 내용만 같은 새 배열을 돌려주면 그 참조 변화를 보고
+        // 다시 부르는 구독자가 무한히 돈다.
+        if (!ALL_VISIBLE_LANES.includes(lane)) return {};
         const has = state.visibleLanes.includes(lane);
         if (has) {
           // 모두 숨긴 상태는 All로 되돌릴 수 있으므로 마지막 레인도 끈다.

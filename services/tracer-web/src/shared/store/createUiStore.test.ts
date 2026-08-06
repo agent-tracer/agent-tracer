@@ -87,6 +87,41 @@ describe("createUiStore", () => {
   });
 });
 
+
+describe("레인 필터", () => {
+  beforeEach(() => {
+    vi.stubGlobal("localStorage", createMemoryStorage());
+  });
+
+  it("끌 수 없는 레인을 켜려 들면 상태를 그대로 둔다", () => {
+    const store = createUiStore({ persisted: false });
+    const before = store.getState().visibleLanes;
+
+    store.getState().toggleVisibleLane("bg" as never);
+
+    expect(store.getState().visibleLanes).toBe(before);
+  });
+
+  it("고른 레인을 정해진 순서 그대로 끄고 켠다", () => {
+    const store = createUiStore({ persisted: false });
+
+    store.getState().toggleVisibleLane("plan");
+    expect(store.getState().visibleLanes).not.toContain("plan");
+
+    store.getState().toggleVisibleLane("plan");
+    expect(store.getState().visibleLanes).toEqual([
+      "user",
+      "asst",
+      "plan",
+      "expl",
+      "impl",
+      "rule",
+      "veri",
+      "coord",
+    ]);
+  });
+});
+
 function createMemoryStorage(): Storage {
   const entries = new Map<string, string>();
   return {
