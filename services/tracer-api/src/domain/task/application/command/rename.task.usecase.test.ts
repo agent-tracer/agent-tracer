@@ -3,7 +3,7 @@ import { NotFoundException } from "@nestjs/common";
 import { TaskEntity } from "@agent-tracer/tracer-model";
 import { FixedClock } from "~tracer-api/domain/task/port/__fakes__/fixed.clock.js";
 import { InMemoryTaskRepository } from "~tracer-api/domain/task/port/__fakes__/in-memory.task.repository.js";
-import type { TaskSearchIndexPort } from "~tracer-api/domain/task/port/task.search.index.port.js";
+import { InMemoryTaskSearchIndex } from "~tracer-api/domain/task/port/__fakes__/in-memory.task.search.index.js";
 import { RenameTaskUseCase } from "./rename.task.usecase.js";
 
 const NOW = new Date("2026-07-01T00:00:00.000Z");
@@ -37,16 +37,11 @@ function makeUseCase(tasks: readonly TaskEntity[]): {
 } {
     const repo = new InMemoryTaskRepository();
     repo.seed(...tasks);
-    const indexed: Record<string, unknown>[] = [];
-    const search = {
-        partialUpdate: async (userId: string, taskId: string, doc: Record<string, unknown>) => {
-            indexed.push({ userId, taskId, ...doc });
-        },
-    } satisfies TaskSearchIndexPort;
+    const search = new InMemoryTaskSearchIndex();
     return {
         useCase: new RenameTaskUseCase(repo, search, new FixedClock(NOW)),
         stored: () => repo.all(),
-        indexed,
+        indexed: search.updates,
     };
 }
 

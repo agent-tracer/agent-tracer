@@ -1,3 +1,4 @@
+import type { EventKind } from "@agent-tracer/kernel";
 import type { EventEntity } from "@agent-tracer/tracer-model";
 
 export const EVENT_READER = Symbol("EventReader");
@@ -6,4 +7,5 @@ export const EVENT_READER = Symbol("EventReader");
 export interface EventReaderPort {
     findTimeline(userId: string, taskId: string, cursor: { seq: string } | undefined, limit: number): Promise<EventEntity[]>;
     findUserMessagesByTask(userId: string, taskId: string): Promise<EventEntity[]>;
+    findByTaskAndKind(userId: string, taskId: string, kind: EventKind): Promise<EventEntity[]>;
 }

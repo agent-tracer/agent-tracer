@@ -26,6 +26,7 @@ export const KIND = {
     permissionRequest: "agent_tracer.permission.request",
     setupTriggered: "agent_tracer.setup.triggered",
     recipeInjected: "agent_tracer.recipe.injected",
+    boundaryLogged: "agent_tracer.boundary.logged",
 } as const;
 
 export type EventKind = (typeof KIND)[keyof typeof KIND];
@@ -80,6 +81,7 @@ export const WORKFLOW_EVENT_KINDS = [
     KIND.worktreeRemove,
     KIND.setupTriggered,
     KIND.fileChanged,
+    KIND.boundaryLogged,
 ] as const;
 
 export const CONVERSATION_EVENT_KINDS = [

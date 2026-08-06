@@ -1,5 +1,5 @@
 import { In, MoreThan, type Repository } from "typeorm";
-import { KIND } from "@agent-tracer/kernel";
+import { KIND, type EventKind } from "@agent-tracer/kernel";
 import type { EventEntity } from "./event.entity.js";
 import { upsertByKeys } from "~tracer-model/persistence/repository.upsert.js";
 
@@ -80,6 +80,10 @@ export class EventRepository implements EventReader {
             where: { userId, taskId, kind: KIND.userMessage },
             order: { seq: "ASC" },
         });
+    }
+
+    async findByTaskAndKind(userId: string, taskId: string, kind: EventKind): Promise<EventEntity[]> {
+        return this.repo.find({ where: { userId, taskId, kind }, order: { seq: "ASC" } });
     }
 
     async findUserMessages(userId: string, limit: number): Promise<EventEntity[]> {

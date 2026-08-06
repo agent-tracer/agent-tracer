@@ -13,6 +13,10 @@ export class InMemorySessionReader implements SessionReaderPort {
         return [...this.rows];
     }
 
+    findById(id: string): Promise<SessionEntity | null> {
+        return Promise.resolve(this.rows.find((session) => session.id === id) ?? null);
+    }
+
     findByTask(userId: string, taskId: string): Promise<SessionEntity[]> {
         const rows = this.rows
             .filter((session) => session.userId === userId && session.taskId === taskId)

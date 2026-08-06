@@ -1,4 +1,4 @@
-import { KIND } from "@agent-tracer/kernel";
+import { KIND, type EventKind } from "@agent-tracer/kernel";
 import type { EventEntity } from "@agent-tracer/tracer-model";
 import type { EventReaderPort } from "~tracer-api/domain/task/port/event.reader.port.js";
 
@@ -21,6 +21,10 @@ export class InMemoryEventReader implements EventReaderPort {
 
     findUserMessagesByTask(userId: string, taskId: string): Promise<EventEntity[]> {
         return Promise.resolve(this.ordered(userId, taskId).filter((event) => event.kind === KIND.userMessage));
+    }
+
+    findByTaskAndKind(userId: string, taskId: string, kind: EventKind): Promise<EventEntity[]> {
+        return Promise.resolve(this.ordered(userId, taskId).filter((event) => event.kind === kind));
     }
 
     private ordered(userId: string, taskId: string): EventEntity[] {

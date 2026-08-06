@@ -13,12 +13,15 @@ import { MONITOR_USER_HEADER } from "@agent-tracer/kernel";
 import { ArchiveTaskUseCase } from "~tracer-api/domain/task/application/command/archive.task.usecase.js";
 import { HideTaskUseCase } from "~tracer-api/domain/task/application/command/hide.task.usecase.js";
 import { RenameTaskUseCase } from "~tracer-api/domain/task/application/command/rename.task.usecase.js";
+import { RevertTaskSplitUseCase } from "~tracer-api/domain/task/application/command/revert.task.split.usecase.js";
+import { SplitTaskTurnsUseCase } from "~tracer-api/domain/task/application/command/split.task.turns.usecase.js";
 import { SetTaskStatusUseCase } from "~tracer-api/domain/task/application/command/set.task.status.usecase.js";
 import { UnarchiveTaskUseCase } from "~tracer-api/domain/task/application/command/unarchive.task.usecase.js";
 import { resolveUserId } from "~tracer-api/support/request-user.js";
 import { pathParamPipe } from "~tracer-api/support/path-param.pipe.js";
 import { SchemaValidationPipe } from "~tracer-api/support/schema.validation.pipe.js";
 import { updateBodySchema, type UpdateBody } from "./task.command.schema.js";
+import { splitBodySchema, type SplitBody } from "./task.split.schema.js";
 
 /** 태스크 수정·보관·숨김 HTTP 계약을 제공한다. */
 @Controller("api/v1/tasks")
@@ -29,6 +32,8 @@ export class TaskCommandController {
         private readonly archiveTask: ArchiveTaskUseCase,
         private readonly unarchiveTask: UnarchiveTaskUseCase,
         private readonly hideTask: HideTaskUseCase,
+        private readonly splitTaskTurns: SplitTaskTurnsUseCase,
+        private readonly revertTaskSplit: RevertTaskSplitUseCase,
     ) {}
 
     @Patch(":taskId")
@@ -64,6 +69,25 @@ export class TaskCommandController {
         @Param("taskId", pathParamPipe) taskId: string,
     ) {
         return this.unarchiveTask.execute(resolveUserId(user), taskId);
+    }
+
+    @Post(":taskId/turns/split")
+    @HttpCode(HttpStatus.OK)
+    async split(
+        @Headers(MONITOR_USER_HEADER) user: string | undefined,
+        @Param("taskId", pathParamPipe) taskId: string,
+        @Body(new SchemaValidationPipe(splitBodySchema)) body: SplitBody,
+    ) {
+        return this.splitTaskTurns.execute(resolveUserId(user), taskId, body);
+    }
+
+    @Delete(":taskId/split")
+    @HttpCode(HttpStatus.OK)
+    async revertSplit(
+        @Headers(MONITOR_USER_HEADER) user: string | undefined,
+        @Param("taskId", pathParamPipe) taskId: string,
+    ) {
+        return this.revertTaskSplit.execute(resolveUserId(user), taskId);
     }
 
     @Delete(":taskId")
