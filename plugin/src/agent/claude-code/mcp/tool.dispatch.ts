@@ -83,7 +83,7 @@ function formatMemoSearchResult(items: readonly MemoSearchResultItem[]): string 
         .join("\n\n---\n\n");
 }
 
-/** get_recipe가 적용을 원장에 기록하므로 적용 여부를 가르는 정보는 본문이 아니라 이 결과에 실려야 한다. */
+/** get_recipe가 적용을 원장에 기록하므로 적용 여부를 구분하는 정보는 본문이 아니라 이 결과에 실려야 한다. */
 function formatRecipeSearchResult(items: readonly RecipeSearchResultItem[]): string {
     if (items.length === 0) return "Nothing saved here fits that.";
     return items.map(formatRecipeSearchItem).join("\n\n---\n\n");

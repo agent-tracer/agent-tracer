@@ -44,7 +44,7 @@ export interface RecipeRecovery {
   readonly symptom: string;
   readonly action: string;
   readonly evidence: readonly string[];
-  /** 붙는 단계이며 비어 있으면 절차 전체에 걸친 복구다. */
+  /** 연결된 단계이며 비어 있으면 절차 전체에 걸친 복구다. */
   readonly stepOrder?: number | null;
 }
 

@@ -25,7 +25,7 @@ export interface RecipeRecoveryDto {
     readonly symptom: string;
     readonly action: string;
     readonly evidence: readonly string[];
-    /** 이 복구가 붙는 단계이며 비어 있으면 절차 전체에 걸친 복구다. */
+    /** 이 복구가 연결된 단계이며 비어 있으면 절차 전체에 걸친 복구다. */
     readonly stepOrder?: number | null;
 }
 

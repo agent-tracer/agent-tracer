@@ -24,7 +24,7 @@ export interface CachedRecipePitfall {
 export interface CachedRecipeRecovery {
     readonly symptom: string;
     readonly action: string;
-    /** 붙는 단계이며 비어 있으면 절차 전체에 걸친 복구라 Corrections 뒤에 모인다. */
+    /** 연결된 단계이며 비어 있으면 절차 전체에 걸친 복구라 Corrections 뒤에 모인다. */
     readonly stepOrder?: number;
 }
 
