@@ -25,6 +25,7 @@ export {
 } from "~tracer-web/shared/ui/display/InlineState.js";
 export { GuidanceText } from "~tracer-web/shared/GuidanceText.js";
 export { EmptyView } from "~tracer-web/shared/ui/EmptyView.js";
+export { Badge, EmptyHint } from "~tracer-web/shared/ui/federation-compat.js";
 export { DISABLED, TRANSITION } from "~tracer-web/shared/ui/lib/interactive.js";
 export {
   ActivityIcon,

@@ -25,9 +25,11 @@ export const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>(
         className={cn("relative overflow-hidden", className)}
         {...props}
       >
+        {/* Radix가 뷰포트 안쪽을 인라인 스타일 `display:table`로 깔아 폭이 내용에 끌려가므로
+            블록으로 되돌려야 자식이 패널 폭 안에서 잘린다. */}
         <RxScroll.Viewport
           ref={viewportRef}
-          className="h-full w-full"
+          className="h-full w-full [&>div]:block!"
           onScroll={onViewportScroll}
         >
           {children}
