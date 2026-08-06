@@ -46,6 +46,7 @@ export const EN_FEED = {
     verify: createGuidanceMessage("Actions confirmed by rule verdicts."),
     coordinate: createGuidanceMessage("Subagent creation and handoffs."),
   },
+  splitOnlyThis: createGuidanceMessage("Move only this turn into a task of its own."),
   splitModalTitle: (span: string) =>
     createGuidanceMessage(`Move turn ${span} into a task of its own`),
   splitTitleLabel: createGuidanceMessage("New task title"),

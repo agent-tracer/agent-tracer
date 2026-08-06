@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import { TaskId } from "~tracer-web/shared/identity.js";
+import { useRevertTaskSplitMutation } from "~tracer-web/entities/task/api/split-mutations.js";
 import { Hairline } from "~tracer-web/widgets/feed/timeline/Hairline.js";
 import { GuidanceText } from "~tracer-web/shared/ui/index.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
@@ -12,24 +14,35 @@ interface SplitMarkProps {
 /** 옮겨 간 구간이 남긴 턴 번호의 구멍을 유실이 아니라 분리로 읽히게 하는 구분선이다. */
 export function SplitMark({ fromTurnIndex, toTurnIndex, taskId }: SplitMarkProps) {
   const guidance = useGuidance();
+  const revert = useRevertTaskSplitMutation();
   const accent = "var(--ink-tertiary)";
 
   return (
     <div
-      className="flex items-center gap-2.5 py-3 font-mono text-[10.5px] uppercase tracking-[0.04em]"
+      className="group flex items-center gap-2.5 py-3 font-mono text-[10.5px] uppercase tracking-[0.04em]"
       style={{ color: accent }}
     >
       <Hairline color={`color-mix(in srgb, ${accent} 45%, transparent)`} />
-      <span>
-        —{" "}
+      <span className="normal-case tracking-normal">
         <GuidanceText
           locale={guidance.locale}
           message={guidance.messages.feed.splitMovedTurns(fromTurnIndex, toTurnIndex)}
         />
       </span>
-      <Link to={`/tasks/${taskId}`} className="underline underline-offset-2 hover:opacity-80">
+      <Link
+        to={`/tasks/${taskId}`}
+        className="rounded-xs border border-hair px-1.5 py-px normal-case tracking-normal hover:text-ink hover:bg-s2"
+      >
         open
       </Link>
+      <button
+        type="button"
+        disabled={revert.isPending}
+        onClick={() => revert.mutate(TaskId(taskId))}
+        className="rounded-xs border border-hair px-1.5 py-px normal-case tracking-normal opacity-0 transition-opacity group-hover:opacity-100 hover:text-ink hover:bg-s2 disabled:opacity-40"
+      >
+        undo
+      </button>
       <Hairline color={`color-mix(in srgb, ${accent} 45%, transparent)`} />
     </div>
   );
