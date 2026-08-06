@@ -34,7 +34,7 @@ export function PageHeader({
   actions,
 }: PageHeaderProps) {
   return (
-    <header className="px-9 pt-6 pb-4 flex flex-col gap-3 border-b border-hair">
+    <header className="px-gutter pt-6 pb-4 flex flex-col gap-3 border-b border-hair">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="m-0 font-mono text-mini uppercase tracking-eyebrow text-ink-tertiary">

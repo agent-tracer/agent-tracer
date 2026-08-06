@@ -27,7 +27,7 @@ export function RuleSectionTabs({
   ];
 
   return (
-    <div className="flex gap-1 px-9 border-b border-hair bg-canvas">
+    <div className="flex gap-1 px-gutter border-b border-hair bg-canvas">
       {tabs.map((tab) => (
         <button
           key={tab.key}

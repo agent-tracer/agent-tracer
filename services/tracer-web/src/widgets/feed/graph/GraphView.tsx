@@ -45,7 +45,7 @@ export function GraphView({
   });
 
   return (
-    <div className="px-9 pb-6">
+    <div className="px-gutter pb-6">
       <div className="rounded-md bg-s1 border border-hair overflow-hidden">
         <GraphViewport binding={viewport.binding}>
           <GraphPlot

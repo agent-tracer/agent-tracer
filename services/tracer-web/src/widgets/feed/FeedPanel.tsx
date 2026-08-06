@@ -97,7 +97,7 @@ export function FeedPanel({ taskId }: FeedPanelProps) {
         splitFromIndexes={new Set((data.splits ?? []).map((range) => range.fromTurnIndex))}
       />
       {data.olderCursor && (
-        <div className="px-9 pb-2">
+        <div className="px-gutter pb-2">
           <button
             type="button"
             onClick={() => loadOlderTimeline.mutate(data.olderCursor as string)}
@@ -109,7 +109,7 @@ export function FeedPanel({ taskId }: FeedPanelProps) {
         </div>
       )}
       {data.timeline.length === 0 ? (
-        <div className="px-9">
+        <div className="px-gutter">
           <EmptyView
             eyebrow="Empty"
             title="No events yet"
@@ -128,7 +128,7 @@ export function FeedPanel({ taskId }: FeedPanelProps) {
           />
         </Suspense>
       ) : (
-        <div className="px-9">
+        <div className="px-gutter">
           <ActList
             items={items}
             splitSelection={split}

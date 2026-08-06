@@ -49,7 +49,7 @@ export function TagsPage() {
         }
       />
 
-      <div className="px-9 py-6 flex flex-col gap-2.5">
+      <div className="px-gutter py-6 flex flex-col gap-2.5">
         {isError && (
           <div className="text-err text-body">
             <p className="m-0">{loadFailedLabel("tags")}</p>

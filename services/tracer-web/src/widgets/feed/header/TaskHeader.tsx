@@ -42,7 +42,7 @@ export function TaskHeader({ task, timeline, resumeTarget }: TaskHeaderProps) {
   const model = extractLatestModel(timeline);
 
   return (
-    <div className="sticky top-0 z-[5] px-9 pt-5 pb-3 group backdrop-blur-[4px] bg-linear-to-b from-canvas from-80% to-transparent">
+    <div className="sticky top-0 z-[5] px-gutter pt-5 pb-3 group backdrop-blur-[4px] bg-linear-to-b from-canvas from-80% to-transparent">
       <div className="flex items-start gap-3 flex-wrap">
         <div className="flex-1 min-w-0">
           <EditableTitle task={task} />

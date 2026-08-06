@@ -31,6 +31,11 @@ const VIOLATIONS = [
     message: "그림자는 shadow-elev-1 또는 shadow-elev-2를 쓴다",
   },
   {
+    // 화면 가장자리 여백은 뜻이 있는 하나의 값이라 이름을 갖는다.
+    pattern: /(?<![\w-])-?[pm]x-9(?![\w.-])/,
+    message: "화면 가장자리 여백은 px-gutter로 쓰고 값은 tokens.css가 정한다",
+  },
+  {
     pattern: /\brounded-\[/,
     message: "모서리는 rounded-xs/sm/md/lg/pill 중에 고른다",
   },

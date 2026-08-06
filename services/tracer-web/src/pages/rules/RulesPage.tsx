@@ -89,11 +89,11 @@ export function RulesPage() {
       />
 
       {tab === "generations" ? (
-        <div className="px-9 py-6 flex flex-col gap-2.5">
+        <div className="px-gutter py-6 flex flex-col gap-2.5">
           <RuleGenerationHistory records={records} isLoading={generations.isLoading} />
         </div>
       ) : (
-        <div className="px-9 py-6 flex flex-col gap-2.5">
+        <div className="px-gutter py-6 flex flex-col gap-2.5">
           <RuleFilterBar
             severity={severity}
             onSeverityChange={setSeverity}

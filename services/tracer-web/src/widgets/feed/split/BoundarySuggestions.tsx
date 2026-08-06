@@ -37,7 +37,7 @@ export function BoundarySuggestions({
   if (pending.length === 0) return null;
 
   return (
-    <Card title="Work changed here" count={pending.length} className="mx-9 mb-3">
+    <Card title="Work changed here" count={pending.length} className="mx-gutter mb-3">
       <ul className="flex flex-col gap-1.5">
         {pending.map((item) => (
           <li

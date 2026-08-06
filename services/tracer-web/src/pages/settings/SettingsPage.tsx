@@ -21,7 +21,7 @@ export function SettingsPage() {
         introLocale={guidance.locale}
       />
 
-      <main className="px-9 py-6 flex flex-col gap-6 max-w-3xl">
+      <main className="px-gutter py-6 flex flex-col gap-6 max-w-3xl">
         <IdentitySection />
         <GuidanceLanguageSection />
         <LlmProviderSection />

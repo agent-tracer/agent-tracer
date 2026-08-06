@@ -79,7 +79,7 @@ export function ScanPanel({
             }
           : {})}
       />
-      <div className="px-9 py-3 border-b border-hair bg-canvas">
+      <div className="px-gutter py-3 border-b border-hair bg-canvas">
         {/* 폭을 100%로 고정한 칸이 있으면 그 칸이 줄을 통째로 차지하므로 두지 않는다. */}
         <div className="flex min-w-0 flex-wrap items-center gap-2">
           <label className="flex min-w-0 items-center gap-1.5">

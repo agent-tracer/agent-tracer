@@ -234,6 +234,15 @@
   --tracking-snug: -0.01em;
   --tracking-display: -0.02em;
 
+  /* ── Spacing ─────────────────────────────────────────────────────────
+   * Tailwind already ships the 4px step scale, so only the spacings that
+   * carry a meaning get a name here. `gutter` is the distance from a screen's
+   * edge to its content: the page header, the feed, the graph, the tab strip
+   * and every list body must line up on it, and before it had a name that
+   * agreement lived as `px-9` copied into fifteen places.
+   */
+  --spacing-gutter: 36px;
+
   /* Motion — one curve, overriding Tailwind's `ease-out`, so every transition
      in the app decelerates the same way. Durations stay on Tailwind's numeric
      steps: `duration-150` for state changes, `duration-200` for anything that

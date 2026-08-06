@@ -52,7 +52,7 @@ export function MemosPage() {
               : loadFailedLabel("memos")
         }
       />
-      <div className="px-9 pt-4 pb-2 border-b border-hair">
+      <div className="px-gutter pt-4 pb-2 border-b border-hair">
         <MemoFilterBar
           author={author}
           onAuthorChange={setAuthor}
@@ -61,7 +61,7 @@ export function MemosPage() {
         />
       </div>
 
-      <div className="px-9 py-6 flex flex-col gap-2.5">
+      <div className="px-gutter py-6 flex flex-col gap-2.5">
         {isError && (
           <div className="text-err text-body">
             <p className="m-0">{loadFailedLabel("memos")}</p>
