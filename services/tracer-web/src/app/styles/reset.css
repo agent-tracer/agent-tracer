@@ -22,9 +22,12 @@
 
   body {
     font-family: var(--font-sans);
+    /* Deliberately one notch above `--text-body`, the scale's default step:
+       this is only the fallback for text no component has sized, and leaving
+       it larger makes such text stand out instead of blending in. */
     font-size: 14px;
     line-height: 1.5;
-    letter-spacing: -0.05px;
+    letter-spacing: var(--tracking-snug);
     color: var(--ink);
     background: var(--canvas);
     -webkit-font-smoothing: antialiased;

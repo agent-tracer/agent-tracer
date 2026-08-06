@@ -8,13 +8,24 @@
  *   primary            — single saturated accent (lavender)
  *   ok / warn / err / compact — status semantics
  *   ph-*               — lane phase colors. Used by lib/presentation/lane-theme.ts
+ *   elev-1 / elev-2    — popover/dropdown and modal/drawer elevation
+ *   focus-ring         — the one focus treatment (see the `focus-ring` utility)
  *
  * Theme switching: <html data-theme="dark"> or "light", driven by
  * `useThemeAttrSync` via the user's preference (slice "theme") and the
  * OS-level `(prefers-color-scheme)`.
  *
- * NEVER reference these variables outside ui/* primitives or feature CSS.
- * Components import them through ui/ wrappers.
+ * HOW COMPONENTS READ THESE
+ * -------------------------
+ * Through the Tailwind utilities bound at the bottom of this file — `bg-s1`,
+ * `text-ink-subtle`, `text-body`, `tracking-eyebrow`, `shadow-elev-1` — never
+ * through `[var(--x)]` arbitrary values or inline `style` objects. Three ways
+ * of saying the same thing is what this file exists to prevent, so the raw
+ * `var(--x)` form is allowed only inside `app/styles/*` and is rejected by the
+ * `local/design-tokens` lint rule everywhere else.
+ *
+ * Adding a value that is not on a scale below means widening the scale here
+ * first — one shared step — rather than spelling a one-off px at the callsite.
  */
 
 /* ── DARK (default — fires when no data-theme attr is set OR set to "dark") ── */
@@ -51,6 +62,10 @@
   --ph-rule:       #caa14a;  /* RULE  — amber */
   --ph-veri:       #5e9970;  /* VERI  — green rule-verdict overlay */
   --ph-coord:      #7a7fad;  /* COORD — purple */
+
+  /* Elevation — a near-black canvas needs deep, wide shadows to read at all */
+  --elev-1:        0 4px 16px rgba(0, 0, 0, 0.45);
+  --elev-2:        0 12px 32px -8px rgba(0, 0, 0, 0.6);
 
   color-scheme: dark;
 }
@@ -95,18 +110,19 @@
   --ph-veri:       #3a7a52;
   --ph-coord:      #5e6395;
 
+  /* Elevation — the same shadows at dark-theme opacity turn into grey smudges
+     on white, so light carries its own pair tinted toward the ink hue */
+  --elev-1:        0 4px 16px rgba(15, 20, 30, 0.10);
+  --elev-2:        0 12px 32px -8px rgba(15, 20, 30, 0.16);
+
   color-scheme: light;
 }
 
 /* ── Tokens shared by both themes ───────────────────────────────────── */
 :root {
-  --dur-fast:      150ms;
-  --dur-base:      200ms;
-  --ease-out:      cubic-bezier(0.2, 0, 0, 1);
-
-  /* Popover/toast elevation — was referenced (Toaster.tsx, SidebarViewSwitcher.tsx)
-     but never defined, so both callers silently rendered no shadow at all. */
-  --elev-1:        0 4px 16px rgba(0, 0, 0, 0.35);
+  /* One focus treatment for the whole app. Applied through the `focus-ring`
+     utility in globals.css — never re-spelled at a callsite. */
+  --focus-ring:    color-mix(in srgb, var(--primary) 55%, transparent);
 }
 
 /* ── Tailwind utility bindings ──────────────────────────────────────────
@@ -151,6 +167,9 @@
   --color-ph-rule: var(--ph-rule);
   --color-ph-veri: var(--ph-veri);
   --color-ph-coord: var(--ph-coord);
+
+  --shadow-elev-1: var(--elev-1);
+  --shadow-elev-2: var(--elev-2);
 }
 
 @theme {
@@ -162,6 +181,64 @@
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-pill: 9999px;
+
+  /* Line-height — two steps, overriding Tailwind's defaults.
+   *   tight   headings and multi-line labels, where lines should group
+   *   normal  running copy
+   * Chips and single-line rows pin a px line-height (`leading-4`) instead,
+   * because there the box height is the thing being controlled, not the text.
+   * Seven hand-written ratios between 1.25 and 1.55 collapsed into these. */
+  --leading-tight: 1.35;
+  --leading-normal: 1.5;
+
+  /* ── Type scale ──────────────────────────────────────────────────────
+   * Eight steps, named by the job the text does rather than by size, so a
+   * callsite picks a role and the role owns the number. Steps sit 1px apart
+   * at the dense end on purpose: this is an operator console where a row of
+   * metadata and the label above it must be told apart at a glance without
+   * either one growing.
+   *
+   * No step declares a line-height. Density here is set per-container (a chip
+   * pins `leading-4`, a paragraph takes `leading-normal`), and a bundled
+   * line-height would silently fight those.
+   *
+   *   nano    graph-canvas annotations, count badges — inside 14px circles
+   *   micro   chips and verdict labels
+   *   mini    pills, section eyebrows, mono metadata
+   *   meta    secondary/help text under a label
+   *   body    the default — buttons, labels, list rows, form controls
+   *   lead    the emphasized line of a row or card
+   *   title   section and settings headings
+   *   display full-screen headings — empty states, crash screen, page titles
+   */
+  --text-nano: 8.5px;
+  --text-micro: 9.5px;
+  --text-mini: 10.5px;
+  --text-meta: 11.5px;
+  --text-body: 12.5px;
+  --text-lead: 13.5px;
+  --text-title: 15px;
+  --text-display: 22px;
+
+  /* ── Letter-spacing scale ────────────────────────────────────────────
+   * Uppercase mono needs opening up; large sans needs tightening. Both are
+   * expressed in em so a step keeps its intent at any size on the scale.
+   *
+   *   eyebrow  uppercase mono labels — SectionLabel, Card headers, chips
+   *   label    mono metadata that stays lowercase
+   *   snug     default sans copy and row titles
+   *   display  the two largest steps, where default spacing looks loose
+   */
+  --tracking-eyebrow: 0.1em;
+  --tracking-label: 0.05em;
+  --tracking-snug: -0.01em;
+  --tracking-display: -0.02em;
+
+  /* Motion — one curve, overriding Tailwind's `ease-out`, so every transition
+     in the app decelerates the same way. Durations stay on Tailwind's numeric
+     steps: `duration-150` for state changes, `duration-200` for anything that
+     moves or resizes. Both were previously spelled as one-off `[120ms]`. */
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
 }
 
 /* Reusable keyframes (used across primitives — pulse for live indicators,

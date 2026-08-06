@@ -1,3 +1,32 @@
+/*
+ * The one focus treatment. Every interactive element in the app opts in with
+ * `focus-ring` instead of spelling its own ring/outline pair — before this,
+ * three different rings and one bare `outline-none` were in circulation and
+ * some controls showed nothing at all on keyboard focus.
+ *
+ * Outline rather than box-shadow: it is never clipped by an ancestor's
+ * `overflow: hidden`, which is most of the dense containers in this UI.
+ */
+@utility focus-ring {
+  outline: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 1px;
+  }
+}
+
+/* Same treatment for a wrapper that holds the real input — a search field
+   whose icon and clear button live inside the bordered box, for instance. */
+@utility focus-ring-within {
+  outline: none;
+
+  &:focus-within {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 1px;
+  }
+}
+
 ::selection {
   background: color-mix(in srgb, var(--primary) 35%, transparent);
 }
