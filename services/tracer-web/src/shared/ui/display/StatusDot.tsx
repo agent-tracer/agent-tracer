@@ -30,12 +30,12 @@ type StatusDotProps = StatusDotBaseProps &
   );
 
 const colorByStatus: Record<StatusKind, string> = {
-  running: "bg-[var(--primary)]",
-  waiting: "bg-[var(--warn)]",
-  done: "bg-[var(--ok)]",
-  failed: "bg-[var(--err)]",
-  idle: "bg-[var(--ink-tertiary)]",
-  canceled: "bg-[var(--ink-tertiary)]",
+  running: "bg-primary",
+  waiting: "bg-warn",
+  done: "bg-ok",
+  failed: "bg-err",
+  idle: "bg-ink-tertiary",
+  canceled: "bg-ink-tertiary",
 };
 
 /** 상태 색상과 소비자가 주입한 설명을 함께 표시한다. */
@@ -59,7 +59,7 @@ export function StatusDot({
       {pulse && status === "running" && (
         <span
           aria-hidden
-          className="absolute inset-0 rounded-full bg-[var(--primary)]"
+          className="absolute inset-0 rounded-full bg-primary"
           style={{ animation: "ping 1.8s cubic-bezier(0,0,.2,1) infinite" }}
         />
       )}

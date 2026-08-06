@@ -38,17 +38,17 @@ export function RuleListItem({ rule, onEdit, task }: RuleListItemProps) {
     >
       <div className="flex items-center gap-2.5 flex-wrap">
         <RuleSeverityChip severity={rule.severity} />
-        <span className="text-[13px] font-medium text-ink tracking-[-0.05px] flex-1 min-w-0">
+        <span className="text-lead font-medium text-ink tracking-snug flex-1 min-w-0">
           {rule.name}
         </span>
         {awaitingReview && (
-          <span className="font-mono text-[10.5px] text-warn py-0.5 px-1.5 bg-s2 rounded-[2px] uppercase tracking-[0.06em]">
+          <span className="font-mono text-mini text-warn py-0.5 px-1.5 bg-s2 rounded-xs uppercase tracking-label">
             Pending review
           </span>
         )}
       </div>
 
-      <div className="flex items-center gap-2 flex-wrap font-mono text-[10.5px] text-ink-tertiary">
+      <div className="flex items-center gap-2 flex-wrap font-mono text-mini text-ink-tertiary">
         <span>source · {rule.source}</span>
         {expectationTool(rule.expect) && (
           <>
@@ -67,14 +67,14 @@ export function RuleListItem({ rule, onEdit, task }: RuleListItemProps) {
       </div>
 
       {rule.rationale && (
-        <p className="m-0 text-xs text-ink-subtle leading-[1.5]">{rule.rationale}</p>
+        <p className="m-0 text-body text-ink-subtle leading-normal">{rule.rationale}</p>
       )}
 
       {awaitingReview && hasCitations && (
         <div className="flex flex-col gap-1.5 mt-1 pt-2 border-t border-dashed border-hair">
           {rule.citedTurnIds.length > 0 && (
-            <div className="flex items-center gap-1.5 flex-wrap font-mono text-[10.5px] text-ink-tertiary">
-              <span className="uppercase tracking-[0.06em]">Cited turns</span>
+            <div className="flex items-center gap-1.5 flex-wrap font-mono text-mini text-ink-tertiary">
+              <span className="uppercase tracking-label">Cited turns</span>
               {rule.citedTurnIds.map((turnId) => (
                 <span key={turnId} className="text-ink-subtle">
                   {turnId}
@@ -83,8 +83,8 @@ export function RuleListItem({ rule, onEdit, task }: RuleListItemProps) {
             </div>
           )}
           {rule.citedEventIds.length > 0 && (
-            <div className="flex items-center gap-1.5 flex-wrap font-mono text-[10.5px] text-ink-tertiary">
-              <span className="uppercase tracking-[0.06em]">Cited events</span>
+            <div className="flex items-center gap-1.5 flex-wrap font-mono text-mini text-ink-tertiary">
+              <span className="uppercase tracking-label">Cited events</span>
               {rule.citedEventIds.map((eventId) => (
                 <button
                   key={eventId}

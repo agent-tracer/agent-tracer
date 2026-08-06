@@ -29,7 +29,7 @@ export function ContextMark({
 
   return (
     <div
-      className="flex items-center gap-2.5 py-2.5 font-mono text-[10.5px] uppercase tracking-[0.04em]"
+      className="flex items-center gap-2.5 py-2.5 font-mono text-mini uppercase tracking-label"
       style={{ color: toneColor }}
     >
       <Hairline color={`color-mix(in srgb, ${toneColor} 30%, transparent)`} />

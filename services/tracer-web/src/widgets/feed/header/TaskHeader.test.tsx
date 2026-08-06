@@ -15,8 +15,8 @@ describe("TaskHeader", () => {
   it("테스크 상세 뷰 전환에서 overview 탭을 노출하지 않는다", () => {
     renderHeader([]);
 
-    expect(screen.getByRole("button", { name: "feed view" })).not.toBeNull();
-    expect(screen.getByRole("button", { name: "graph view" })).not.toBeNull();
+    expect(screen.getByRole("button", { name: "Feed view" })).not.toBeNull();
+    expect(screen.getByRole("button", { name: "Graph view" })).not.toBeNull();
     expect(screen.queryByRole("button", { name: "overview view" })).toBeNull();
   });
 

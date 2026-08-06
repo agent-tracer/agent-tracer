@@ -17,7 +17,7 @@ export function TaskListFooter({ runtimeCaption }: TaskListFooterProps) {
   const host = safeHost(getMonitorWsUrl());
 
   return (
-    <div className="flex items-center gap-2 border-t border-hair px-3.5 py-2 font-mono text-[10.5px] text-ink-tertiary">
+    <div className="flex items-center gap-2 border-t border-hair px-3.5 py-2 font-mono text-mini text-ink-tertiary">
       <span>WS {host}</span>
       {runtimeCaption && (
         <Tooltip
@@ -48,7 +48,7 @@ export function TaskListFooter({ runtimeCaption }: TaskListFooterProps) {
               new KeyboardEvent("keydown", { key: "?", bubbles: true }),
             );
           }}
-          className="ml-auto inline-flex items-center justify-center rounded-xs h-4 w-4 hover:bg-s1 border border-hair text-ink-tertiary cursor-help text-[9px] leading-none"
+          className="ml-auto inline-flex items-center justify-center rounded-xs h-4 w-4 hover:bg-s1 border border-hair text-ink-tertiary cursor-help text-micro leading-none"
         >
           ?
         </button>

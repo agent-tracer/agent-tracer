@@ -5,7 +5,15 @@ import type { RuleRecord } from "~tracer-web/entities/rule/model/rule.js";
 import { useRulesQuery } from "~tracer-web/entities/rule/api/queries.js";
 import { useTasksQuery } from "~tracer-web/entities/task/api/list-queries.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
-import { Button, GuidanceText, Modal } from "~tracer-web/shared/ui/index.js";
+import {
+  Button,
+  GuidanceText,
+  InlineState,
+  Modal,
+  PageHeader,
+  loadFailedLabel,
+  loadingLabel,
+} from "~tracer-web/shared/ui/index.js";
 import { useRuleGenerationsQuery } from "~tracer-web/entities/rule/api/rule-generation-queries.js";
 import { RuleForm } from "~tracer-web/widgets/rules/editor/RuleForm.js";
 import { RuleGenerationDialog } from "~tracer-web/widgets/rules/generation/RuleGenerationDialog.js";
@@ -47,39 +55,31 @@ export function RulesPage() {
 
   return (
     <div className="flex flex-col min-h-0 h-full overflow-auto">
-      <header className="px-9 pt-6 pb-4 flex flex-col gap-3 border-b border-hair">
-        <div>
-          <p className="m-0 font-mono text-[10px] uppercase tracking-[0.12em] text-ink-tertiary">
-            Workspace
-          </p>
-          <div className="flex items-start gap-3">
-            <h1 className="mt-0.5 mb-0 text-[22px] font-semibold text-ink tracking-[-0.3px]">
-              Rules
-            </h1>
-            <span className="ml-auto flex items-center gap-2">
-              <Button variant="ghost" onClick={() => setCreating("manual")}>
-                New rule
-              </Button>
-              <Button onClick={() => setCreating("generate")}>Generate rules</Button>
-            </span>
-          </div>
-          <GuidanceText
-            as="p"
-            className="mt-1 mb-0 text-[12.5px] text-ink-subtle"
-            locale={guidance.locale}
-            message={guidance.messages.rules.workspaceIntroduction}
-          />
-          {tab === "rules" && (
-            <p className="mt-1 mb-0 text-[12.5px] text-ink-subtle">
-              {isLoading
-                ? "Loading…"
+      <PageHeader
+        eyebrow="Workspace"
+        title="Rules"
+        intro={guidance.messages.rules.workspaceIntroduction}
+        introLocale={guidance.locale}
+        {...(tab === "rules"
+          ? {
+              status: isLoading
+                ? loadingLabel("rules")
                 : data
                   ? `${data.rules.length} rule${data.rules.length === 1 ? "" : "s"} configured`
-                  : "Couldn't load rules."}
-            </p>
-          )}
-        </div>
-      </header>
+                  : loadFailedLabel("rules"),
+            }
+          : {})}
+        actions={
+          <>
+            <Button variant="ghost" onClick={() => setCreating("manual")}>
+              New rule
+            </Button>
+            <Button variant="primary" onClick={() => setCreating("generate")}>
+              Generate rules
+            </Button>
+          </>
+        }
+      />
 
       <RuleSectionTabs
         active={tab}
@@ -103,8 +103,8 @@ export function RulesPage() {
             onSourceChange={setSource}
           />
           {isError && (
-            <div className="text-err text-[12.5px]">
-              <p className="m-0">Couldn't load rules.</p>
+            <div className="text-err text-body">
+              <p className="m-0">{loadFailedLabel("rules")}</p>
               <GuidanceText
                 as="p"
                 className="mt-1 mb-0"
@@ -115,16 +115,16 @@ export function RulesPage() {
           )}
           {!isLoading && filtered.length === 0 && (
             data && data.rules.length === 0 ? (
-              <GuidanceText
-                as="p"
-                className="text-[12.5px] text-ink-subtle text-center py-8"
-                locale={guidance.locale}
-                message={guidance.messages.rules.workspaceEmpty}
-              />
+              <InlineState state="empty">
+                <GuidanceText
+                  locale={guidance.locale}
+                  message={guidance.messages.rules.workspaceEmpty}
+                />
+              </InlineState>
             ) : (
-              <p className="text-[12.5px] text-ink-subtle text-center py-8">
+              <InlineState state="empty">
                 No rules match the current filters.
-              </p>
+              </InlineState>
             )
           )}
           {filtered.map((rule) => (

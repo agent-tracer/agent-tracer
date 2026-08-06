@@ -1,7 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { reportError } from "~tracer-web/shared/lib/error-reporter.js";
 import { UiStoreProvider, useGuidance } from "~tracer-web/shared/store/index.js";
-import { GuidanceText } from "~tracer-web/shared/ui/index.js";
+import { Button, GuidanceText } from "~tracer-web/shared/ui/index.js";
 
 interface AppErrorBoundaryProps {
   readonly children: ReactNode;
@@ -46,25 +46,21 @@ function AppCrashFallback({ error }: { readonly error: Error }) {
       className="min-h-screen flex items-center justify-center p-6 bg-canvas text-ink font-sans"
     >
       <div className="max-w-[520px] w-full py-5 px-[22px] bg-s1 border border-hair rounded-lg">
-        <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.12em] text-err">
+        <p className="mb-2 font-mono text-meta uppercase tracking-eyebrow text-err">
           Dashboard crashed
         </p>
-        <h2 className="mb-3 text-[17px] font-semibold tracking-[-0.2px]">
+        <h2 className="mb-3 text-display font-semibold tracking-snug">
           {error.name}: {error.message}
         </h2>
         <GuidanceText
           as="p"
-          className="mb-4 text-sm leading-[1.5] text-ink-subtle"
+          className="mb-4 text-lead leading-normal text-ink-subtle"
           locale={guidance.locale}
           message={guidance.messages.app.crashRecovery}
         />
-        <button
-          type="button"
-          onClick={() => window.location.reload()}
-          className="py-[7px] px-3.5 text-[12.5px] font-medium text-canvas bg-primary border border-primary rounded cursor-pointer"
-        >
+        <Button variant="primary" onClick={() => window.location.reload()}>
           Reload dashboard
-        </button>
+        </Button>
       </div>
     </div>
   );

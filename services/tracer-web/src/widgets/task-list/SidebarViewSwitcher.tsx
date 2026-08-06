@@ -64,11 +64,11 @@ export function SidebarViewSwitcher({ subagentCount }: SidebarViewSwitcherProps)
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="inline-flex h-[26px] items-center gap-1.5 rounded-sm px-2 hover:bg-s2 font-sans text-sm font-semibold text-ink tracking-[-0.1px]"
+        className="inline-flex h-[26px] items-center gap-1.5 rounded-sm px-2 hover:bg-s2 font-sans text-lead font-semibold text-ink tracking-snug"
       >
         <span>{active.label}</span>
         {view === "subagents" && subagentCount !== undefined && (
-          <span aria-hidden className="font-mono text-[10px] text-ink-tertiary">
+          <span aria-hidden className="font-mono text-mini text-ink-tertiary">
             {subagentCount}
           </span>
         )}
@@ -77,7 +77,7 @@ export function SidebarViewSwitcher({ subagentCount }: SidebarViewSwitcherProps)
       {open && (
         <ul
           role="listbox"
-          className="absolute left-0 top-[30px] z-20 w-[200px] overflow-hidden rounded-md border border-hair bg-canvas shadow-[var(--elev-1)]"
+          className="absolute left-0 top-[30px] z-20 w-[200px] overflow-hidden rounded-md border border-hair bg-canvas shadow-elev-1"
         >
           {OPTIONS.map((opt) => {
             const isActive = opt.value === view;
@@ -94,18 +94,18 @@ export function SidebarViewSwitcher({ subagentCount }: SidebarViewSwitcherProps)
                     isActive ? "bg-s2" : "bg-transparent",
                   )}
                 >
-                  <div className="font-sans text-[12.5px] font-semibold text-ink flex items-center gap-1.5">
+                  <div className="font-sans text-body font-semibold text-ink flex items-center gap-1.5">
                     <span>{opt.label}</span>
                     {opt.value === "subagents" &&
                       subagentCount !== undefined && (
-                        <span aria-hidden className="font-mono text-[10px] text-ink-tertiary">
+                        <span aria-hidden className="font-mono text-mini text-ink-tertiary">
                           {subagentCount}
                         </span>
                       )}
                   </div>
                   <GuidanceText
                     as="div"
-                    className="font-sans text-[11px] text-ink-tertiary"
+                    className="font-sans text-meta text-ink-tertiary"
                     locale={guidance.locale}
                     message={guidance.messages.tasks[opt.guidanceKey]}
                   />

@@ -27,7 +27,7 @@ export function GraphControls({
   const guidance = useGuidance();
   const setClamped = (next: number) => onZoom(clampGraphZoom(next));
   return (
-    <div className="flex items-center gap-1.5 py-1.5 px-3 border-t border-hair bg-canvas font-mono text-[10.5px] text-ink-tertiary">
+    <div className="flex items-center gap-1.5 py-1.5 px-3 border-t border-hair bg-canvas font-mono text-mini text-ink-tertiary">
       <span>zoom</span>
       <button
         type="button"

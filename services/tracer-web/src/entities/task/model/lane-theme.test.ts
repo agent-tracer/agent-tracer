@@ -8,6 +8,7 @@ describe("타임라인 레인 테마", () => {
       key: "expl",
       label: "EXPL",
       cssColor: "var(--ph-expl)",
+      chipTone: "expl",
     });
     expect(laneThemeFor("questions").key).toBe("rule");
   });
@@ -17,6 +18,7 @@ describe("타임라인 레인 테마", () => {
       key: "asst",
       label: "ASST",
       cssColor: "var(--ph-asst)",
+      chipTone: "asst",
     });
     expect(laneThemeFor("user").key).toBe("user");
   });

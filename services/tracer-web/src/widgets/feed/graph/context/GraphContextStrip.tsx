@@ -50,7 +50,7 @@ export function GraphContextStrip({ events, range }: GraphContextStripProps) {
         }
       >
         <div
-          className="sticky left-0 top-0 h-full float-left bg-s1 border-r border-hair flex items-center pl-3.5 font-mono text-[9.5px] tracking-[0.1em] uppercase text-ink-tertiary z-[8] cursor-help"
+          className="sticky left-0 top-0 h-full float-left bg-s1 border-r border-hair flex items-center pl-3.5 font-mono text-micro tracking-eyebrow uppercase text-ink-tertiary z-[8] cursor-help"
           style={{ width: LANE_LABEL_WIDTH }}
         >
           Context
@@ -68,7 +68,7 @@ export function GraphContextStrip({ events, range }: GraphContextStripProps) {
         <ModelSpanBand spans={modelSpans} range={range} />
         {last && (
           <div
-            className="absolute top-1 right-2 py-px px-1.5 font-mono text-[10px] font-medium bg-canvas rounded-[2px]"
+            className="absolute top-1 right-2 py-px px-1.5 font-mono text-mini font-medium bg-canvas rounded-xs"
             style={{
               color: stroke,
               border: `1px solid color-mix(in srgb, ${stroke} 40%, transparent)`,

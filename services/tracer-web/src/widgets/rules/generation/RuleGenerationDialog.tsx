@@ -94,7 +94,7 @@ export function RuleGenerationDialog({
       {errorMessage !== null && (
         <GuidanceText
           as="p"
-          className="m-0 text-[12px] text-err"
+          className="m-0 text-body text-err"
           locale={guidance.locale}
           message={errorMessage}
         />

@@ -45,8 +45,8 @@ export function LaneFilter() {
   const allOff = visible.length === 0;
 
   return (
-    <div className="flex items-center gap-1.5 flex-wrap font-mono text-[10px]">
-      <span className="text-ink-tertiary uppercase tracking-[0.1em] mr-1">
+    <div className="flex items-center gap-1.5 flex-wrap font-mono text-mini">
+      <span className="text-ink-tertiary uppercase tracking-eyebrow mr-1">
         Lanes
       </span>
       <button
@@ -85,7 +85,7 @@ export function LaneFilter() {
               onClick={() => toggle(lane)}
               aria-pressed={isOn}
               className={cn(
-                "inline-flex items-center gap-1 py-0.5 px-2 rounded-pill cursor-pointer transition-all duration-[120ms] border",
+                "inline-flex items-center gap-1 py-0.5 px-2 rounded-pill cursor-pointer transition-all duration-150 border",
                 isOn
                   ? "border-hair-strong bg-s2 text-ink opacity-100"
                   : "border-hair bg-transparent text-ink-tertiary opacity-55",
@@ -108,7 +108,7 @@ export function LaneFilter() {
 /** All·None처럼 이미 그 상태일 때 눌러도 바뀌지 않는 일괄 버튼의 표시. */
 function bulkButtonClass(active: boolean) {
   return cn(
-    "py-0.5 px-2.5 rounded-pill transition-all duration-[120ms] uppercase tracking-[0.06em] border",
+    "py-0.5 px-2.5 rounded-pill transition-all duration-150 uppercase tracking-label border",
     active
       ? "border-hair-strong bg-s2 text-ink cursor-default opacity-100"
       : "border-hair bg-transparent text-ink-muted cursor-pointer opacity-85",

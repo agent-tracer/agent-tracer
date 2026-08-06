@@ -36,9 +36,9 @@ export function ActCard({ vm }: ActCardProps) {
         "[animation:slidein_0.25s_ease-out]",
       )}
     >
-      <div className="text-right pt-2 leading-[1.4] font-mono text-ink-tertiary">
-        <div className="text-[11px]">{vm.clockLabel}</div>
-        <div className="text-[10px] opacity-65 mt-0.5">
+      <div className="text-right pt-2 leading-tight font-mono text-ink-tertiary">
+        <div className="text-meta">{vm.clockLabel}</div>
+        <div className="text-mini opacity-65 mt-0.5">
           {vm.offsetLabel}
         </div>
       </div>
@@ -48,7 +48,7 @@ export function ActCard({ vm }: ActCardProps) {
           className={cn(
             "rounded-md pl-3.5 pr-3.5 py-2.5 transition-colors relative overflow-hidden bg-s1 text-ink",
             "border border-hair hover:border-hair-strong",
-            active && "border-primary-focus shadow-[0_0_0_1px_color-mix(in_srgb,var(--primary-focus)_35%,transparent)]",
+            active && "border-primary-focus ring-1 ring-primary-focus/35",
           )}
         >
           {/* 같은 레인의 카드를 세로로 묶어 보이게 하는 레인 색 왼쪽 테두리다. */}
@@ -59,7 +59,7 @@ export function ActCard({ vm }: ActCardProps) {
           />
           {memoCount > 0 && (
             <span
-              className="absolute top-2 right-2 inline-flex items-center gap-1 rounded-pill bg-s2 border border-hair px-1.5 py-px font-mono text-[9.5px] text-ink-tertiary"
+              className="absolute top-2 right-2 inline-flex items-center gap-1 rounded-pill bg-s2 border border-hair px-1.5 py-px font-mono text-micro text-ink-tertiary"
               title={`${memoCount} memo${memoCount === 1 ? "" : "s"} on this event`}
             >
               <NoteIcon size={9} />
@@ -68,7 +68,7 @@ export function ActCard({ vm }: ActCardProps) {
           )}
           <ActHeader vm={vm} />
           {vm.bodyText && (
-            <div className="mt-1 text-[13.5px] leading-[1.5] text-ink tracking-[-0.1px]">
+            <div className="mt-1 text-lead leading-normal text-ink tracking-snug">
               {vm.bodyText}
             </div>
           )}

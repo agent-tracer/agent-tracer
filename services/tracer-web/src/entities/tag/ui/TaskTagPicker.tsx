@@ -98,7 +98,7 @@ export function TaskTagPicker({ taskId }: TaskTagPickerProps) {
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-label="Edit tags"
-        className="inline-flex items-center gap-1 rounded-xs border border-dashed border-hair-strong px-1.5 py-0.5 text-[10.5px] font-medium text-ink-subtle hover:text-ink hover:border-hair-strong"
+        className="inline-flex items-center gap-1 rounded-xs border border-dashed border-hair-strong px-1.5 py-0.5 text-mini font-medium text-ink-subtle hover:text-ink hover:border-hair-strong"
       >
         + Tag
       </button>
@@ -112,12 +112,12 @@ export function TaskTagPicker({ taskId }: TaskTagPickerProps) {
           preferredWidth={280}
           preferredMaxHeight={360}
           gap={4}
-          className="rounded-xs border border-hair bg-canvas shadow-lg"
+          className="rounded-xs border border-hair bg-canvas shadow-elev-1"
         >
           <div className="p-2 border-b border-hair flex flex-col gap-1">
             <GuidanceText
               as="p"
-              className="m-0 text-[10.5px] text-ink-tertiary"
+              className="m-0 text-mini text-ink-tertiary"
               locale={guidance.locale}
               message={guidance.messages.tags.taskAssignDescription}
             />
@@ -126,7 +126,7 @@ export function TaskTagPicker({ taskId }: TaskTagPickerProps) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Filter or create a tag…"
-              className="w-full text-[12px] py-1"
+              className="w-full text-body py-1"
             />
           </div>
           <div role="listbox" aria-label="Workspace tags" className="max-h-[240px] overflow-y-auto py-1">
@@ -139,7 +139,7 @@ export function TaskTagPicker({ taskId }: TaskTagPickerProps) {
               />
             ))}
             {allTags.length === 0 && !canCreate && (
-              <p className="px-3 py-4 text-center text-[11.5px] text-ink-tertiary">
+              <p className="px-3 py-4 text-center text-meta text-ink-tertiary">
                 No tags yet.
               </p>
             )}
@@ -149,7 +149,7 @@ export function TaskTagPicker({ taskId }: TaskTagPickerProps) {
               type="button"
               onClick={createAndAttach}
               disabled={createMutation.isPending}
-              className="w-full px-3 py-2 text-left text-[12px] text-primary-hover border-t border-hair hover:bg-s1"
+              className="w-full px-3 py-2 text-left text-body text-primary-hover border-t border-hair hover:bg-s1"
             >
               {createMutation.isPending ? "Creating…" : `Create tag "${trimmedQuery}"`}
             </button>
@@ -178,9 +178,9 @@ function TagOptionRow({
       className={cn("w-full flex items-center gap-2 px-3 py-1.5 text-left hover:bg-s1", checked && "bg-s1")}
     >
       <span aria-hidden className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: tag.color }} />
-      <span className="flex-1 truncate text-[12.5px] text-ink">{tag.name}</span>
+      <span className="flex-1 truncate text-body text-ink">{tag.name}</span>
       {checked && (
-        <span aria-hidden className="text-primary text-[11px]">
+        <span aria-hidden className="text-primary text-meta">
           ✓
         </span>
       )}

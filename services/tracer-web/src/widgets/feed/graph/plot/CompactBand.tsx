@@ -62,7 +62,7 @@ export function CompactBand({ events, range }: CompactBandProps) {
           className="absolute top-0 bottom-0 pointer-events-none w-6 bg-compact/12 border-l border-r border-dashed border-compact"
           style={{ left: `calc(${trackLeftCss(cluster.leftPercent)} - ${BAND_WIDTH / 2}px)` }}
         >
-          <span className="absolute left-1/2 -translate-x-1/2 top-1.5 py-px px-1.5 bg-canvas text-warn font-mono text-[9px] tracking-[0.06em] border border-compact/40 rounded-[2px] whitespace-nowrap">
+          <span className="absolute left-1/2 -translate-x-1/2 top-1.5 py-px px-1.5 bg-canvas text-warn font-mono text-micro tracking-label border border-compact/40 rounded-xs whitespace-nowrap">
             {cluster.count > 1 ? `PreCompact ×${cluster.count}` : "PreCompact"}
           </span>
         </div>

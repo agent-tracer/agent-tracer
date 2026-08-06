@@ -59,10 +59,10 @@ export function ScanPanel({
     <div className="py-4 px-4 pb-3 border-b border-hair bg-canvas sm:px-6">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <div className="text-lg font-semibold text-ink">Recipes</div>
+          <div className="text-title font-semibold text-ink">Recipes</div>
           <GuidanceText
             as="div"
-            className="text-xs text-ink-muted mt-1 max-w-[720px]"
+            className="text-body text-ink-muted mt-1 max-w-[720px]"
             locale={guidance.locale}
             message={guidance.messages.recipes.introduction}
           />
@@ -70,7 +70,7 @@ export function ScanPanel({
       </div>
       <div className="mt-3 flex min-w-0 flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <div className="flex w-full min-w-0 items-center gap-1.5 sm:w-auto">
-          <span className="shrink-0 text-[11px] text-ink-muted uppercase tracking-[0.06em]">Task</span>
+          <span className="shrink-0 text-meta text-ink-muted uppercase tracking-label">Task</span>
           <TaskPicker
             tasks={tasks}
             loading={tasksLoading}
@@ -90,7 +90,7 @@ export function ScanPanel({
           disabled={isScanning}
         />
         <div className="flex w-full min-w-0 items-center gap-1.5 sm:w-auto">
-          <span className="shrink-0 text-[11px] text-ink-muted uppercase tracking-[0.06em]">Backend</span>
+          <span className="shrink-0 text-meta text-ink-muted uppercase tracking-label">Backend</span>
           <AgentBackendSelect
             value={agentBackend}
             onChange={onAgentBackendChange}
@@ -113,7 +113,7 @@ export function ScanPanel({
           {isScanning ? "Scanning…" : "Scan now"}
         </Button>
         {latestJob && (
-          <span className="text-[11.5px] text-ink-muted">
+          <span className="text-meta text-ink-muted">
             Last scan: {latestJob.status}
             {latestJob.status === "completed" && (
               <>
@@ -127,7 +127,7 @@ export function ScanPanel({
         )}
       </div>
       {failureMessage && (
-        <div className="mt-2 text-xs py-1.5 px-2.5 rounded-sm bg-err/8 text-err">
+        <div className="mt-2 text-body py-1.5 px-2.5 rounded-sm bg-err/8 text-err">
           {isGuidanceMessage(failureMessage) ? (
             <GuidanceText locale={guidance.locale} message={failureMessage} />
           ) : (

@@ -3,7 +3,7 @@ import {
   useGuidanceLocale,
   useSetGuidanceLocale,
 } from "~tracer-web/shared/store/index.js";
-import { Card, Field, Select } from "~tracer-web/shared/ui/index.js";
+import { Card, Field, SectionHeading, Select } from "~tracer-web/shared/ui/index.js";
 
 /** 브라우저 안내 문구의 표시 언어를 설정한다. */
 export function GuidanceLanguageSection() {
@@ -13,7 +13,7 @@ export function GuidanceLanguageSection() {
 
   return (
     <Card surface="canvas" className="py-5 px-6">
-      <h2 className="text-[15px] font-semibold mb-1">Display</h2>
+      <SectionHeading>Display</SectionHeading>
       <Field
         label="Guidance language"
         help={guidance.messages.settings.guidanceLanguage}

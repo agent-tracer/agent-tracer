@@ -2,6 +2,7 @@ import type { TaskId } from "~tracer-web/shared/identity.js";
 import { useTaskMemosQuery } from "~tracer-web/entities/memo/api/queries.js";
 import { MemoThreadList } from "~tracer-web/entities/memo/ui/MemoThreadList.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
+import { loadingLabel } from "~tracer-web/shared/ui/index.js";
 
 interface TaskMemoThreadProps {
   readonly taskId: TaskId;
@@ -13,7 +14,7 @@ export function TaskMemoThread({ taskId }: TaskMemoThreadProps) {
   const { data, isLoading } = useTaskMemosQuery(taskId);
 
   if (isLoading) {
-    return <p className="m-0 text-[11.5px] text-ink-subtle">Loading memos…</p>;
+    return <p className="m-0 text-meta text-ink-subtle">{loadingLabel("memos")}</p>;
   }
 
   return (

@@ -64,7 +64,7 @@ export function ResizeHandle({ side, currentWidth, onResize }: ResizeHandleProps
       <span
         aria-hidden
         className={cn(
-          "absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-0.5 transition-colors duration-[120ms]",
+          "absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-0.5 transition-colors duration-150",
           dragging ? "bg-primary" : hover ? "bg-primary/55" : "bg-transparent",
         )}
       />

@@ -7,7 +7,7 @@ import { useTaskRulesQuery } from "~tracer-web/entities/rule/api/queries.js";
 import { useTaskDetailQuery } from "~tracer-web/entities/task/api/detail-queries.js";
 import type { GuidanceLocale, GuidanceMessage } from "~tracer-web/shared/guidance.js";
 import { useGuidance, useSelectedTaskId } from "~tracer-web/shared/store/index.js";
-import { EmptyView, GuidanceText } from "~tracer-web/shared/ui/index.js";
+import { EmptyView, GuidanceText, loadFailedTitle } from "~tracer-web/shared/ui/index.js";
 import { Modal } from "~tracer-web/shared/ui/index.js";
 import { RuleForm } from "~tracer-web/widgets/rules/editor/RuleForm.js";
 import { RuleGenerationPanel } from "~tracer-web/widgets/rules/generation/RuleGenerationPanel.js";
@@ -28,20 +28,20 @@ export function RulesTab() {
     return (
       <EmptyView
         eyebrow="Rules"
-        title="Select a task to view its rules."
+        title="Select a task to view its rules"
         description={guidance.messages.rules.selectTask}
         locale={guidance.locale}
       />
     );
   }
   if (rulesQ.isLoading) {
-    return <EmptyView eyebrow="Loading" title="Fetching rules…" />;
+    return <EmptyView eyebrow="Loading" title="Rules" />;
   }
   if (rulesQ.isError || !rulesQ.data) {
     return (
       <EmptyView
         eyebrow="Error"
-        title="Couldn't load rules"
+        title={loadFailedTitle("rules")}
         description={guidance.messages.rules.loadError}
         locale={guidance.locale}
       />
@@ -141,7 +141,7 @@ function RulesTabHeader({
   const reEvaluateDisabled = totalRules === 0 || bulkReEvalPending;
   return (
     <div className="flex items-center justify-between">
-      <h3 className="m-0 text-[13px] font-semibold text-ink tracking-[-0.1px]">
+      <h3 className="m-0 text-lead font-semibold text-ink tracking-snug">
         Rules
       </h3>
       <div className="flex items-center gap-1.5">
@@ -157,7 +157,7 @@ function RulesTabHeader({
                 : "Re-evaluate every rule against this task"
           }
           className={cn(
-            "inline-flex items-center gap-1 py-1.5 px-2.5 text-xs font-medium border border-hair rounded-xs whitespace-nowrap",
+            "inline-flex items-center gap-1 py-1.5 px-2.5 text-body font-medium border border-hair rounded-xs whitespace-nowrap",
             reEvaluateDisabled
               ? "text-ink-tertiary bg-s1 cursor-not-allowed"
               : "text-ink bg-s2 cursor-pointer",
@@ -170,7 +170,7 @@ function RulesTabHeader({
         <button
           type="button"
           onClick={onCreate}
-          className="inline-flex items-center gap-1 py-1.5 px-2.5 text-xs font-medium text-ink bg-s2 border border-hair rounded-xs cursor-pointer"
+          className="inline-flex items-center gap-1 py-1.5 px-2.5 text-body font-medium text-ink bg-s2 border border-hair rounded-xs cursor-pointer"
         >
           + Rule
         </button>
@@ -198,14 +198,14 @@ function RuleSection({
 }: RuleSectionProps) {
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.1em] text-ink-tertiary">
+      <div className="flex items-center gap-2 font-mono text-mini uppercase tracking-eyebrow text-ink-tertiary">
         <span>{title}</span>
         <span className="text-ink-muted">{rules.length}</span>
       </div>
       {rules.length === 0 ? (
         <GuidanceText
           as="p"
-          className="m-0 text-xs text-ink-subtle pl-0.5"
+          className="m-0 text-body text-ink-subtle pl-0.5"
           locale={locale}
           message={emptyHint}
         />

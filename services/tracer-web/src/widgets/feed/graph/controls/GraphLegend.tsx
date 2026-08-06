@@ -1,7 +1,7 @@
 /** 그래프의 시각적 어휘를 설명하는 하단 범례 스트립. */
 export function GraphLegend() {
   return (
-    <div className="flex items-center gap-3.5 px-4 py-2.5 border-t border-hair flex-wrap font-mono text-[10.5px] text-ink-tertiary bg-canvas">
+    <div className="flex items-center gap-3.5 px-4 py-2.5 border-t border-hair flex-wrap font-mono text-mini text-ink-tertiary bg-canvas">
       <Item color="var(--ph-plan)">
         <Swatch color="var(--ph-plan)" />
         Lane node
@@ -21,7 +21,7 @@ export function GraphLegend() {
       <Item color="var(--warn)">
         <span
           aria-hidden
-          className="h-2.5 w-2.5 rounded-[2px] border-2 border-dashed border-warn"
+          className="h-2.5 w-2.5 rounded-xs border-2 border-dashed border-warn"
         />
         PreCompact
       </Item>

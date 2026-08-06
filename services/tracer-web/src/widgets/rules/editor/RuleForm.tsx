@@ -12,7 +12,7 @@ import {
 import { useTaskUserInputsQuery } from "~tracer-web/entities/task/api/detail-queries.js";
 import type { GuidanceMessage } from "~tracer-web/shared/guidance.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
-import { GuidanceText } from "~tracer-web/shared/ui/index.js";
+import { Button, GuidanceText } from "~tracer-web/shared/ui/index.js";
 import { RuleBasicsFields } from "~tracer-web/widgets/rules/editor/RuleBasicsFields.js";
 import { RuleExpectationFields } from "~tracer-web/widgets/rules/editor/RuleExpectationFields.js";
 import {
@@ -157,7 +157,7 @@ export function RuleForm({ rule, taskId, onClose }: RuleFormProps) {
       </RuleFormField>
 
       {error && (
-        <div role="alert" className="m-0 text-xs text-err leading-[1.5]">
+        <div role="alert" className="m-0 text-body text-err leading-normal">
           {error.kind === "guidance" ? (
             <GuidanceText locale={guidance.locale} message={error.message} />
           ) : (
@@ -167,28 +167,13 @@ export function RuleForm({ rule, taskId, onClose }: RuleFormProps) {
       )}
 
       <footer className="sticky bottom-0 -mx-4 mt-1 py-3 px-4 flex justify-end gap-2 bg-s1 border-t border-hair">
-        <button
-          type="button"
-          onClick={onClose}
-          disabled={isPending}
-          className={ghostButtonClassName}
-        >
+        <Button onClick={onClose} disabled={isPending}>
           Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={isPending}
-          className={primaryButtonClassName}
-        >
+        </Button>
+        <Button type="submit" variant="primary" disabled={isPending}>
           {isPending ? "Saving…" : isEdit ? "Save changes" : "Create rule"}
-        </button>
+        </Button>
       </footer>
     </form>
   );
 }
-
-const primaryButtonClassName =
-  "py-[7px] px-3.5 text-[12.5px] font-medium text-canvas bg-primary border border-primary rounded-xs cursor-pointer";
-
-const ghostButtonClassName =
-  "py-[7px] px-3 text-[12.5px] text-ink-muted bg-transparent border border-hair rounded-xs cursor-pointer";

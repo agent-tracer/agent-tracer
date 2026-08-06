@@ -2,7 +2,15 @@ import { useState } from "react";
 import type { TagSummaryRecord } from "~tracer-web/entities/tag/model/tag.js";
 import { useTagsQuery } from "~tracer-web/entities/tag/api/queries.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
-import { Button, GuidanceText, Modal } from "~tracer-web/shared/ui/index.js";
+import {
+  Button,
+  GuidanceText,
+  InlineState,
+  Modal,
+  PageHeader,
+  loadFailedLabel,
+  loadingLabel,
+} from "~tracer-web/shared/ui/index.js";
 import { TagManagerList } from "~tracer-web/widgets/tags/TagManagerList.js";
 import { TagEditorForm } from "~tracer-web/widgets/tags/TagEditorForm.js";
 import { TagDeleteConfirm } from "~tracer-web/widgets/tags/TagDeleteConfirm.js";
@@ -22,39 +30,29 @@ export function TagsPage() {
 
   return (
     <div className="flex flex-col min-h-0 h-full overflow-auto">
-      <header className="px-9 pt-6 pb-4 flex flex-col gap-3 border-b border-hair">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="m-0 font-mono text-[10px] uppercase tracking-[0.12em] text-ink-tertiary">
-              Workspace
-            </p>
-            <h1 className="mt-0.5 mb-0 text-[22px] font-semibold text-ink tracking-[-0.3px]">
-              Tags
-            </h1>
-            <GuidanceText
-              as="p"
-              className="mt-1 mb-0 text-[12.5px] text-ink-subtle"
-              locale={guidance.locale}
-              message={guidance.messages.tags.workspaceIntroduction}
-            />
-            <p className="mt-1 mb-0 text-[12.5px] text-ink-subtle">
-              {isLoading
-                ? "Loading…"
-                : data
-                  ? `${tags.length} tag${tags.length === 1 ? "" : "s"}`
-                  : "Couldn't load tags."}
-            </p>
-          </div>
+      <PageHeader
+        eyebrow="Workspace"
+        title="Tags"
+        intro={guidance.messages.tags.workspaceIntroduction}
+        introLocale={guidance.locale}
+        status={
+          isLoading
+            ? loadingLabel("tags")
+            : data
+              ? `${tags.length} tag${tags.length === 1 ? "" : "s"}`
+              : loadFailedLabel("tags")
+        }
+        actions={
           <Button variant="primary" onClick={() => setEditorState("create")}>
             New tag
           </Button>
-        </div>
-      </header>
+        }
+      />
 
       <div className="px-9 py-6 flex flex-col gap-2.5">
         {isError && (
-          <div className="text-err text-[12.5px]">
-            <p className="m-0">Couldn't load tags.</p>
+          <div className="text-err text-body">
+            <p className="m-0">{loadFailedLabel("tags")}</p>
             <GuidanceText
               as="p"
               className="mt-1 mb-0"
@@ -64,12 +62,12 @@ export function TagsPage() {
           </div>
         )}
         {!isLoading && tags.length === 0 && !isError && (
-          <GuidanceText
-            as="p"
-            className="text-[12.5px] text-ink-subtle text-center py-8"
-            locale={guidance.locale}
-            message={guidance.messages.tags.workspaceEmpty}
-          />
+          <InlineState state="empty">
+            <GuidanceText
+              locale={guidance.locale}
+              message={guidance.messages.tags.workspaceEmpty}
+            />
+          </InlineState>
         )}
         <TagManagerList
           tags={tags}

@@ -1,6 +1,6 @@
 import type { Recipe } from "~tracer-web/entities/recipe/model/recipe.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
-import { Button, EmptyHint, GuidanceText } from "~tracer-web/shared/ui/index.js";
+import { Button, GuidanceText, InlineState } from "~tracer-web/shared/ui/index.js";
 import {
   useAcceptRecipeMutation,
   useDismissRecipeMutation,
@@ -16,15 +16,15 @@ interface CandidatesListProps {
 /** 스캔이 제안한 레시피 후보의 검토 결정을 제공한다. */
 export function CandidatesList({ rows, loading, taskTitleById }: CandidatesListProps) {
   const guidance = useGuidance();
-  if (loading) return <EmptyHint>Loading candidates…</EmptyHint>;
+  if (loading) return <InlineState state="loading" subject="candidates" />;
   if (rows.length === 0) {
     return (
-      <EmptyHint>
+      <InlineState state="empty">
         <GuidanceText
           locale={guidance.locale}
           message={guidance.messages.recipes.candidatesEmpty}
         />
-      </EmptyHint>
+      </InlineState>
     );
   }
   return (

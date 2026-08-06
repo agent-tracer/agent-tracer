@@ -6,13 +6,13 @@ import { useTaskTagsQuery } from "~tracer-web/entities/tag/api/queries.js";
 import { TagChipList } from "~tracer-web/entities/tag/ui/TagChipList.js";
 import { TaskTagPicker } from "~tracer-web/entities/tag/ui/TaskTagPicker.js";
 import { useNowMs } from "~tracer-web/shared/lib/hooks/use-now-ms.js";
-import {
-  useMainView,
-  useSetMainView,
-  type MainView,
-} from "~tracer-web/shared/store/index.js";
+import { useMainView, useSetMainView } from "~tracer-web/shared/store/index.js";
 import { cn } from "~tracer-web/shared/ui/lib/cn.js";
-import { ChevronDownIcon, ChevronRightIcon } from "~tracer-web/shared/ui/index.js";
+import {
+  ChevronDownIcon,
+  ChevronRightIcon,
+  SegmentedButton,
+} from "~tracer-web/shared/ui/index.js";
 import { formatDuration } from "~tracer-web/shared/lib/formatting/time.js";
 import { formatHHmm } from "~tracer-web/shared/lib/formatting/time.js";
 import { extractLatestModel } from "~tracer-web/widgets/feed/lib/extraction/extract-model.js";
@@ -42,7 +42,7 @@ export function TaskHeader({ task, timeline, resumeTarget }: TaskHeaderProps) {
   const model = extractLatestModel(timeline);
 
   return (
-    <div className="sticky top-0 z-[5] px-9 pt-5 pb-3 group backdrop-blur-[4px] bg-[linear-gradient(to_bottom,var(--canvas)_80%,transparent)]">
+    <div className="sticky top-0 z-[5] px-9 pt-5 pb-3 group backdrop-blur-[4px] bg-linear-to-b from-canvas from-80% to-transparent">
       <div className="flex items-start gap-3 flex-wrap">
         <div className="flex-1 min-w-0">
           <EditableTitle task={task} />
@@ -57,7 +57,7 @@ export function TaskHeader({ task, timeline, resumeTarget }: TaskHeaderProps) {
         </div>
       ) : null}
 
-      <div className="flex items-center gap-2.5 flex-wrap mt-2 text-xs text-ink-subtle">
+      <div className="flex items-center gap-2.5 flex-wrap mt-2 text-body text-ink-subtle">
         <ByItem
           label="Started"
           value={startedClock}
@@ -89,7 +89,7 @@ export function TaskHeader({ task, timeline, resumeTarget }: TaskHeaderProps) {
           type="button"
           onClick={() => setDetailsOpen((open) => !open)}
           aria-expanded={detailsOpen}
-          className="inline-flex items-center gap-1 text-[11px] font-medium text-ink-subtle hover:text-ink"
+          className="inline-flex items-center gap-1 text-meta font-medium text-ink-subtle hover:text-ink"
         >
           {detailsOpen ? <ChevronDownIcon /> : <ChevronRightIcon />}
           Details &amp; Memo
@@ -100,7 +100,7 @@ export function TaskHeader({ task, timeline, resumeTarget }: TaskHeaderProps) {
       </div>
 
       <div
-        className="mt-1 text-[11.5px] text-ink-tertiary font-mono"
+        className="mt-1 text-meta text-ink-tertiary font-mono"
         title={task.workspacePath}
       >
         {task.workspacePath ?? "agent-tracer"}
@@ -122,7 +122,7 @@ export function TaskHeader({ task, timeline, resumeTarget }: TaskHeaderProps) {
             <ByItem label="Cwd" value={task.workspacePath ?? "—"} mono />
             {resumeTarget ? (
               <span className="inline-flex items-baseline gap-1.5">
-                <span className="text-[10.5px] uppercase tracking-[0.06em] text-ink-tertiary">
+                <span className="text-mini uppercase tracking-label text-ink-tertiary">
                   Session
                 </span>
                 <SessionIdPill resumeTarget={resumeTarget} />
@@ -162,10 +162,10 @@ interface ByItemProps {
 function ByItem({ label, value, mono, title }: ByItemProps) {
   return (
     <span className="inline-flex items-baseline gap-1.5" title={title}>
-      <span className="text-[10.5px] uppercase tracking-[0.06em] text-ink-tertiary">
+      <span className="text-mini uppercase tracking-label text-ink-tertiary">
         {label}
       </span>
-      <span className={cn("text-ink-muted", mono ? "font-mono text-[11.5px]" : "font-[inherit] text-xs")}>
+      <span className={cn("text-ink-muted", mono ? "font-mono text-meta" : "font-[inherit] text-body")}>
         {value}
       </span>
     </span>
@@ -177,48 +177,21 @@ function ViewToggle() {
   const setMainView = useSetMainView();
   return (
     <div className="inline-flex p-0.5 rounded-sm bg-s1 border border-hair">
-      <ToggleButton
+      <SegmentedButton
         active={mainView === "feed"}
         onClick={() => setMainView("feed")}
-        view="feed"
+        aria-label="Feed view"
       >
         Feed
-      </ToggleButton>
-      <ToggleButton
+      </SegmentedButton>
+      <SegmentedButton
         active={mainView === "graph"}
         onClick={() => setMainView("graph")}
-        view="graph"
+        aria-label="Graph view"
       >
         Graph
-      </ToggleButton>
+      </SegmentedButton>
     </div>
-  );
-}
-
-interface ToggleButtonProps {
-  readonly active: boolean;
-  readonly view: MainView;
-  readonly onClick: () => void;
-  readonly children: React.ReactNode;
-}
-
-function ToggleButton({ active, onClick, view, children }: ToggleButtonProps) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      aria-label={`${view} view`}
-      className={cn(
-        "px-2.5 h-6 rounded-xs inline-flex items-center gap-1",
-        "text-[11.5px] font-medium transition-colors",
-        active
-          ? "bg-s3 text-ink shadow-[0_1px_0_0_var(--hair-strong)]"
-          : "bg-transparent text-ink-subtle shadow-none",
-      )}
-    >
-      {children}
-    </button>
   );
 }
 

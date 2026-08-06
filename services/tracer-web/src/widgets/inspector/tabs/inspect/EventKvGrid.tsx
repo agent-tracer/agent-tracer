@@ -12,7 +12,7 @@ export function EventKvGrid({ event }: EventKvGridProps) {
 
   return (
     <dl
-      className="mt-3 grid gap-y-1.5 gap-x-3 text-xs"
+      className="mt-3 grid gap-y-1.5 gap-x-3 text-body"
       style={{ gridTemplateColumns: "78px 1fr" }}
     >
       {pairs.map((pair) => (
@@ -25,10 +25,10 @@ export function EventKvGrid({ event }: EventKvGridProps) {
 function KvRow({ pair }: { pair: { key: string; value: string } }) {
   return (
     <>
-      <dt className="font-mono text-[10.5px] tracking-[0.04em] text-ink-tertiary pt-px">
+      <dt className="font-mono text-mini tracking-label text-ink-tertiary pt-px">
         {pair.key}
       </dt>
-      <dd className="m-0 font-mono text-[11.5px] text-ink-muted break-all">
+      <dd className="m-0 font-mono text-meta text-ink-muted break-all">
         {pair.value}
       </dd>
     </>

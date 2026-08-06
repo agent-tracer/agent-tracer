@@ -45,7 +45,7 @@ export function ModelSpanBand({ spans, range }: ModelSpanBandProps) {
           />
         );
       })}
-      <div className="relative ml-auto pr-2 font-mono text-[9.5px] text-ink-tertiary pointer-events-none whitespace-nowrap">
+      <div className="relative ml-auto pr-2 font-mono text-micro text-ink-tertiary pointer-events-none whitespace-nowrap">
         {dedupeModelLabels(spans).join(" → ")}
       </div>
     </div>

@@ -16,11 +16,11 @@ export function BrandMark({ viewport = "wide" }: BrandMarkProps) {
       // 248은 넓은 셸의 첫 열에 맞추는 폭이며, 그 열이 없는 화면에서는 자리만 먹는다.
       style={viewport === "wide" ? { minWidth: 248 } : undefined}
     >
-      <div className="flex items-center justify-center w-[22px] h-[22px] rounded-sm bg-primary text-white text-xs font-semibold tracking-[-0.04em]">
+      <div className="flex items-center justify-center w-[22px] h-[22px] rounded-sm bg-primary text-on-primary text-body font-semibold tracking-display">
         A
       </div>
       {viewport !== "mobile" && (
-        <div className="text-[13.5px] font-medium tracking-[-0.2px] text-ink">
+        <div className="text-lead font-medium tracking-snug text-ink">
           Agent Tracer
         </div>
       )}

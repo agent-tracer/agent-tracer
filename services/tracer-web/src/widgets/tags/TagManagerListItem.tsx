@@ -19,14 +19,14 @@ export function TagManagerListItem({ tag, onEdit, onDelete, onViewTasks }: TagMa
         <button
           type="button"
           onClick={() => onViewTasks(tag)}
-          className="font-mono text-[10.5px] text-ink-muted underline decoration-dotted underline-offset-2 hover:text-ink"
+          className="font-mono text-mini text-ink-muted underline decoration-dotted underline-offset-2 hover:text-ink"
         >
           {tag.taskCount} task{tag.taskCount === 1 ? "" : "s"}
         </button>
       </div>
 
       {tag.description && (
-        <p className="m-0 text-xs text-ink-subtle leading-[1.5]">{tag.description}</p>
+        <p className="m-0 text-body text-ink-subtle leading-normal">{tag.description}</p>
       )}
 
       <div className="flex items-center gap-2 mt-1">

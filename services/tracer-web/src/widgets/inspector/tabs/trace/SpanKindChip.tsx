@@ -1,74 +1,38 @@
 import type { OpenInferenceSpanKind } from "~tracer-web/entities/task/model/openinference.js";
 import type { GuidanceCatalog } from "~tracer-web/shared/guidance.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
-import { GuidanceText, Tooltip } from "~tracer-web/shared/ui/index.js";
+import { Chip, GuidanceText, Tooltip, type ChipTone } from "~tracer-web/shared/ui/index.js";
 
 interface SpanKindChipProps {
   readonly kind: OpenInferenceSpanKind;
 }
 
-/** span kind 전용 색 팔레트(레인 색과는 별개). */
-const KIND_TONE: Record<
-  OpenInferenceSpanKind,
-  { color: string; bg: string; label: string; guidanceKey: SpanKindDescription }
+/** 피드에서 보던 색이 트레이스에서도 같은 뜻을 갖도록 레인 색을 빌린다. */
+const KIND: Readonly<
+  Record<OpenInferenceSpanKind, { tone: ChipTone; label: string; guidanceKey: SpanKindDescription }>
 > = {
-  LLM: {
-    color: "var(--ph-plan)",
-    bg: "color-mix(in srgb, var(--ph-plan) 14%, transparent)",
-    label: "LLM",
-    guidanceKey: "llm",
-  },
-  TOOL: {
-    color: "var(--ph-impl)",
-    bg: "color-mix(in srgb, var(--ph-impl) 14%, transparent)",
-    label: "TOOL",
-    guidanceKey: "tool",
-  },
-  AGENT: {
-    color: "var(--ph-coord)",
-    bg: "color-mix(in srgb, var(--ph-coord) 14%, transparent)",
-    label: "AGENT",
-    guidanceKey: "agent",
-  },
-  RETRIEVER: {
-    color: "var(--ph-expl)",
-    bg: "color-mix(in srgb, var(--ph-expl) 14%, transparent)",
-    label: "FETCH",
-    guidanceKey: "retriever",
-  },
-  CHAIN: {
-    color: "var(--ink-muted)",
-    bg: "var(--s2)",
-    label: "STEP",
-    guidanceKey: "chain",
-  },
-  UNKNOWN: {
-    color: "var(--ink-tertiary)",
-    bg: "var(--s2)",
-    label: "MISC",
-    guidanceKey: "unknown",
-  },
+  LLM: { tone: "plan", label: "LLM", guidanceKey: "llm" },
+  TOOL: { tone: "impl", label: "TOOL", guidanceKey: "tool" },
+  AGENT: { tone: "coord", label: "AGENT", guidanceKey: "agent" },
+  RETRIEVER: { tone: "expl", label: "FETCH", guidanceKey: "retriever" },
+  CHAIN: { tone: "neutral", label: "STEP", guidanceKey: "chain" },
+  UNKNOWN: { tone: "quiet", label: "MISC", guidanceKey: "unknown" },
 };
 
 export function SpanKindChip({ kind }: SpanKindChipProps) {
   const guidance = useGuidance();
-  const tone = KIND_TONE[kind];
+  const entry = KIND[kind];
   return (
     <Tooltip
       content={
         <GuidanceText
           locale={guidance.locale}
-          message={guidance.messages.inspector.spanKinds[tone.guidanceKey]}
+          message={guidance.messages.inspector.spanKinds[entry.guidanceKey]}
         />
       }
       side="right"
     >
-      <span
-        className="inline-flex items-center rounded-xs px-1.5 font-mono text-[9.5px] font-semibold tracking-[0.08em] leading-4"
-        style={{ color: tone.color, background: tone.bg }}
-      >
-        {tone.label}
-      </span>
+      <Chip tone={entry.tone}>{entry.label}</Chip>
     </Tooltip>
   );
 }

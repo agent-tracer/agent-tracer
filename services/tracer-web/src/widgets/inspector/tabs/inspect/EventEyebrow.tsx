@@ -12,12 +12,12 @@ export function EventEyebrow({ event }: EventEyebrowProps) {
 
   return (
     <div
-      className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.1em]"
+      className="flex items-center gap-2 font-mono text-mini uppercase tracking-eyebrow"
       style={{ color: lane.cssColor }}
     >
       <span
         aria-hidden
-        className="h-2 w-2 rounded-[2px]"
+        className="h-2 w-2 rounded-xs"
         style={{ background: lane.cssColor }}
       />
       <span>{lane.label} · seq {shortId}</span>

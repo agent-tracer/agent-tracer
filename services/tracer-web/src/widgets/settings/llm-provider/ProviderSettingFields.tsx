@@ -38,21 +38,21 @@ export function SecretSettingField({
   return (
     <Field label={label} help={help} helpLocale={locale}>
       {loading ? (
-        <span className="text-ink-muted text-sm">Loading…</span>
+        <span className="text-ink-muted text-lead">Loading…</span>
       ) : current ? (
         <div className="flex items-center gap-2 min-w-0">
-          <code className="font-mono text-xs py-1 px-2 bg-s1 rounded-xs truncate max-w-60">
+          <code className="font-mono text-body py-1 px-2 bg-s1 rounded-xs truncate max-w-60">
             {current.masked}
           </code>
-          <span className="text-ink-tertiary text-[11px] whitespace-nowrap">
+          <span className="text-ink-tertiary text-meta whitespace-nowrap">
             saved {formatAbsoluteHHmmss(current.updatedAt)}
           </span>
-          <Button variant="ghost" onClick={onClear} className="text-xs border-0 p-0 underline">
+          <Button variant="ghost" onClick={onClear} className="text-body border-0 p-0 underline">
             Clear
           </Button>
         </div>
       ) : (
-        <span className="text-ink-tertiary text-[12.5px]">Not set</span>
+        <span className="text-ink-tertiary text-body">Not set</span>
       )}
       <div className="flex gap-2 mt-2">
         <Input
@@ -64,7 +64,7 @@ export function SecretSettingField({
           autoComplete="off"
           className="flex-1 font-mono"
         />
-        <Button variant="solid" disabled={!draft.trim() || pending} onClick={onSave}>
+        <Button variant="primary" disabled={!draft.trim() || pending} onClick={onSave}>
           {current ? "Replace" : "Save"}
         </Button>
       </div>
@@ -111,7 +111,7 @@ export function ModelSettingField({
           Save
         </Button>
         {current ? (
-          <Button variant="ghost" onClick={onClear} className="text-xs border-0 p-0 underline">
+          <Button variant="ghost" onClick={onClear} className="text-body border-0 p-0 underline">
             Clear
           </Button>
         ) : null}

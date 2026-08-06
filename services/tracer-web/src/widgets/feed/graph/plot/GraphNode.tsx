@@ -70,7 +70,7 @@ export function GraphNode({ node }: GraphNodeProps) {
       {node.vm.hasViolation && (
         <span
           aria-hidden
-          className="absolute -top-2 -right-2 inline-flex items-center justify-center rounded-full w-3.5 h-3.5 bg-err text-white font-mono text-[9px] font-bold"
+          className="absolute -top-2 -right-2 inline-flex items-center justify-center rounded-full w-3.5 h-3.5 bg-err text-on-primary font-mono text-micro font-bold"
         >
           !
         </span>
@@ -78,7 +78,7 @@ export function GraphNode({ node }: GraphNodeProps) {
       {verificationCount > 0 && (
         <span
           aria-hidden
-          className="absolute -bottom-2 -right-2 inline-flex items-center justify-center rounded-full min-w-3.5 h-3.5 px-0.5 bg-ph-veri text-white font-mono text-[8px] font-bold"
+          className="absolute -bottom-2 -right-2 inline-flex items-center justify-center rounded-full min-w-3.5 h-3.5 px-0.5 bg-ph-veri text-on-primary font-mono text-nano font-bold"
         >
           {verificationCount === 1 ? "✓" : `✓${verificationCount}`}
         </span>
@@ -86,7 +86,7 @@ export function GraphNode({ node }: GraphNodeProps) {
       {memoCount > 0 && (
         <span
           aria-hidden
-          className="absolute -bottom-2 -left-2 inline-flex items-center justify-center rounded-full min-w-3.5 h-3.5 px-0.5 bg-primary text-white font-mono text-[8px] font-bold"
+          className="absolute -bottom-2 -left-2 inline-flex items-center justify-center rounded-full min-w-3.5 h-3.5 px-0.5 bg-primary text-on-primary font-mono text-nano font-bold"
         >
           {memoCount}
         </span>
@@ -95,7 +95,7 @@ export function GraphNode({ node }: GraphNodeProps) {
         <span
           aria-hidden
           className={cn(
-            "absolute -top-[22px] left-1/2 -translate-x-1/2 py-px px-[5px] truncate bg-canvas font-mono text-[10px] rounded-[3px] pointer-events-none transition-[border-color,color,max-width] duration-150",
+            "absolute -top-[22px] left-1/2 -translate-x-1/2 py-px px-[5px] truncate bg-canvas font-mono text-mini rounded-xs pointer-events-none transition-[border-color,color,max-width] duration-150",
             hovered ? "max-w-[320px]" : "max-w-[220px]",
           )}
           style={{

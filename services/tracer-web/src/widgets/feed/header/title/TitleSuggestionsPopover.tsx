@@ -50,17 +50,17 @@ export function TitleSuggestionsPopover({
       preferredMaxHeight={480}
       role="dialog"
       aria-label="Title suggestions"
-      className="bg-s1 border border-hair rounded-sm shadow-[0_12px_32px_-8px_rgba(0,0,0,0.45)] p-2.5"
+      className="bg-s1 border border-hair rounded-sm shadow-elev-1 p-2.5"
     >
       <div className="flex items-center justify-between mb-1.5">
-        <span className="text-[11px] text-ink-tertiary uppercase tracking-[0.04em]">
+        <span className="text-meta text-ink-tertiary uppercase tracking-label">
           Suggested titles
         </span>
         <button
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="bg-transparent border-none text-ink-tertiary cursor-pointer text-sm leading-none"
+          className="bg-transparent border-none text-ink-tertiary cursor-pointer text-lead leading-none"
         >
           ×
         </button>
@@ -70,17 +70,17 @@ export function TitleSuggestionsPopover({
           value={agentBackend}
           onChange={onAgentBackendChange}
           disabled={loading}
-          className="min-w-0 flex-1 text-[11.5px]"
+          className="min-w-0 flex-1 text-meta"
         />
         <button
           type="button"
           onClick={onSuggest}
           disabled={loading}
           className={cn(
-            "shrink-0 rounded-xs border px-2.5 py-1.5 text-[11.5px] font-medium",
+            "shrink-0 rounded-xs border px-2.5 py-1.5 text-meta font-medium",
             loading
               ? "cursor-wait border-hair bg-s2 text-ink-subtle"
-              : "cursor-pointer border-primary bg-primary text-canvas",
+              : "cursor-pointer border-primary bg-primary text-on-primary",
           )}
         >
           {loading ? "Suggesting…" : "Generate title suggestions"}
@@ -89,13 +89,13 @@ export function TitleSuggestionsPopover({
       {loading && (
         <GuidanceText
           as="p"
-          className="m-0 text-xs text-ink-subtle"
+          className="m-0 text-body text-ink-subtle"
           locale={guidance.locale}
           message={guidance.messages.feed.suggestingTitle}
         />
       )}
       {error && (
-        <p className="m-0 text-xs text-err [overflow-wrap:anywhere]">
+        <p className="m-0 text-body text-err [overflow-wrap:anywhere]">
           {isGuidanceMessage(error) ? (
             <GuidanceText locale={guidance.locale} message={error} />
           ) : (
@@ -106,7 +106,7 @@ export function TitleSuggestionsPopover({
       {!loading && !error && suggestions.length === 0 && (
         <GuidanceText
           as="p"
-          className="m-0 text-xs text-ink-subtle"
+          className="m-0 text-body text-ink-subtle"
           locale={guidance.locale}
           message={guidance.messages.feed.currentTitleFine}
         />
@@ -119,14 +119,14 @@ export function TitleSuggestionsPopover({
               onClick={() => onApply(suggestion.title)}
               disabled={suggestion.title === currentTitle}
               className={cn(
-                "block w-full text-left py-1.5 px-2 rounded-xs border border-hair bg-s2 text-ink text-[12.5px] font-medium leading-[1.35] [overflow-wrap:anywhere]",
+                "block w-full text-left py-1.5 px-2 rounded-xs border border-hair bg-s2 text-ink text-body font-medium leading-tight [overflow-wrap:anywhere]",
                 suggestion.title === currentTitle
                   ? "cursor-default"
                   : "cursor-pointer",
               )}
             >
               <div>{suggestion.title}</div>
-              <div className="text-[11px] font-normal text-ink-tertiary mt-0.5 leading-[1.4]">
+              <div className="text-meta font-normal text-ink-tertiary mt-0.5 leading-tight">
                 {suggestion.rationale}
               </div>
             </button>

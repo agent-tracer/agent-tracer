@@ -55,7 +55,7 @@ export function ThemeToggle() {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-[calc(100%+4px)] z-50 min-w-[148px] rounded-sm py-1 bg-s1 border border-hair shadow-[0_8px_24px_rgba(0,0,0,0.25)]"
+          className="absolute right-0 top-[calc(100%+4px)] z-50 min-w-[148px] rounded-sm py-1 bg-s1 border border-hair shadow-elev-1"
         >
           <MenuItem
             label="Light"
@@ -108,7 +108,7 @@ function MenuItem({
       aria-checked={active}
       onClick={onSelect}
       className={cn(
-        "w-full flex items-center gap-2 px-2.5 h-7 text-left hover:bg-s2 text-[12.5px]",
+        "w-full flex items-center gap-2 px-2.5 h-7 text-left hover:bg-s2 text-body",
         active ? "text-ink bg-s2" : "text-ink-muted bg-transparent",
       )}
     >

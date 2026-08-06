@@ -4,6 +4,7 @@ import type { MonitoringTask } from "~tracer-web/entities/task/model/task.js";
 import type { TagId, TaskId } from "~tracer-web/shared/identity.js";
 import { useTasksByTagQuery } from "~tracer-web/entities/tag/api/queries.js";
 import { useTasksQuery } from "~tracer-web/entities/task/api/list-queries.js";
+import { InlineState } from "~tracer-web/shared/ui/index.js";
 
 interface TaggedTaskListProps {
   readonly tagId: TagId;
@@ -21,15 +22,19 @@ export function TaggedTaskList({ tagId }: TaggedTaskListProps) {
   }, [tasksQ.data]);
 
   if (tasksByTagQ.isLoading) {
-    return <p className="px-4 pb-4 text-[12.5px] text-ink-subtle">Loading tasks…</p>;
+    return <InlineState state="loading" subject="tasks" className="px-4 pb-4" />;
   }
   if (tasksByTagQ.isError) {
-    return <p className="px-4 pb-4 text-[12.5px] text-err">Couldn't load tasks.</p>;
+    return <InlineState state="error" subject="tasks" className="px-4 pb-4" />;
   }
 
   const taskIds = tasksByTagQ.data?.taskIds ?? [];
   if (taskIds.length === 0) {
-    return <p className="px-4 pb-4 text-[12.5px] text-ink-subtle">No tasks carry this tag.</p>;
+    return (
+      <InlineState state="empty" className="px-4 pb-4">
+        No tasks carry this tag.
+      </InlineState>
+    );
   }
 
   return (
@@ -40,7 +45,7 @@ export function TaggedTaskList({ tagId }: TaggedTaskListProps) {
           <Link
             key={taskId}
             to={`/tasks/${taskId}`}
-            className="rounded-xs border border-hair bg-s1 px-2.5 py-2 text-[12.5px] text-ink hover:bg-s2 truncate"
+            className="rounded-xs border border-hair bg-s1 px-2.5 py-2 text-body text-ink hover:bg-s2 truncate"
           >
             {task ? (task.displayTitle ?? task.title) : `${taskId.slice(0, 8)}…`}
           </Link>

@@ -5,7 +5,7 @@ import {
   useTaskOpenInferenceQuery,
 } from "~tracer-web/entities/task/api/detail-queries.js";
 import { TurnSplitModal, useTurnSplit } from "~tracer-web/features/turn-split/index.js";
-import { EmptyView } from "~tracer-web/shared/ui/index.js";
+import { EmptyView, loadFailedTitle } from "~tracer-web/shared/ui/index.js";
 import { buildSpanTree, type SpanTreeRow } from "~tracer-web/widgets/inspector/tabs/trace/lib/build-span-tree.js";
 import { SpanRow } from "~tracer-web/widgets/inspector/tabs/trace/SpanRow.js";
 import { TurnHeaderRow } from "~tracer-web/widgets/inspector/tabs/trace/TurnHeaderRow.js";
@@ -42,20 +42,20 @@ export function TraceTab() {
     return (
       <EmptyView
         eyebrow="Trace"
-        title="Select a task to view its trace."
+        title="Select a task to view its trace"
         description={guidance.messages.inspector.selectTaskForTrace}
         locale={guidance.locale}
       />
     );
   }
   if (isLoading) {
-    return <EmptyView eyebrow="Loading" title="Building span tree…" />;
+    return <EmptyView eyebrow="Loading" title="Span tree" />;
   }
   if (isError || !data) {
     return (
       <EmptyView
         eyebrow="Error"
-        title="Couldn't load trace"
+        title={loadFailedTitle("the trace")}
         description={guidance.messages.inspector.traceLoadError}
         locale={guidance.locale}
       />
@@ -74,7 +74,7 @@ export function TraceTab() {
 
   return (
     <div className="px-2 py-3 flex flex-col gap-px">
-      <div className="px-2 pb-2 flex items-center gap-2 border-b border-hair font-mono text-[10px] uppercase tracking-[0.1em] text-ink-tertiary">
+      <div className="px-2 pb-2 flex items-center gap-2 border-b border-hair font-mono text-mini uppercase tracking-eyebrow text-ink-tertiary">
         <span>
           OpenInference · {rows.length} span{rows.length === 1 ? "" : "s"}
         </span>
@@ -92,7 +92,7 @@ export function TraceTab() {
             onClick={() => setShowTelemetry((v) => !v)}
             aria-pressed={showTelemetry}
             className={cn(
-              "ml-auto rounded-xs border border-hair px-1.5 py-0.5 font-mono text-[10px] normal-case tracking-normal",
+              "ml-auto rounded-xs border border-hair px-1.5 py-0.5 font-mono text-mini normal-case tracking-normal",
               showTelemetry ? "text-ink bg-s2" : "text-ink-muted bg-transparent",
             )}
             title={`${telemetryCount} context-snapshot / telemetry spans hidden`}

@@ -19,7 +19,7 @@ import { apiErrorMessage } from "~tracer-web/shared/api/api-error-message.js";
 import type { GuidanceMessage } from "~tracer-web/shared/guidance.js";
 import { monitorQueryKeys } from "~tracer-web/shared/api/query-keys.js";
 import { JOB_KIND, isActiveJobStatus } from "~tracer-web/entities/job/model/job.js";
-import { GuidanceText, Modal } from "~tracer-web/shared/ui/index.js";
+import { GuidanceText, loadingLabel, Modal } from "~tracer-web/shared/ui/index.js";
 import { formatRelativeShort } from "~tracer-web/shared/lib/formatting/time.js";
 import { useNowMs } from "~tracer-web/shared/lib/hooks/use-now-ms.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
@@ -93,10 +93,10 @@ export function TaskCleanupModal({ open, onClose }: TaskCleanupModalProps) {
                 enqueueMutation.mutate({ filters: {} });
               }}
               className={cn(
-                "py-1.5 px-3 rounded-sm border border-hair text-[12.5px] font-medium",
+                "py-1.5 px-3 rounded-sm border border-hair text-body font-medium",
                 isScanning || enqueueMutation.isPending
                   ? "bg-s2 text-ink-subtle cursor-not-allowed"
-                  : "bg-primary text-canvas cursor-pointer",
+                  : "bg-primary text-on-primary cursor-pointer",
               )}
             >
               {isScanning ? "Scanning…" : "Scan tasks"}
@@ -108,14 +108,14 @@ export function TaskCleanupModal({ open, onClose }: TaskCleanupModalProps) {
               className="min-w-[154px]"
             />
           </div>
-          <span className="font-mono text-[11px] text-ink-tertiary">
+          <span className="font-mono text-meta text-ink-tertiary">
             {job
               ? `Last scan ${formatRelativeShort(job.completedAt ?? job.createdAt, nowMs)} · ${archiveSuggestions.length} archive suggestion${archiveSuggestions.length === 1 ? "" : "s"} · ${job.tasksScanned} tasks`
               : "No scan yet"}
           </span>
         </div>
         {failureMessage && (
-          <div className="py-2 px-2.5 rounded-sm border border-err text-err text-xs mb-3 break-words">
+          <div className="py-2 px-2.5 rounded-sm border border-err text-err text-body mb-3 break-words">
             {failureMessage}
           </div>
         )}
@@ -140,13 +140,13 @@ function SuggestionList({
 }) {
   const guidance = useGuidance();
   if (isLoading) {
-    return <p className="text-xs text-ink-subtle">Loading suggestions…</p>;
+    return <p className="text-body text-ink-subtle">{loadingLabel("suggestions")}</p>;
   }
   if (suggestions.length === 0) {
     return (
       <GuidanceText
         as="p"
-        className="text-xs text-ink-subtle"
+        className="text-body text-ink-subtle"
         locale={guidance.locale}
         message={guidance.messages.tasks.cleanupEmpty}
       />
@@ -190,17 +190,17 @@ function SuggestionRow({
   return (
     <div className="border border-hair rounded-sm py-2.5 px-3 bg-s2 min-w-0">
       <div className="flex items-center gap-2 mb-1 min-w-0">
-        <span className="text-[12.5px] font-semibold text-ink truncate min-w-0 flex-1" title={taskTitle}>
+        <span className="text-body font-semibold text-ink truncate min-w-0 flex-1" title={taskTitle}>
           {taskTitle}
         </span>
       </div>
-      <p className="mt-0 mb-1.5 text-xs text-ink-subtle [overflow-wrap:anywhere] break-words leading-[1.45]">
+      <p className="mt-0 mb-1.5 text-body text-ink-subtle [overflow-wrap:anywhere] break-words leading-normal">
         {suggestion.rationale}
       </p>
       {error && (
         <GuidanceText
           as="p"
-          className="mt-1 mb-0 text-[11.5px] text-err [overflow-wrap:anywhere]"
+          className="mt-1 mb-0 text-meta text-err [overflow-wrap:anywhere]"
           locale={guidance.locale}
           message={error}
         />
@@ -211,7 +211,7 @@ function SuggestionRow({
           onClick={handleDismiss}
           disabled={isBusy}
           className={cn(
-            "py-1 px-2.5 rounded-xs border border-hair bg-transparent text-ink-subtle text-[11.5px]",
+            "py-1 px-2.5 rounded-xs border border-hair bg-transparent text-ink-subtle text-meta",
             isBusy ? "cursor-not-allowed" : "cursor-pointer",
           )}
         >
@@ -222,7 +222,7 @@ function SuggestionRow({
           onClick={handleAccept}
           disabled={isBusy}
           className={cn(
-            "py-1 px-2.5 rounded-xs border border-primary bg-primary text-canvas text-[11.5px] font-medium",
+            "py-1 px-2.5 rounded-xs border border-primary bg-primary text-on-primary text-meta font-medium",
             isBusy ? "cursor-not-allowed" : "cursor-pointer",
           )}
         >

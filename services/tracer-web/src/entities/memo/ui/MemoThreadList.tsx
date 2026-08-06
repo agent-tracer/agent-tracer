@@ -54,7 +54,7 @@ export function MemoThreadList({
       {memos.length === 0 ? (
         <GuidanceText
           as="p"
-          className="m-0 text-[11.5px] text-ink-subtle"
+          className="m-0 text-meta text-ink-subtle"
           locale={locale}
           message={emptyMessage}
         />
@@ -84,7 +84,7 @@ export function MemoThreadList({
           onChange={(e) => setDraft(e.target.value)}
           placeholder={addPlaceholder}
           disabled={createMutation.isPending}
-          className="flex-1 text-[12px] py-1.5"
+          className="flex-1 text-body py-1.5"
         />
         <Button
           type="submit"

@@ -37,14 +37,14 @@ export function RecipeCard({
     >
       <div className="flex justify-between items-start gap-3">
         <div className="min-w-0">
-          <div className="text-sm font-semibold text-ink break-words">
+          <div className="text-lead font-semibold text-ink break-words">
             {recipe.title}
           </div>
-          <div className="text-xs text-ink-muted mt-1 break-words">
+          <div className="text-body text-ink-muted mt-1 break-words">
             {recipe.intent}
           </div>
           {showParentBadge && recipe.parentRecipeId && (
-            <div className="mt-1.5 inline-block text-[11px] py-0.5 px-1.5 rounded-pill bg-s1 text-ink-tertiary font-mono">
+            <div className="mt-1.5 inline-block text-meta py-0.5 px-1.5 rounded-pill bg-s1 text-ink-tertiary font-mono">
               compare · parent {recipe.parentRecipeId.slice(0, 8)}
             </div>
           )}
@@ -71,7 +71,7 @@ function GoverningRules({ ruleIds }: { readonly ruleIds: readonly string[] }) {
   return (
     <div className="mt-2.5">
       <SectionLabel>Governing rules</SectionLabel>
-      <div className="mt-1 flex flex-wrap gap-1 text-[10.5px] font-mono text-ink-tertiary">
+      <div className="mt-1 flex flex-wrap gap-1 text-mini font-mono text-ink-tertiary">
         {ruleIds.map((id) => (
           <span key={id} className="py-px px-1.5 rounded-pill bg-s1">
             {id}
@@ -84,7 +84,7 @@ function GoverningRules({ ruleIds }: { readonly ruleIds: readonly string[] }) {
 
 function Description({ text }: { readonly text: string }) {
   return (
-    <div className="mt-2.5 text-xs text-ink leading-[1.5] whitespace-pre-wrap break-words">
+    <div className="mt-2.5 text-body text-ink leading-normal whitespace-pre-wrap break-words">
       {text}
     </div>
   );
@@ -94,7 +94,7 @@ function Request({ text }: { readonly text: string }) {
   return (
     <div className="mt-2.5">
       <SectionLabel>Request</SectionLabel>
-      <div className="mt-1 text-[11.5px] text-ink leading-[1.5] whitespace-pre-wrap break-words">
+      <div className="mt-1 text-meta text-ink leading-normal whitespace-pre-wrap break-words">
         {text}
       </div>
     </div>
@@ -113,9 +113,9 @@ function Corrections({
   return (
     <div className="mt-2.5">
       <SectionLabel>Corrections</SectionLabel>
-      <div className="mt-1 flex flex-col gap-1.5 text-[11.5px] text-ink">
+      <div className="mt-1 flex flex-col gap-1.5 text-meta text-ink">
         {rows.map((row, i) => (
-          <div key={`${row.whatAgentDid}-${i}`} className="leading-[1.45]">
+          <div key={`${row.whatAgentDid}-${i}`} className="leading-normal">
             <div>
               <span className="text-ink-muted">Did:</span> {row.whatAgentDid}
             </div>
@@ -142,9 +142,9 @@ function Pitfalls({
   return (
     <div className="mt-2.5">
       <SectionLabel>Pitfalls</SectionLabel>
-      <div className="mt-1 flex flex-col gap-1.5 text-[11.5px] text-ink">
+      <div className="mt-1 flex flex-col gap-1.5 text-meta text-ink">
         {rows.map((row, i) => (
-          <div key={`${row.pitfall}-${i}`} className="leading-[1.45]">
+          <div key={`${row.pitfall}-${i}`} className="leading-normal">
             <div>{row.pitfall}</div>
             <div className="text-ink-muted">{row.whyNonObvious}</div>
             {row.evidence.length > 0 && <Evidence ids={row.evidence} />}
@@ -157,7 +157,7 @@ function Pitfalls({
 
 function Evidence({ ids }: { readonly ids: readonly string[] }) {
   return (
-    <div className="mt-0.5 flex flex-wrap gap-1 text-[10.5px] font-mono text-ink-tertiary">
+    <div className="mt-0.5 flex flex-wrap gap-1 text-mini font-mono text-ink-tertiary">
       {ids.map((id) => (
         <span key={id} className="py-px px-1.5 rounded-pill bg-s1">
           {id}
@@ -170,7 +170,7 @@ function Evidence({ ids }: { readonly ids: readonly string[] }) {
 function SummaryMd({ md }: { readonly md: string }) {
   if (!md.trim()) return null;
   return (
-    <pre className="mt-2.5 py-2.5 px-3 text-[11.5px] font-mono bg-s1 rounded-sm text-ink whitespace-pre-wrap overflow-auto max-h-60">
+    <pre className="mt-2.5 py-2.5 px-3 text-meta font-mono bg-s1 rounded-sm text-ink whitespace-pre-wrap overflow-auto max-h-60">
       {md}
     </pre>
   );
@@ -184,12 +184,12 @@ function Steps({
   return (
     <div className="mt-2.5">
       <SectionLabel>Steps</SectionLabel>
-      <ol className="m-0 pl-[22px] text-xs text-ink">
+      <ol className="m-0 pl-[22px] text-body text-ink">
         {steps.map((s) => (
           <li key={s.order} className="mt-1">
             <span>{s.action}</span>
             {s.rationale && (
-              <div className="text-ink-muted text-[11px]">{s.rationale}</div>
+              <div className="text-ink-muted text-meta">{s.rationale}</div>
             )}
           </li>
         ))}
@@ -206,9 +206,9 @@ function TouchedFiles({
   return (
     <div className="mt-2.5">
       <SectionLabel>Touched files</SectionLabel>
-      <div className="mt-1 flex flex-wrap gap-1 text-[11px] font-mono">
+      <div className="mt-1 flex flex-wrap gap-1 text-meta font-mono">
         {files.map((f, i) => (
-          <span key={`${f.path}-${i}`} className="py-px px-1.5 rounded-pill bg-s1 text-ink-tertiary font-mono text-[10.5px]">
+          <span key={`${f.path}-${i}`} className="py-px px-1.5 rounded-pill bg-s1 text-ink-tertiary font-mono text-mini">
             {f.role === "read" ? "R " : f.role === "write" ? "W " : "RW "}
             {f.path}
           </span>
@@ -228,7 +228,7 @@ function Slices({
   return (
     <div className="mt-2.5">
       <SectionLabel>From tasks</SectionLabel>
-      <div className="mt-1 flex flex-col gap-1 text-[11.5px]">
+      <div className="mt-1 flex flex-col gap-1 text-meta">
         {slices.map((s) => {
           const title = taskTitleById.get(s.taskId) ?? s.taskId;
           const scope =
@@ -236,7 +236,7 @@ function Slices({
           return (
             <div key={s.taskId} className="text-ink">
               <span className="text-ink-muted">·</span> <span>{title}</span>{" "}
-              <span className="text-ink-tertiary text-[10.5px]">({scope})</span>
+              <span className="text-ink-tertiary text-mini">({scope})</span>
             </div>
           );
         })}
@@ -247,7 +247,7 @@ function Slices({
 
 function Rationale({ text }: { readonly text: string }) {
   return (
-    <div className="mt-2.5 text-[11.5px] text-ink-muted italic leading-[1.5]">
+    <div className="mt-2.5 text-meta text-ink-muted italic leading-normal">
       Why clustered: {text}
     </div>
   );
@@ -261,7 +261,7 @@ function FootMeta({
   readonly createdAt: string;
 }) {
   return (
-    <div className="mt-2 text-[10.5px] text-ink-tertiary font-mono flex gap-2">
+    <div className="mt-2 text-mini text-ink-tertiary font-mono flex gap-2">
       {language && <span>lang: {language}</span>}
       <span>{formatAbsoluteHHmmss(createdAt)}</span>
     </div>

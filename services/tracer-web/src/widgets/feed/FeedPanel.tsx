@@ -8,7 +8,8 @@ import {
 } from "~tracer-web/entities/task/api/detail-queries.js";
 import { useGuidance, useMainView } from "~tracer-web/shared/store/index.js";
 import { isNotFoundError } from "~tracer-web/shared/api/client/response.js";
-import { EmptyView } from "~tracer-web/shared/ui/index.js";
+import { DISABLED, EmptyView, loadFailedTitle } from "~tracer-web/shared/ui/index.js";
+import { cn } from "~tracer-web/shared/ui/lib/cn.js";
 import { TaskHeader } from "~tracer-web/widgets/feed/header/TaskHeader.js";
 import { ActList } from "~tracer-web/widgets/feed/timeline/ActList.js";
 import { buildFeed } from "~tracer-web/widgets/feed/lib/timeline/group-acts.js";
@@ -49,7 +50,7 @@ export function FeedPanel({ taskId }: FeedPanelProps) {
   }, [data]);
 
   if (isLoading) {
-    return <EmptyView eyebrow="Loading" title="Fetching task timeline…" />;
+    return <EmptyView eyebrow="Loading" title="Task timeline" />;
   }
   if (isError || !data) {
     // 404/`not_found`는 태스크가 사라졌다는 뜻이다(다른 탭에서 삭제됐거나 URL의 id가 잘못됨).
@@ -63,7 +64,7 @@ export function FeedPanel({ taskId }: FeedPanelProps) {
           action={
             <Link
               to="/tasks"
-              className="inline-flex items-center px-3 py-1.5 rounded-xs border border-hair text-[12.5px] text-ink bg-s1"
+              className="inline-flex items-center px-3 py-1.5 rounded-xs border border-hair text-body text-ink bg-s1"
             >
               Back to tasks
             </Link>
@@ -74,7 +75,7 @@ export function FeedPanel({ taskId }: FeedPanelProps) {
     return (
       <EmptyView
         eyebrow="Error"
-        title="Couldn't load task"
+        title={loadFailedTitle("the task")}
         description={guidance.messages.app.taskServerUnavailable}
         locale={guidance.locale}
       />
@@ -101,7 +102,7 @@ export function FeedPanel({ taskId }: FeedPanelProps) {
             type="button"
             onClick={() => loadOlderTimeline.mutate(data.olderCursor as string)}
             disabled={loadOlderTimeline.isPending}
-            className="inline-flex items-center px-3 py-1.5 rounded-xs border border-hair text-[12.5px] text-ink-subtle bg-s1 disabled:opacity-50"
+            className={cn("inline-flex items-center px-3 py-1.5 rounded-xs border border-hair text-body text-ink-subtle bg-s1 focus-ring", DISABLED)}
           >
             {loadOlderTimeline.isPending ? "Loading older events…" : "Load older events"}
           </button>

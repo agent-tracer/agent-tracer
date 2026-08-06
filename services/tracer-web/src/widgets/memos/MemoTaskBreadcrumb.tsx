@@ -23,7 +23,7 @@ export function MemoTaskBreadcrumb({
       {!task && (
         <span
           title="Task no longer exists or hasn't been loaded yet"
-          className="text-ink-tertiary text-[10px]"
+          className="text-ink-tertiary text-mini"
         >
           (missing)
         </span>

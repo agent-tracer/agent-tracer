@@ -27,7 +27,7 @@ export function MemoFilterBar({
       <Select
         value={author}
         onChange={(e) => onAuthorChange(e.target.value as AuthorFilter)}
-        className="text-[11.5px] text-ink-muted bg-s1 py-[5px]"
+        className="text-meta text-ink-muted bg-s1 py-[5px]"
       >
         {AUTHOR_OPTIONS.map((opt) => (
           <option key={opt.value} value={opt.value}>
@@ -41,7 +41,7 @@ export function MemoFilterBar({
         value={search}
         onChange={(e) => onSearchChange(e.target.value)}
         placeholder="Search memo body…"
-        className="w-[220px] text-[11.5px] py-[5px]"
+        className="w-[220px] text-meta py-[5px]"
       />
     </div>
   );

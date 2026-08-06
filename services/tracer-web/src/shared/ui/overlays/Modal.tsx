@@ -74,16 +74,16 @@ export function Modal({
       <div
         ref={panelRef}
         style={{ maxWidth }}
-        className="w-full bg-s1 border border-hair rounded-md shadow-[0_20px_50px_-10px_rgba(0,0,0,0.6)] max-h-[80vh] flex flex-col overflow-hidden"
+        className="w-full bg-s1 border border-hair rounded-md shadow-elev-2 max-h-[80vh] flex flex-col overflow-hidden"
       >
         <header className="px-4 pt-3.5 pb-3 border-b border-hair">
-          <h2 className="m-0 text-sm font-semibold text-ink tracking-[-0.1px]">
+          <h2 className="m-0 text-lead font-semibold text-ink tracking-snug">
             {title}
           </h2>
           {description && (
             <GuidanceText
               as="p"
-              className="mt-1 mb-0 text-xs text-ink-subtle leading-[1.5]"
+              className="mt-1 mb-0 text-body text-ink-subtle leading-normal"
               locale={descriptionLocale}
               message={description}
             />

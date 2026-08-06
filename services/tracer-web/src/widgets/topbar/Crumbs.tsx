@@ -11,7 +11,7 @@ export function Crumbs() {
   return (
     <nav
       aria-label="Breadcrumb"
-      className="flex items-center gap-1.5 min-w-0 text-sm text-ink-subtle"
+      className="flex items-center gap-1.5 min-w-0 text-lead text-ink-subtle"
     >
       <CrumbItem
         icon={<HomeGlyph />}
@@ -19,7 +19,7 @@ export function Crumbs() {
       />
       {task && (
         <>
-          <span className="text-hair-strong font-mono text-xs">
+          <span className="text-hair-strong font-mono text-body">
             /
           </span>
           <CrumbItem
@@ -50,7 +50,7 @@ function CrumbItem({ icon, label, current }: CrumbItemProps) {
       <span className="text-ink-tertiary inline-flex">
         {icon}
       </span>
-      <span className="truncate tracking-[-0.1px] max-w-80">
+      <span className="truncate tracking-snug max-w-80">
         {label}
       </span>
     </span>

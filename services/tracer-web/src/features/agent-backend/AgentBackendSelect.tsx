@@ -31,7 +31,7 @@ export function AgentBackendSelect({
       value={value ?? ""}
       disabled={disabled}
       onChange={(event) => onChange(event.target.value)}
-      className={cn("text-xs", className)}
+      className={cn("text-body", className)}
     >
       {catalog.upstreams.map((upstream) => (
         <option key={upstream.name} value={upstream.name}>

@@ -29,7 +29,7 @@ export function TurnMark({ turnIndex, verdict, status, splitSelection }: TurnMar
 
   return (
     <div
-      className="group flex items-center gap-2.5 py-3 font-mono text-[10.5px] uppercase tracking-[0.04em]"
+      className="group flex items-center gap-2.5 py-3 font-mono text-mini uppercase tracking-label"
       style={{ color: accent }}
     >
       <Hairline color={`color-mix(in srgb, ${accent} 45%, transparent)`} />

@@ -3,7 +3,7 @@ import type { MonitoringTask } from "~tracer-web/entities/task/model/task.js";
 import type { StatusKind } from "~tracer-web/shared/ui/lib/status-kind.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
 import {
-  Badge,
+  Chip,
   GuidanceText,
   StatusDot,
   Tooltip,
@@ -103,8 +103,8 @@ export function TaskRow({
         />
         <span
           className={cn(
-            "min-w-0 tracking-[-0.1px] truncate",
-            isSubagent ? "text-xs italic" : "text-[13px] not-italic",
+            "min-w-0 tracking-snug truncate",
+            isSubagent ? "text-body italic" : "text-lead not-italic",
             unread
               ? "font-semibold"
               : isSubagent
@@ -118,7 +118,7 @@ export function TaskRow({
           {task.displayTitle ?? task.title}
         </span>
         {task.status === "waiting" && (
-          <Badge variant="appr">await input</Badge>
+          <Chip tone="warn">await input</Chip>
         )}
         <Tooltip
           content={
@@ -130,7 +130,7 @@ export function TaskRow({
         >
           <span
             className={cn(
-              "font-mono text-[10.5px]",
+              "font-mono text-mini",
               unread && !actions.active
                 ? "text-primary font-semibold"
                 : "text-ink-subtle font-normal",
@@ -154,7 +154,7 @@ export function TaskRow({
       </div>
 
       {!hideRuntimeBadge && task.runtimeSource && (
-        <div className="flex items-center gap-2 flex-wrap font-mono text-[10.5px] text-ink-tertiary">
+        <div className="flex items-center gap-2 flex-wrap font-mono text-mini text-ink-tertiary">
           <span className="inline-flex items-center gap-1">
             <span
               aria-hidden

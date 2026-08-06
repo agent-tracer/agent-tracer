@@ -27,7 +27,7 @@ export function TurnBands({ turns, range, splitSelection }: TurnBandsProps) {
             style={{ left: trackLeftCss(leftPercent) }}
           >
             <span className="absolute left-1 top-0.5 flex items-center gap-1 whitespace-nowrap">
-              <span className="rounded-[2px] bg-s2 px-1 py-px font-mono text-[8.5px] tracking-[0.08em] text-ink-tertiary">
+              <span className="rounded-xs bg-s2 px-1 py-px font-mono text-nano tracking-eyebrow text-ink-tertiary">
                 T{turn.turnIndex}
               </span>
               {splitSelection ? (

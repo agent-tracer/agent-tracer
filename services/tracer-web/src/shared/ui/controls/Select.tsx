@@ -1,16 +1,11 @@
 import type { ComponentPropsWithoutRef } from "react";
 import { cn } from "~tracer-web/shared/ui/lib/cn.js";
+import { CONTROL_SURFACE } from "~tracer-web/shared/ui/controls/Input.js";
+import { DISABLED, TRANSITION } from "~tracer-web/shared/ui/lib/interactive.js";
 
 export function Select({ className, children, ...rest }: ComponentPropsWithoutRef<"select">) {
   return (
-    <select
-      className={cn(
-        "px-2.5 py-1.5 text-sm rounded-xs border border-hair bg-canvas text-ink",
-        "outline-none focus-visible:ring-2 focus-visible:ring-primary/45",
-        className,
-      )}
-      {...rest}
-    >
+    <select className={cn(CONTROL_SURFACE, TRANSITION, DISABLED, className)} {...rest}>
       {children}
     </select>
   );

@@ -18,7 +18,7 @@ export function TimeMark({ label, tone = "normal", count }: TimeMarkProps) {
     <div
       className={cn(
         "flex items-center gap-2.5 py-3",
-        "text-[10.5px] uppercase tracking-[0.04em] font-[var(--font-mono)]",
+        "text-mini uppercase tracking-label font-mono",
       )}
       style={{ color: isCompact ? "var(--warn)" : "var(--ink-tertiary)" }}
     >

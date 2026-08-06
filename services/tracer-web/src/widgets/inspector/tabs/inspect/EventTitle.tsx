@@ -13,10 +13,10 @@ export function EventTitle({ event }: EventTitleProps) {
 
   return (
     <div className="mt-1.5">
-      <h2 className="m-0 text-base font-semibold tracking-[-0.3px] text-ink leading-[1.35]">
+      <h2 className="m-0 text-title font-semibold tracking-display text-ink leading-tight">
         {event.title}
       </h2>
-      <p className="mt-1.5 font-mono text-[11px] text-ink-subtle">
+      <p className="mt-1.5 font-mono text-meta text-ink-subtle">
         {subline}
       </p>
     </div>

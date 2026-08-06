@@ -1,6 +1,7 @@
 import * as RxTabs from "@radix-ui/react-tabs";
 import { forwardRef, type ComponentPropsWithoutRef } from "react";
 import { cn } from "~tracer-web/shared/ui/lib/cn.js";
+import { DISABLED, TRANSITION } from "~tracer-web/shared/ui/lib/interactive.js";
 
 export const Tabs = RxTabs.Root;
 
@@ -11,10 +12,7 @@ export const TabsList = forwardRef<
   return (
     <RxTabs.List
       ref={ref}
-      className={cn(
-        "flex border-b border-[var(--hair)] px-3.5",
-        className,
-      )}
+      className={cn("flex border-b border-hair px-3.5", className)}
       {...props}
     />
   );
@@ -29,12 +27,12 @@ export const TabsTrigger = forwardRef<
       ref={ref}
       className={cn(
         "inline-flex items-center gap-1.5 px-3 py-3 -mb-px",
-        "text-[12.5px] font-medium text-[var(--ink-subtle)]",
-        "border-b-2 border-transparent",
-        "hover:text-[var(--ink)]",
-        "data-[state=active]:text-[var(--ink)] data-[state=active]:border-[var(--primary)]",
-        "disabled:opacity-40 disabled:pointer-events-none",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_srgb,var(--primary)_45%,transparent)]",
+        "text-body font-medium text-ink-subtle",
+        "border-b-2 border-transparent hover:text-ink",
+        "data-[state=active]:text-ink data-[state=active]:border-primary",
+        "focus-ring",
+        TRANSITION,
+        DISABLED,
         className,
       )}
       {...props}

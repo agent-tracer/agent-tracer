@@ -36,7 +36,7 @@ export function TurnSplitButton({
           selection.pick(turnIndex);
         }}
         className={cn(
-          "inline-flex items-center rounded-pill border px-2 py-[2px] font-mono text-[10.5px] normal-case tracking-normal transition-colors",
+          "inline-flex items-center rounded-pill border px-2 py-[2px] font-mono text-mini normal-case tracking-normal transition-colors",
           picking
             ? "border-primary text-ink"
             : "border-hair text-ink-subtle hover:text-ink hover:border-hair-strong",

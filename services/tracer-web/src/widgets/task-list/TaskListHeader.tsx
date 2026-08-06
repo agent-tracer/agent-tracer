@@ -22,7 +22,7 @@ export function TaskListHeader() {
 
   return (
     <div className="mx-3 mb-2 flex items-center gap-2">
-      <label className="flex-1 min-w-0 flex h-[30px] items-center gap-2 rounded-sm border border-hair bg-s1 px-2.5 text-ink-subtle focus-within:border-primary-focus focus-within:shadow-[0_0_0_2px_color-mix(in_srgb,var(--primary-focus)_30%,transparent)]">
+      <label className="flex-1 min-w-0 flex h-[30px] items-center gap-2 rounded-sm border border-hair bg-s1 px-2.5 text-ink-subtle focus-ring-within">
         <SearchGlyph />
         <input
           type="text"
@@ -30,14 +30,14 @@ export function TaskListHeader() {
           onChange={(e) => setValue(e.target.value)}
           placeholder="Search tasks…"
           aria-label="Search tasks"
-          className="flex-1 min-w-0 border-0 bg-transparent outline-0 font-sans font-normal text-[12.5px] text-ink tracking-[-0.05px]"
+          className="flex-1 min-w-0 border-0 bg-transparent outline-0 font-sans font-normal text-body text-ink tracking-snug"
         />
         {value && (
           <button
             type="button"
             onClick={() => setValue("")}
             aria-label="Clear search"
-            className="text-ink-tertiary hover:text-ink text-sm leading-none"
+            className="text-ink-tertiary hover:text-ink text-lead leading-none"
           >
             ×
           </button>
@@ -61,7 +61,7 @@ export function TaskListHeader() {
           {pendingCount > 0 && (
             <span
               aria-hidden
-              className="absolute -top-1 -right-1 min-w-[14px] h-[14px] px-[3px] rounded-[7px] bg-primary text-canvas font-mono text-[9.5px] leading-[14px] font-semibold text-center"
+              className="absolute -top-1 -right-1 min-w-[14px] h-[14px] px-[3px] rounded-pill bg-primary text-on-primary font-mono text-micro leading-[14px] font-semibold text-center"
             >
               {pendingCount > 99 ? "99+" : pendingCount}
             </span>

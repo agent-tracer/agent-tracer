@@ -21,7 +21,7 @@ export function TaskListFilters({ counts }: TaskListFiltersProps) {
   const showArchived = useShowArchived();
 
   return (
-    <div className="flex items-center gap-px px-2.5 pb-1.5 border-b border-[var(--hair)]">
+    <div className="flex items-center gap-px px-2.5 pb-1.5 border-b border-hair">
       <FilterPill
         label="All"
         count={counts.all}
@@ -52,7 +52,7 @@ export function TaskListFilters({ counts }: TaskListFiltersProps) {
       />
       {showArchived && (
         <span
-          className="ml-auto inline-flex items-center gap-1.5 text-[10.5px] text-primary font-medium tracking-[0.04em] uppercase"
+          className="ml-auto inline-flex items-center gap-1.5 text-mini text-primary font-medium tracking-label uppercase"
           aria-live="polite"
         >
           Archived view
@@ -86,16 +86,16 @@ function FilterPill({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "inline-flex items-center gap-[5px] rounded-[var(--radius-sm)]",
-        "px-[9px] py-[5px] text-[11.5px] font-medium",
+        "inline-flex items-center gap-[5px] rounded-sm",
+        "px-[9px] py-[5px] text-meta font-medium",
         active
-          ? "bg-[var(--s2)] text-[var(--ink)]"
-          : "text-[var(--ink-subtle)] hover:text-[var(--ink)]",
+          ? "bg-s2 text-ink"
+          : "text-ink-subtle hover:text-ink",
       )}
     >
       {dot && <DotIndicator tone={dot} />}
       <span>{label}</span>
-      <span className="font-mono text-[10px] text-ink-tertiary">
+      <span className="font-mono text-mini text-ink-tertiary">
         {count}
       </span>
     </button>

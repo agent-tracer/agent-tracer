@@ -1,6 +1,5 @@
 import { Fragment } from "react";
-import type { GuidanceLocale, GuidanceMessage } from "~tracer-web/shared/guidance.js";
-import { GuidanceText, ScrollArea } from "~tracer-web/shared/ui/index.js";
+import { DISABLED, GuidanceText, InlineState, ScrollArea } from "~tracer-web/shared/ui/index.js";
 import { useGuidance, useSidebarSearchQuery } from "~tracer-web/shared/store/index.js";
 import { useDebouncedValue } from "~tracer-web/shared/lib/hooks/use-debounced-value.js";
 import { cn } from "~tracer-web/shared/ui/lib/cn.js";
@@ -50,19 +49,22 @@ export function TaskListPanel() {
           <SearchResultsPanel query={query} />
         ) : (
           <div className="px-2 pt-1.5 pb-3.5">
-            {isLoading && <Status label="Loading tasks…" />}
+            {isLoading && <InlineState state="loading" subject="tasks" dense />}
             {isError && (
-              <Status
-                message={guidance.messages.tasks.listLoadError}
-                locale={guidance.locale}
-                tone="err"
-              />
+              <InlineState state="error" dense>
+                <GuidanceText
+                  locale={guidance.locale}
+                  message={guidance.messages.tasks.listLoadError}
+                />
+              </InlineState>
             )}
             {!isLoading && !isError && groups.length === 0 && (
-              <Status
-                message={guidance.messages.tasks.filterEmpty}
-                locale={guidance.locale}
-              />
+              <InlineState state="empty" dense>
+                <GuidanceText
+                  locale={guidance.locale}
+                  message={guidance.messages.tasks.filterEmpty}
+                />
+              </InlineState>
             )}
             {groups.map((group) => (
               <Fragment key={group.key}>
@@ -90,7 +92,8 @@ export function TaskListPanel() {
                 onClick={fetchMore}
                 disabled={isFetchingMore}
                 className={cn(
-                  "mt-2 w-full rounded-sm border border-hair px-3 py-2 text-xs hover:bg-s1 disabled:opacity-60 text-ink-subtle",
+                  "mt-2 w-full rounded-sm border border-hair px-3 py-2 text-body hover:bg-s1 text-ink-subtle focus-ring",
+                  DISABLED,
                   isFetchingMore ? "cursor-wait" : "cursor-pointer",
                 )}
               >
@@ -108,24 +111,4 @@ export function TaskListPanel() {
   );
 }
 
-function Status({
-  label,
-  message,
-  locale,
-  tone = "muted",
-}: {
-  /** 불러오는 중 같은 조작 표시는 영어 한 낱말로 남는다. */
-  label?: string;
-  message?: GuidanceMessage;
-  locale?: GuidanceLocale;
-  tone?: "muted" | "err";
-}) {
-  const className = cn(
-    "px-3 py-4 text-center text-xs",
-    tone === "err" ? "text-err" : "text-ink-subtle",
-  );
-  if (message !== undefined && locale !== undefined) {
-    return <GuidanceText as="div" className={className} locale={locale} message={message} />;
-  }
-  return <div className={className}>{label}</div>;
-}
+

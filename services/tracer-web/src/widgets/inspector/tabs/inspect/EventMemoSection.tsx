@@ -18,7 +18,7 @@ export function EventMemoSection({ taskId, eventId }: EventMemoSectionProps) {
       aria-label="Event memos"
       className="mt-3 rounded-sm border border-hair bg-s2 px-3 py-2.5"
     >
-      <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.1em] text-ink-tertiary">
+      <div className="flex items-center gap-2 font-mono text-mini uppercase tracking-eyebrow text-ink-tertiary">
         <span>Memos</span>
         {data && data.memos.length > 0 && (
           <span className="text-ink-muted normal-case tracking-normal">

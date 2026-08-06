@@ -1,6 +1,13 @@
 import { useState } from "react";
 import type { Recipe } from "~tracer-web/entities/recipe/model/recipe.js";
-import { Button, EmptyHint, GuidanceText, Modal } from "~tracer-web/shared/ui/index.js";
+import {
+  Button,
+  GuidanceText,
+  InlineState,
+  Input,
+  Modal,
+  Textarea,
+} from "~tracer-web/shared/ui/index.js";
 import {
   useDeleteRecipeMutation,
   useEditRecipeMutation,
@@ -21,15 +28,15 @@ interface ListProps {
 /** 승인된 레시피를 수정·보관하는 라이브러리를 표시한다. */
 export function ActiveRecipesList({ rows, loading, taskTitleById }: ListProps) {
   const guidance = useGuidance();
-  if (loading) return <EmptyHint>Loading recipes…</EmptyHint>;
+  if (loading) return <InlineState state="loading" subject="recipes" />;
   if (rows.length === 0) {
     return (
-      <EmptyHint>
+      <InlineState state="empty">
         <GuidanceText
           locale={guidance.locale}
           message={guidance.messages.recipes.activeEmpty}
         />
-      </EmptyHint>
+      </InlineState>
     );
   }
   return (
@@ -43,15 +50,15 @@ export function ActiveRecipesList({ rows, loading, taskTitleById }: ListProps) {
 
 export function ArchivedRecipesList({ rows, loading, taskTitleById }: ListProps) {
   const guidance = useGuidance();
-  if (loading) return <EmptyHint>Loading archive…</EmptyHint>;
+  if (loading) return <InlineState state="loading" subject="the archive" />;
   if (rows.length === 0) {
     return (
-      <EmptyHint>
+      <InlineState state="empty">
         <GuidanceText
           locale={guidance.locale}
           message={guidance.messages.recipes.archiveEmpty}
         />
-      </EmptyHint>
+      </InlineState>
     );
   }
   return (
@@ -130,7 +137,7 @@ function ActiveRecipeCard({
         footMetaAt={recipe.updatedAt}
         muted={muted}
         metaPills={
-          <div className="mt-1.5 flex flex-wrap gap-1.5 text-[10.5px] font-mono text-ink-tertiary">
+          <div className="mt-1.5 flex flex-wrap gap-1.5 text-mini font-mono text-ink-tertiary">
             <Pill>rev {recipe.rev}</Pill>
             <Pill>{recipe.status}</Pill>
             <Pill>{recipe.userEdited ? "provenance user" : "provenance agent"}</Pill>
@@ -162,11 +169,11 @@ function ActiveRecipeCard({
         descriptionLocale={guidance.locale}
       >
         <div className="p-4 flex flex-col gap-3">
-          <div className="text-sm text-ink">{recipe.title}</div>
+          <div className="text-lead text-ink">{recipe.title}</div>
           {remove.isError && (
             <GuidanceText
               as="div"
-              className="text-xs text-danger"
+              className="text-body text-err"
               locale={guidance.locale}
               message={apiErrorMessage(guidance.messages.common, remove.error)}
             />
@@ -196,43 +203,39 @@ function ActiveRecipeCard({
       >
         <div className="p-4 flex flex-col gap-3">
           <Field label="Title">
-            <input
+            <Input
               value={form.title}
               onChange={(e) => setForm((s) => ({ ...s, title: e.target.value }))}
-              className={inputClassName}
               disabled={edit.isPending}
-            />
+              />
           </Field>
           <Field label="Intent">
-            <input
+            <Input
               value={form.intent}
               onChange={(e) => setForm((s) => ({ ...s, intent: e.target.value }))}
-              className={inputClassName}
               disabled={edit.isPending}
-            />
+              />
           </Field>
           <Field label="Description">
-            <textarea
+            <Textarea
               value={form.description}
               onChange={(e) => setForm((s) => ({ ...s, description: e.target.value }))}
               rows={3}
-              className={inputClassName}
               disabled={edit.isPending}
-            />
+              />
           </Field>
           <Field label="Summary">
-            <textarea
+            <Textarea
               value={form.summaryMd}
               onChange={(e) => setForm((s) => ({ ...s, summaryMd: e.target.value }))}
               rows={8}
-              className={inputClassName}
               disabled={edit.isPending}
-            />
+              />
           </Field>
           {error && (
             <GuidanceText
               as="div"
-              className="text-xs text-danger"
+              className="text-body text-err"
               locale={guidance.locale}
               message={error}
             />
@@ -253,7 +256,7 @@ function ActiveRecipeCard({
 
 function Field({ label, children }: { readonly label: string; readonly children: React.ReactNode }) {
   return (
-    <label className="flex flex-col gap-1.5 text-xs text-ink-muted">
+    <label className="flex flex-col gap-1.5 text-body text-ink-muted">
       <span>{label}</span>
       {children}
     </label>
@@ -268,5 +271,3 @@ function Pill({ children }: { readonly children: React.ReactNode }) {
   );
 }
 
-const inputClassName =
-  "w-full bg-canvas border border-hair rounded-sm px-2.5 py-2 text-sm text-ink focus:outline-none focus:border-primary";

@@ -26,14 +26,14 @@ export function RecipeSectionTabs({ active, onSelect, counts }: RecipeSectionTab
           type="button"
           onClick={() => onSelect(t.key)}
           className={cn(
-            "py-1.5 px-3 border-none bg-transparent text-[12.5px] cursor-pointer flex items-center gap-1.5 border-b-2",
+            "py-1.5 px-3 border-none bg-transparent text-body cursor-pointer flex items-center gap-1.5 border-b-2",
             active === t.key
               ? "text-ink font-semibold border-primary"
               : "text-ink-muted font-medium border-transparent",
           )}
         >
           {t.label}
-          <span className="font-mono text-[10px] px-1.5 rounded-pill bg-s1 text-ink-tertiary min-w-[18px] text-center">
+          <span className="font-mono text-mini px-1.5 rounded-pill bg-s1 text-ink-tertiary min-w-[18px] text-center">
             {t.count}
           </span>
         </button>

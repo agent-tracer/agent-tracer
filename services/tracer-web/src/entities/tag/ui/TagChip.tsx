@@ -14,7 +14,7 @@ export function TagChip({ tag, onRemove }: TagChipProps) {
   return (
     <span
       title={tag.name}
-      className="inline-flex items-center gap-1 rounded-pill px-2 py-0.5 text-[11px] font-medium leading-4 max-w-40"
+      className="inline-flex items-center gap-1 rounded-pill px-2 py-0.5 text-meta font-medium leading-4 max-w-40"
       style={{ backgroundColor: tag.color, color: foreground }}
     >
       <span className="truncate">{tag.name}</span>

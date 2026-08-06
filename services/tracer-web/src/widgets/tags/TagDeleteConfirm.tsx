@@ -1,7 +1,7 @@
 import type { TagSummaryRecord } from "~tracer-web/entities/tag/model/tag.js";
 import { useDeleteTagMutation } from "~tracer-web/entities/tag/api/mutations.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
-import { GuidanceText } from "~tracer-web/shared/ui/index.js";
+import { Button, GuidanceText } from "~tracer-web/shared/ui/index.js";
 
 interface TagDeleteConfirmProps {
   readonly tag: TagSummaryRecord;
@@ -21,36 +21,30 @@ export function TagDeleteConfirm({ tag, onClose }: TagDeleteConfirmProps) {
     <div className="pt-4 px-4 pb-4 flex flex-col gap-3">
       <GuidanceText
         as="p"
-        className="m-0 text-[12.5px] text-ink-subtle leading-[1.5]"
+        className="m-0 text-body text-ink-subtle leading-normal"
         locale={guidance.locale}
         message={guidance.messages.tags.deleteDescription}
       />
-      <p className="m-0 text-[12.5px] text-ink">
+      <p className="m-0 text-body text-ink">
         Deleting <strong>{tag.name}</strong> will detach it from {tag.taskCount} task
         {tag.taskCount === 1 ? "" : "s"}.
       </p>
       {deleteMutation.isError && (
-        <p role="alert" className="m-0 text-xs text-err">
+        <p role="alert" className="m-0 text-body text-err">
           Delete failed. Try again.
         </p>
       )}
       <footer className="flex justify-end gap-2 pt-2 border-t border-hair">
-        <button
-          type="button"
-          onClick={onClose}
-          disabled={deleteMutation.isPending}
-          className="py-[7px] px-3 text-[12.5px] text-ink-muted bg-transparent border border-hair rounded-xs cursor-pointer"
-        >
+        <Button onClick={onClose} disabled={deleteMutation.isPending}>
           Cancel
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          variant="danger"
           onClick={handleDelete}
           disabled={deleteMutation.isPending}
-          className="py-[7px] px-3.5 text-[12.5px] font-medium text-canvas bg-err border border-err rounded-xs cursor-pointer disabled:opacity-50"
         >
           {deleteMutation.isPending ? "Deleting…" : "Delete tag"}
-        </button>
+        </Button>
       </footer>
     </div>
   );

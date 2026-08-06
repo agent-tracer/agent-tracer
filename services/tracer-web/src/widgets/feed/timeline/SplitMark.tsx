@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 import { TaskId } from "~tracer-web/shared/identity.js";
 import { useRevertTaskSplitMutation } from "~tracer-web/entities/task/api/split-mutations.js";
 import { Hairline } from "~tracer-web/widgets/feed/timeline/Hairline.js";
-import { GuidanceText } from "~tracer-web/shared/ui/index.js";
+import { DISABLED, GuidanceText } from "~tracer-web/shared/ui/index.js";
+import { cn } from "~tracer-web/shared/ui/lib/cn.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
 
 interface SplitMarkProps {
@@ -19,7 +20,7 @@ export function SplitMark({ fromTurnIndex, toTurnIndex, taskId }: SplitMarkProps
 
   return (
     <div
-      className="group flex items-center gap-2.5 py-3 font-mono text-[10.5px] uppercase tracking-[0.04em]"
+      className="group flex items-center gap-2.5 py-3 font-mono text-mini uppercase tracking-label"
       style={{ color: accent }}
     >
       <Hairline color={`color-mix(in srgb, ${accent} 45%, transparent)`} />
@@ -39,7 +40,7 @@ export function SplitMark({ fromTurnIndex, toTurnIndex, taskId }: SplitMarkProps
         type="button"
         disabled={revert.isPending}
         onClick={() => revert.mutate(TaskId(taskId))}
-        className="inline-flex items-center rounded-pill border border-hair px-2 py-[2px] normal-case tracking-normal text-ink-subtle opacity-0 transition-opacity group-hover:opacity-100 hover:text-ink hover:border-hair-strong disabled:opacity-40"
+        className={cn("inline-flex items-center rounded-pill border border-hair px-2 py-[2px] normal-case tracking-normal text-ink-subtle opacity-0 transition-opacity group-hover:opacity-100 hover:text-ink hover:border-hair-strong focus-ring", DISABLED)}
       >
         undo
       </button>

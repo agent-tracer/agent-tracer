@@ -38,13 +38,13 @@ export function RuleGenerationRunStatus({ controller }: RuleGenerationRunStatusP
       {operationalBlockingReason && (
         <GuidanceText
           as="p"
-          className="mt-2 mb-0 text-[11px] text-ink-tertiary"
+          className="mt-2 mb-0 text-meta text-ink-tertiary"
           locale={guidance.locale}
           message={operationalBlockingReason}
         />
       )}
       {incompleteTimelineStatus && (
-        <p className="mt-2 mb-0 text-[11px] text-warn">
+        <p className="mt-2 mb-0 text-meta text-warn">
           <span aria-hidden>⚠ </span>
           <GuidanceText
             locale={guidance.locale}
@@ -53,7 +53,7 @@ export function RuleGenerationRunStatus({ controller }: RuleGenerationRunStatusP
         </p>
       )}
       {outcome !== null && (
-        <p className={cn("mt-2 mb-0 text-[11px]", TONE_CLASS[outcome.tone] ?? "text-ink-tertiary")}>
+        <p className={cn("mt-2 mb-0 text-meta", TONE_CLASS[outcome.tone] ?? "text-ink-tertiary")}>
           <GuidanceText locale={guidance.locale} message={outcome.headline} />
           {outcome.detail !== null && (
             <>
@@ -65,7 +65,7 @@ export function RuleGenerationRunStatus({ controller }: RuleGenerationRunStatusP
             <button
               type="button"
               onClick={() => void stop()}
-              className="ml-2 underline cursor-pointer bg-transparent border-0 p-0 text-[11px] text-ink-tertiary"
+              className="ml-2 underline cursor-pointer bg-transparent border-0 p-0 text-meta text-ink-tertiary"
             >
               Stop
             </button>
@@ -73,14 +73,14 @@ export function RuleGenerationRunStatus({ controller }: RuleGenerationRunStatusP
         </p>
       )}
       {lastIntent !== undefined && (
-        <p className="mt-1 mb-0 text-[11px] text-ink-subtle break-words">
+        <p className="mt-1 mb-0 text-meta text-ink-subtle break-words">
           Intent: “{lastIntent}”
         </p>
       )}
       {errorMessage && (
         <GuidanceText
           as="p"
-          className="mt-2 mb-0 text-[11px] text-err"
+          className="mt-2 mb-0 text-meta text-err"
           locale={guidance.locale}
           message={errorMessage}
         />

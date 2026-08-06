@@ -42,15 +42,15 @@ export function TaskHitRow({ hit, nowMs }: TaskHitRowProps) {
             />
           }
         />
-        <span className="flex-1 min-w-0 truncate text-sm text-ink tracking-[-0.1px]">
+        <span className="flex-1 min-w-0 truncate text-lead text-ink tracking-snug">
           {hit.title}
         </span>
-        <span className="font-mono text-[10.5px] text-ink-subtle">
+        <span className="font-mono text-mini text-ink-subtle">
           {formatRelativeShort(hit.updatedAt, nowMs)}
         </span>
       </div>
       {hit.workspacePath && (
-        <div className="truncate mt-0.5 font-mono text-[10.5px] text-ink-tertiary">
+        <div className="truncate mt-0.5 font-mono text-mini text-ink-tertiary">
           {hit.workspacePath}
         </div>
       )}
@@ -74,24 +74,24 @@ export function EventHitRow({ hit }: EventHitRowProps) {
       <div className="flex items-center gap-2">
         <span
           aria-hidden
-          className="h-2 w-2 rounded-[2px] shrink-0"
+          className="h-2 w-2 rounded-xs shrink-0"
           style={{ background: lane.cssColor }}
         />
         <span
-          className="font-mono text-[10px] font-semibold tracking-[0.08em]"
+          className="font-mono text-mini font-semibold tracking-eyebrow"
           style={{ color: lane.cssColor }}
         >
           {lane.label}
         </span>
-        <span className="flex-1 min-w-0 truncate text-[12.5px] text-ink tracking-[-0.05px]">
+        <span className="flex-1 min-w-0 truncate text-body text-ink tracking-snug">
           {hit.title}
         </span>
       </div>
-      <div className="truncate mt-0.5 font-mono text-[10.5px] text-ink-tertiary">
+      <div className="truncate mt-0.5 font-mono text-mini text-ink-tertiary">
         {hit.taskTitle}
       </div>
       {hit.snippet && (
-        <p className="mt-1 mb-0 line-clamp-2 text-[11.5px] text-ink-subtle leading-[1.45]">
+        <p className="mt-1 mb-0 line-clamp-2 text-meta text-ink-subtle leading-normal">
           {hit.snippet}
         </p>
       )}
@@ -115,12 +115,12 @@ export function MemoHitRow({ hit }: MemoHitRowProps) {
       className="block px-2.5 py-2 mb-px rounded-sm border border-transparent hover:bg-s1"
     >
       <div className="flex items-center gap-2">
-        <span className="font-mono text-[10px] font-semibold tracking-[0.08em] text-ink-tertiary">
+        <span className="font-mono text-mini font-semibold tracking-eyebrow text-ink-tertiary">
           MEMO
         </span>
-        <span className="font-mono text-[10.5px] text-ink-tertiary">{hit.author}</span>
+        <span className="font-mono text-mini text-ink-tertiary">{hit.author}</span>
       </div>
-      <p className="mt-0.5 mb-0 line-clamp-2 text-[12.5px] text-ink tracking-[-0.05px] leading-[1.45]">
+      <p className="mt-0.5 mb-0 line-clamp-2 text-body text-ink tracking-snug leading-normal">
         {hit.body}
       </p>
     </Link>

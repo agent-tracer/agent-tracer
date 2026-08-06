@@ -16,13 +16,13 @@ export function EventVerificationSection({
       aria-label="Event verifications"
       className="mt-3 rounded-sm border border-hair bg-s2 px-3 py-2.5"
     >
-      <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.1em] text-ph-veri">
+      <div className="flex items-center gap-2 font-mono text-mini uppercase tracking-eyebrow text-ph-veri">
         <span>Verified by</span>
         <span className="text-ink-muted normal-case tracking-normal">
           {count} {count === 1 ? "rule" : "rules"}
         </span>
         {!entry.moveToVeri && (
-          <span className="ml-auto rounded-pill border border-hair px-1.5 py-px text-[9px] normal-case tracking-normal text-ink-tertiary">
+          <span className="ml-auto rounded-pill border border-hair px-1.5 py-px text-micro normal-case tracking-normal text-ink-tertiary">
             Absence check anchor
           </span>
         )}
@@ -31,7 +31,7 @@ export function EventVerificationSection({
         {entry.verifications.map((verification) => (
           <li
             key={verification.id}
-            className="flex items-start gap-2 text-[11.5px] leading-4 text-ink"
+            className="flex items-start gap-2 text-meta leading-4 text-ink"
           >
             <span aria-hidden className="mt-[5px] h-1.5 w-1.5 shrink-0 rounded-full bg-ph-veri" />
             <span>{verification.ruleName}</span>

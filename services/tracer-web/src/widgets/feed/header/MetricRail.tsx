@@ -76,12 +76,12 @@ function Cell({ label, value, tone, chart, description }: CellProps) {
   return (
     <Tooltip content={<GuidanceText locale={guidance.locale} message={description} />}>
       <div className="inline-flex items-center gap-2">
-        <span className="font-mono text-[10px] text-ink-tertiary tracking-[0.08em] uppercase">
+        <span className="font-mono text-mini text-ink-tertiary tracking-eyebrow uppercase">
           {label}
         </span>
         <span
           className={cn(
-            "text-sm font-semibold tracking-[-0.1px] [font-variant-numeric:tabular-nums] whitespace-nowrap",
+            "text-lead font-semibold tracking-snug [font-variant-numeric:tabular-nums] whitespace-nowrap",
             tone === "err" ? "text-err" : tone === "warn" ? "text-warn" : "text-ink",
           )}
         >

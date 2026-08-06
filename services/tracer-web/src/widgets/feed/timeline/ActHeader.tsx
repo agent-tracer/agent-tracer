@@ -1,4 +1,5 @@
 import type { ActVm } from "~tracer-web/widgets/feed/lib/timeline/act-classification.js";
+import { Chip } from "~tracer-web/shared/ui/index.js";
 
 interface ActHeaderProps {
   readonly vm: ActVm;
@@ -8,22 +9,14 @@ interface ActHeaderProps {
 export function ActHeader({ vm }: ActHeaderProps) {
   return (
     <div className="flex items-center gap-2 flex-wrap">
-      <span
-        className="inline-flex items-center rounded-xs px-1.5 font-mono text-[9.5px] font-semibold tracking-[0.08em] leading-4"
-        style={{
-          color: vm.lane.cssColor,
-          background: `color-mix(in srgb, ${vm.lane.cssColor} 14%, transparent)`,
-        }}
-      >
-        {vm.lane.label}
-      </span>
-      <span className="font-mono text-[11.5px] text-ink font-medium tracking-[-0.05px]">
+      <Chip tone={vm.lane.chipTone}>{vm.lane.label}</Chip>
+      <span className="font-mono text-meta text-ink font-medium tracking-snug">
         {vm.toolName}
       </span>
       {vm.hasViolation && (
-        <span className="ml-auto rounded-xs px-1.5 font-mono text-[10.5px] text-err bg-err/14 tracking-[0.02em]">
+        <Chip tone="err" className="ml-auto">
           viol
-        </span>
+        </Chip>
       )}
     </div>
   );

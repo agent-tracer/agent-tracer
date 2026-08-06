@@ -78,10 +78,10 @@ export function TurnSplitModal({ taskId, target, turns, onClose }: TurnSplitModa
           <ul className="mt-1.5 flex flex-col gap-1">
             {moved.map((turn) => (
               <li key={turn.id} className="flex items-baseline gap-2 min-w-0">
-                <span className="w-4 shrink-0 text-right font-mono text-[10.5px] text-ink-tertiary">
+                <span className="w-4 shrink-0 text-right font-mono text-mini text-ink-tertiary">
                   {turn.turnIndex}
                 </span>
-                <span className="truncate text-[11.5px] text-ink leading-[1.5]">
+                <span className="truncate text-meta text-ink leading-normal">
                   {turn.askedText ?? "—"}
                 </span>
               </li>
@@ -92,7 +92,7 @@ export function TurnSplitModal({ taskId, target, turns, onClose }: TurnSplitModa
         {mutation.isError && (
           <GuidanceText
             as="p"
-            className="mt-3 mb-0 text-xs text-err"
+            className="mt-3 mb-0 text-body text-err"
             locale={guidance.locale}
             message={apiErrorMessage(guidance.messages.common, mutation.error)}
           />

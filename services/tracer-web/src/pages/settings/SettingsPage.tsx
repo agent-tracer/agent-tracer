@@ -1,5 +1,5 @@
 import { useGuidance } from "~tracer-web/shared/store/index.js";
-import { GuidanceText } from "~tracer-web/shared/ui/index.js";
+import { GuidanceText, PageHeader } from "~tracer-web/shared/ui/index.js";
 import { DaemonHealthSection } from "~tracer-web/widgets/settings/daemon/DaemonHealthSection.js";
 import { GuidanceLanguageSection } from "~tracer-web/widgets/settings/display/GuidanceLanguageSection.js";
 import { IdentitySection } from "~tracer-web/widgets/settings/identity/IdentitySection.js";
@@ -14,20 +14,12 @@ export function SettingsPage() {
 
   return (
     <div className="flex flex-col min-h-0 h-full overflow-auto">
-      <header className="px-9 pt-6 pb-4 flex flex-col gap-2 border-b border-hair">
-        <p className="text-[11px] tracking-[0.08em] uppercase text-ink-tertiary">
-          Settings
-        </p>
-        <h1 className="text-[22px] font-semibold tracking-[-0.01em]">
-          Local monitor configuration
-        </h1>
-        <GuidanceText
-          as="p"
-          className="text-ink-muted text-sm"
-          locale={guidance.locale}
-          message={guidance.messages.settings.introduction}
-        />
-      </header>
+      <PageHeader
+        eyebrow="Settings"
+        title="Local monitor configuration"
+        intro={guidance.messages.settings.introduction}
+        introLocale={guidance.locale}
+      />
 
       <main className="px-9 py-6 flex flex-col gap-6 max-w-3xl">
         <IdentitySection />
@@ -36,7 +28,7 @@ export function SettingsPage() {
         <RuleGenerationSettingsSection />
         <DaemonHealthSection />
 
-        <section className="border border-hair rounded-md py-4 px-5 bg-s1 text-[12.5px] text-ink-muted">
+        <section className="border border-hair rounded-md py-4 px-5 bg-s1 text-body text-ink-muted">
           <strong className="text-ink">Security note</strong>
           <GuidanceText
             as="p"

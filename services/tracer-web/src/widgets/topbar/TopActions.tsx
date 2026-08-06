@@ -134,7 +134,7 @@ function NavButton({ entry, compact }: NavButtonProps) {
         {entry.icon}
         {!compact && (
           <>
-            <span className="text-xs font-medium tracking-[-0.05px]">{entry.label}</span>
+            <span className="text-body font-medium tracking-snug">{entry.label}</span>
             {counted && <CountBadge count={entry.count ?? null} />}
           </>
         )}
@@ -153,8 +153,8 @@ function CountBadge({ count }: { readonly count: number | null }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center justify-center rounded-pill font-mono text-[10px] font-semibold px-1.5 min-w-5 leading-4",
-        (count ?? 0) > 0 ? "bg-ink-tertiary text-white" : "bg-s1 text-ink-tertiary",
+        "inline-flex items-center justify-center rounded-pill font-mono text-mini font-semibold px-1.5 min-w-5 leading-4",
+        (count ?? 0) > 0 ? "bg-ink-tertiary text-on-primary" : "bg-s1 text-ink-tertiary",
       )}
     >
       {count === null ? "…" : count}

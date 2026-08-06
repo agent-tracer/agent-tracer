@@ -20,11 +20,11 @@ export function Card({ title, count, surface = "s1", className, children }: Card
     >
       {title && (
         <header className="flex items-center gap-2">
-          <span className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-ink-tertiary">
+          <span className="font-mono text-mini uppercase tracking-eyebrow text-ink-tertiary">
             {title}
           </span>
           {count !== undefined && (
-            <span className="text-[11px] text-ink-muted">{count}</span>
+            <span className="text-meta text-ink-muted">{count}</span>
           )}
         </header>
       )}

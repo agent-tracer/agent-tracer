@@ -27,18 +27,18 @@ export function RuleGenerationForm({ controller }: RuleGenerationFormProps) {
   return (
     <div className="flex flex-col gap-2">
       <div className="min-w-0">
-        <p className="m-0 font-mono text-[10px] uppercase tracking-[0.1em] text-ink-tertiary">
+        <p className="m-0 font-mono text-mini uppercase tracking-eyebrow text-ink-tertiary">
           Auto-generate
         </p>
         <GuidanceText
           as="p"
-          className="mt-1 mb-0 text-xs text-ink-muted leading-[1.4]"
+          className="mt-1 mb-0 text-body text-ink-muted leading-tight"
           locale={guidance.locale}
           message={guidance.messages.rules.generation.introduction}
         />
       </div>
       <label className="flex flex-col gap-1">
-        <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-tertiary">
+        <span className="font-mono text-mini uppercase tracking-eyebrow text-ink-tertiary">
           Rule source · user input
         </span>
         <select
@@ -47,7 +47,7 @@ export function RuleGenerationForm({ controller }: RuleGenerationFormProps) {
           disabled={disabled || userInputs.length === 0}
           aria-label="User input to base the rules on"
           className={cn(
-            "w-full py-1.5 px-2 text-xs rounded-xs border border-hair bg-canvas text-ink",
+            "w-full py-1.5 px-2 text-body rounded-xs border border-hair bg-canvas text-ink",
             (disabled || userInputs.length === 0) && "cursor-not-allowed opacity-60",
           )}
         >
@@ -58,7 +58,7 @@ export function RuleGenerationForm({ controller }: RuleGenerationFormProps) {
           ))}
         </select>
         <GuidanceText
-          className="text-[10px] text-ink-subtle"
+          className="text-mini text-ink-subtle"
           locale={guidance.locale}
           message={guidance.messages.rules.generation.anchorHelp}
         />
@@ -71,19 +71,19 @@ export function RuleGenerationForm({ controller }: RuleGenerationFormProps) {
         maxLength={RULE_GENERATION_INTENT_MAX_LENGTH}
         aria-label="Rule generation intent"
         className={cn(
-          "w-full resize-y py-1.5 px-2 text-xs leading-[1.5] rounded-xs border border-hair bg-canvas text-ink placeholder:text-ink-subtle",
+          "w-full resize-y py-1.5 px-2 text-body leading-normal rounded-xs border border-hair bg-canvas text-ink placeholder:text-ink-subtle",
           disabled && "cursor-not-allowed opacity-60",
         )}
       />
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 flex-col gap-0.5">
           <GuidanceText
-            className="text-[10px] text-ink-subtle"
+            className="text-mini text-ink-subtle"
             locale={guidance.locale}
             message={guidance.messages.rules.generation.intentHelp}
           />
           {intentDraft.length > 0 && (
-            <span className="font-mono text-[10px] text-ink-subtle">
+            <span className="font-mono text-mini text-ink-subtle">
               {intentDraft.length}/{RULE_GENERATION_INTENT_MAX_LENGTH}
             </span>
           )}
@@ -93,7 +93,7 @@ export function RuleGenerationForm({ controller }: RuleGenerationFormProps) {
           onClick={() => void generate()}
           disabled={disabled}
           className={cn(
-            "py-1.5 px-2.5 text-xs font-medium border border-hair rounded-xs whitespace-nowrap",
+            "py-1.5 px-2.5 text-body font-medium border border-hair rounded-xs whitespace-nowrap",
             disabled
               ? "text-ink-tertiary bg-s2 cursor-not-allowed"
               : "text-canvas bg-ink cursor-pointer",

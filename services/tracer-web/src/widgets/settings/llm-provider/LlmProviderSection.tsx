@@ -8,13 +8,7 @@ import { apiErrorMessage } from "~tracer-web/shared/api/api-error-message.js";
 import { isNotImplementedError } from "~tracer-web/shared/api/client/response.js";
 import type { GuidanceMessage } from "~tracer-web/shared/guidance.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
-import {
-  Button,
-  Card,
-  Field,
-  GuidanceText,
-  Select,
-} from "~tracer-web/shared/ui/index.js";
+import { Button, Card, Field, GuidanceText, SectionHeading, Select } from "~tracer-web/shared/ui/index.js";
 import { cn } from "~tracer-web/shared/ui/lib/cn.js";
 import { ModelSettingField, SecretSettingField } from "~tracer-web/widgets/settings/llm-provider/ProviderSettingFields.js";
 import {
@@ -89,16 +83,16 @@ export function LlmProviderSection() {
 
   return (
     <Card surface="canvas" className="py-5 px-6">
-      <h2 className="text-[15px] font-semibold mb-1">LLM provider</h2>
+      <SectionHeading>LLM provider</SectionHeading>
       <GuidanceText
         as="p"
-        className="text-ink-muted text-[12.5px] mb-5"
+        className="text-ink-muted text-body mb-5"
         locale={guidance.locale}
         message={guidance.messages.settings.ruleGenerationIntroduction}
       />
       <GuidanceText
         as="p"
-        className="text-ink-tertiary text-[12px] mb-4"
+        className="text-ink-tertiary text-body mb-4"
         locale={guidance.locale}
         message={guidance.messages.settings.llmProviderScope}
       />
@@ -111,7 +105,7 @@ export function LlmProviderSection() {
         loading={isLoading}
         pending={putMutation.isPending}
         draft={apiKeyDraft}
-        placeholder="sk-ant-..."
+        placeholder="sk-ant-…"
         onDraftChange={setApiKeyDraft}
         onSave={() => void save(SETTING_KEYS.apiKey, apiKeyDraft, setApiKeyDraft)}
         onClear={() => void remove(SETTING_KEYS.apiKey)}
@@ -161,7 +155,7 @@ export function LlmProviderSection() {
             <Button
               variant="ghost"
               onClick={() => void remove(SETTING_KEYS.outputLanguage)}
-              className="text-xs border-0 p-0 underline"
+              className="text-body border-0 p-0 underline"
             >
               Reset to auto
             </Button>
@@ -170,7 +164,7 @@ export function LlmProviderSection() {
       </Field>
 
       {feedback && (
-        <p className={cn("mt-4 text-xs", feedback.tone === "err" ? "text-err" : "text-ink-muted")}>
+        <p className={cn("mt-4 text-body", feedback.tone === "err" ? "text-err" : "text-ink-muted")}>
           <GuidanceText locale={guidance.locale} message={feedback.message} />
           {feedback.reason !== undefined && (
             <>

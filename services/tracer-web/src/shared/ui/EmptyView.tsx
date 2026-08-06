@@ -25,17 +25,17 @@ export function EmptyView({
     <div className="flex h-full items-center justify-center text-center">
       <div className="max-w-[440px] px-6">
         {eyebrow && (
-          <div className="font-mono text-[10.5px] text-ink-tertiary uppercase tracking-[0.1em]">
+          <div className="font-mono text-mini text-ink-tertiary uppercase tracking-eyebrow">
             {eyebrow}
           </div>
         )}
-        <h1 className="mt-3 m-0 text-[22px] font-semibold tracking-[-0.4px] text-ink">
+        <h1 className="mt-3 m-0 text-display font-semibold tracking-display text-ink">
           {title}
         </h1>
         {description && (
           <GuidanceText
             as="p"
-            className="mt-2 text-ink-subtle text-[13px] leading-[1.55]"
+            className="mt-2 text-ink-subtle text-lead leading-normal"
             locale={locale}
             message={description}
           />

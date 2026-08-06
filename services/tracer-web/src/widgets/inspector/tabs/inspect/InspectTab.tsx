@@ -51,7 +51,7 @@ export function InspectTab() {
     return (
       <EmptyView
         eyebrow="Inspect"
-        title="Select an action to inspect."
+        title="Select an action to inspect"
         description={guidance.messages.inspector.selectAction}
         locale={guidance.locale}
       />
@@ -59,7 +59,7 @@ export function InspectTab() {
   }
 
   return (
-    <div className="px-4 py-4 border-b border-[var(--hair)]">
+    <div className="px-4 py-4 border-b border-hair">
       <EventEyebrow event={event} />
       <EventTitle event={event} />
       <TurnContextSection turn={turn} />

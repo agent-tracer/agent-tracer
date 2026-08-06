@@ -22,7 +22,7 @@ export function TagChipList({ tags, maxVisible = 4, emptyFallback = null }: TagC
         <TagChip key={tag.id} tag={tag} />
       ))}
       {overflowCount > 0 && (
-        <span className="font-mono text-[10.5px] text-ink-tertiary" title={`${overflowCount} more tags`}>
+        <span className="font-mono text-mini text-ink-tertiary" title={`${overflowCount} more tags`}>
           +{overflowCount}
         </span>
       )}

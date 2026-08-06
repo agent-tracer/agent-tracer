@@ -72,7 +72,7 @@ export function RuleRow({ rule, contextTaskId, onEdit }: RuleRowProps) {
           <span
             aria-hidden
             className={cn(
-              "inline-block font-mono text-[9px] text-ink-tertiary w-2.5 transition-transform duration-[120ms] ease-in-out",
+              "inline-block font-mono text-micro text-ink-tertiary w-2.5 transition-transform duration-150 ease-in-out",
               expanded ? "rotate-90" : "rotate-0",
             )}
           >
@@ -80,13 +80,13 @@ export function RuleRow({ rule, contextTaskId, onEdit }: RuleRowProps) {
           </span>
         )}
         <RuleSeverityChip severity={rule.severity} />
-        <span className="flex-1 min-w-0 truncate text-[12.5px] font-medium text-ink tracking-[-0.05px]">
+        <span className="flex-1 min-w-0 truncate text-body font-medium text-ink tracking-snug">
           {rule.name}
         </span>
         <RuleVerdictChip status={rule.verdictStatus} />
       </button>
 
-      <div className="flex items-center gap-2 flex-wrap mt-1.5 font-mono text-[10.5px] text-ink-tertiary">
+      <div className="flex items-center gap-2 flex-wrap mt-1.5 font-mono text-mini text-ink-tertiary">
         <span>source · {rule.source}</span>
         {expectationTool(rule.expect) && (
           <>
@@ -97,7 +97,7 @@ export function RuleRow({ rule, contextTaskId, onEdit }: RuleRowProps) {
       </div>
 
       {rule.rationale && (
-        <p className="mt-2 m-0 text-[11.5px] text-ink-subtle leading-[1.5]">
+        <p className="mt-2 m-0 text-meta text-ink-subtle leading-normal">
           {rule.rationale}
         </p>
       )}

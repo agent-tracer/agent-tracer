@@ -39,7 +39,7 @@ export function RuleFilterBar({
       <Select
         value={severity}
         onChange={(e) => onSeverityChange(e.target.value as SeverityFilter)}
-        className="text-[11.5px] text-ink-muted bg-s1 py-[5px]"
+        className="text-meta text-ink-muted bg-s1 py-[5px]"
       >
         {SEVERITY_OPTIONS.map((opt) => (
           <option key={opt.value} value={opt.value}>
@@ -50,7 +50,7 @@ export function RuleFilterBar({
       <Select
         value={source}
         onChange={(e) => onSourceChange(e.target.value as SourceFilter)}
-        className="text-[11.5px] text-ink-muted bg-s1 py-[5px]"
+        className="text-meta text-ink-muted bg-s1 py-[5px]"
       >
         {SOURCE_OPTIONS.map((opt) => (
           <option key={opt.value} value={opt.value}>
@@ -64,7 +64,7 @@ export function RuleFilterBar({
         value={search}
         onChange={(e) => onSearchChange(e.target.value)}
         placeholder="Search by name…"
-        className="w-[220px] text-[11.5px] py-[5px]"
+        className="w-[220px] text-meta py-[5px]"
       />
     </div>
   );

@@ -1,16 +1,21 @@
 import type { ComponentPropsWithoutRef } from "react";
 import { cn } from "~tracer-web/shared/ui/lib/cn.js";
+import { DISABLED, TRANSITION } from "~tracer-web/shared/ui/lib/interactive.js";
 
-type ButtonVariant = "primary" | "solid" | "ghost";
+/** 한 화면에서 채워진 `primary`는 하나만 두고 나머지는 `ghost`와 `danger`가 맡는다. */
+type ButtonVariant = "primary" | "ghost" | "danger";
 
 interface ButtonProps extends ComponentPropsWithoutRef<"button"> {
   readonly variant?: ButtonVariant;
 }
 
 const variantClass: Record<ButtonVariant, string> = {
-  primary: "bg-primary text-on-primary border border-primary",
-  solid: "bg-ink text-canvas border border-hair",
-  ghost: "bg-transparent text-ink-muted border border-hair",
+  primary:
+    "bg-primary text-on-primary border border-primary hover:bg-primary-hover hover:border-primary-hover",
+  ghost:
+    "bg-transparent text-ink-muted border border-hair hover:text-ink hover:border-hair-strong",
+  danger:
+    "bg-transparent text-err border border-err hover:bg-err/12",
 };
 
 export function Button({ variant = "ghost", className, type = "button", ...rest }: ButtonProps) {
@@ -18,8 +23,9 @@ export function Button({ variant = "ghost", className, type = "button", ...rest 
     <button
       type={type}
       className={cn(
-        "px-3 py-1.5 text-[12.5px] font-medium rounded-xs transition-opacity",
-        "disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none",
+        "px-3 py-1.5 text-body font-medium rounded-xs focus-ring",
+        TRANSITION,
+        DISABLED,
         variantClass[variant],
         className,
       )}

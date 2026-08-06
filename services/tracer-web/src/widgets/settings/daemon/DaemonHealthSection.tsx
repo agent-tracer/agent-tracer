@@ -6,9 +6,8 @@ import { useNowMs } from "~tracer-web/shared/lib/hooks/use-now-ms.js";
 import { useDaemonHealthQuery } from "~tracer-web/entities/daemon/api/queries.js";
 import { resolveDaemonControlPageUrl } from "~tracer-web/shared/config/daemon-base-url.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
-import { Card, ExternalLinkIcon, GuidanceText, Pill, Tooltip } from "~tracer-web/shared/ui/index.js";
+import { Card, ExternalLinkIcon, GuidanceText, Pill, SectionHeading, Tooltip } from "~tracer-web/shared/ui/index.js";
 
-/** 로컬 데몬이 보고하는 자기 건강 스냅샷(스풀 적체·dead-letter·삼킨 오류·버전· 마지막 보고 시각)을 보여준다. */
 /** 로컬 수집 데몬의 연결·스풀·재시작 상태를 표시한다. */
 export function DaemonHealthSection() {
   const { data } = useDaemonHealthQuery();
@@ -18,12 +17,11 @@ export function DaemonHealthSection() {
 
   return (
     <Card surface="canvas" className="py-5 px-6">
-      <div className="flex items-center justify-between gap-3 mb-1">
-        <h2 className="text-[15px] font-semibold">Collector health</h2>
-        <ControlPageLink reachable={reachable} />
-      </div>
+      <SectionHeading action={<ControlPageLink reachable={reachable} />}>
+        Collector health
+      </SectionHeading>
       {!snapshot ? (
-        <p className="text-ink-muted text-sm">No health report received yet.</p>
+        <p className="text-ink-muted text-lead">No health report received yet.</p>
       ) : (
         <div className="flex flex-col gap-2 mt-1">
           <Row label="Spool backlog" value={formatBytes(snapshot.spoolBacklogBytes)} />
@@ -67,7 +65,7 @@ function ControlPageLink({ reachable }: { readonly reachable: boolean }) {
   const guidance = useGuidance();
   const label = "Open control page";
   const className =
-    "inline-flex items-center gap-1.5 text-xs font-medium no-underline rounded-sm px-2 h-7";
+    "inline-flex items-center gap-1.5 text-body font-medium no-underline rounded-sm px-2 h-7";
 
   if (!reachable) {
     return (
@@ -113,7 +111,7 @@ function ControlPageLink({ reachable }: { readonly reachable: boolean }) {
 
 function Row({ label, value }: { readonly label: string; readonly value: ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-3 text-[12.5px]">
+    <div className="flex items-center justify-between gap-3 text-body">
       <span className="text-ink-tertiary">{label}</span>
       <span className="text-ink font-mono">{value}</span>
     </div>

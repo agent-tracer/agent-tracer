@@ -23,7 +23,7 @@ export function MemoListItem({ memo, task }: MemoListItemProps) {
 
   return (
     <article className="bg-s1 border border-hair rounded-md py-3 px-3.5 flex flex-col gap-2">
-      <div className="flex items-center gap-2 flex-wrap font-mono text-[10.5px] text-ink-tertiary">
+      <div className="flex items-center gap-2 flex-wrap font-mono text-mini text-ink-tertiary">
         <MemoTaskBreadcrumb taskId={memo.taskId} task={task} />
         {memo.eventId && (
           <>

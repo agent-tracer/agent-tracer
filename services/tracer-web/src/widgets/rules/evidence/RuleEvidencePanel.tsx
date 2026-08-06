@@ -37,7 +37,7 @@ export function RuleEvidencePanel({
     return (
       <GuidanceText
         as="div"
-        className={cn(WRAP_CLASS, "text-[11px] text-ink-tertiary")}
+        className={cn(WRAP_CLASS, "text-meta text-ink-tertiary")}
         locale={guidance.locale}
         message={guidance.messages.rules.evidence.loading}
       />
@@ -47,7 +47,7 @@ export function RuleEvidencePanel({
     return (
       <GuidanceText
         as="div"
-        className={cn(WRAP_CLASS, "text-[11px] text-err")}
+        className={cn(WRAP_CLASS, "text-meta text-err")}
         locale={guidance.locale}
         message={guidance.messages.rules.evidence.unavailable}
       />
@@ -57,7 +57,7 @@ export function RuleEvidencePanel({
     return (
       <GuidanceText
         as="div"
-        className={cn(WRAP_CLASS, "text-[11px] text-ink-tertiary")}
+        className={cn(WRAP_CLASS, "text-meta text-ink-tertiary")}
         locale={guidance.locale}
         message={guidance.messages.rules.evidence.empty}
       />
@@ -75,7 +75,7 @@ export function RuleEvidencePanel({
         actionCount={expects.length}
       />
       {(notFulfilled || unfulfilled.length > 0) && (
-        <div className="text-[11px] text-warn py-1 px-2 border border-dashed border-warn rounded-xs flex gap-1.5 items-center">
+        <div className="text-meta text-warn py-1 px-2 border border-dashed border-warn rounded-xs flex gap-1.5 items-center">
           <span>⚠</span>
           <GuidanceText
             locale={guidance.locale}

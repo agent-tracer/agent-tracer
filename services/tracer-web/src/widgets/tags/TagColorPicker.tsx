@@ -42,10 +42,10 @@ export function TagColorPicker({ color, onChange, disabled }: TagColorPickerProp
           onChange={(e) => onChange(e.target.value.trim().toLowerCase())}
           disabled={disabled}
           placeholder="#rrggbb"
-          className="w-28 font-mono text-[11.5px] py-1"
+          className="w-28 font-mono text-meta py-1"
         />
         {!isValidHex && (
-          <span className="text-[10.5px] text-err">Use #rrggbb</span>
+          <span className="text-mini text-err">Use #rrggbb</span>
         )}
       </div>
     </div>

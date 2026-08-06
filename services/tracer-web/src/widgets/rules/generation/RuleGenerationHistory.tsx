@@ -2,7 +2,7 @@ import type { RuleGenerationRecord } from "~tracer-web/entities/rule/api/api-rul
 import { useClearRuleGenerationsMutation } from "~tracer-web/entities/rule/api/rule-generation-queries.js";
 import { useNowMs } from "~tracer-web/shared/lib/hooks/use-now-ms.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
-import { Button, GuidanceText } from "~tracer-web/shared/ui/index.js";
+import { Button, GuidanceText, InlineState } from "~tracer-web/shared/ui/index.js";
 import { RuleGenerationStrip } from "~tracer-web/widgets/rules/generation/RuleGenerationStrip.js";
 
 interface RuleGenerationHistoryProps {
@@ -23,14 +23,14 @@ export function RuleGenerationHistory({ records, isLoading }: RuleGenerationHist
   const finished = records.length - running;
 
   if (isLoading) {
-    return <p className="text-[12.5px] text-ink-subtle text-center py-8">Loading…</p>;
+    return <InlineState state="loading" subject="generation history" />;
   }
 
   if (records.length === 0) {
     return (
       <GuidanceText
         as="p"
-        className="text-[12.5px] text-ink-subtle text-center py-8"
+        className="text-body text-ink-subtle text-center py-8"
         locale={guidance.locale}
         message={guidance.messages.rules.generation.historyEmpty}
       />
@@ -41,7 +41,7 @@ export function RuleGenerationHistory({ records, isLoading }: RuleGenerationHist
     <>
       <div className="flex items-center gap-3 pb-1">
         <GuidanceText
-          className="text-[12px] text-ink-subtle"
+          className="text-body text-ink-subtle"
           locale={guidance.locale}
           message={guidance.messages.rules.generation.runCount(records.length, running)}
         />

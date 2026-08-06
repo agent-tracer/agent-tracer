@@ -11,10 +11,10 @@ interface TurnHeaderRowProps {
 export function TurnHeaderRow({ turn, splitSelection }: TurnHeaderRowProps) {
   return (
     <div className="group flex items-center gap-2 px-2 pt-3 pb-1">
-      <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.1em] text-ink-tertiary">
+      <span className="shrink-0 font-mono text-mini uppercase tracking-eyebrow text-ink-tertiary">
         Turn {turn.turnIndex}
       </span>
-      <span className="min-w-0 flex-1 truncate text-[11.5px] text-ink-muted">
+      <span className="min-w-0 flex-1 truncate text-meta text-ink-muted">
         {turn.askedText ?? ""}
       </span>
       {splitSelection ? (

@@ -27,14 +27,14 @@ export function EvidenceFlow({
     <div
       role="group"
       aria-label="Rule evidence flow"
-      className="flex items-center gap-2 font-mono text-[10px]"
+      className="flex items-center gap-2 font-mono text-mini"
     >
       <FlowStep
         label={anchored ? "INPUT" : "TRIGGER"}
         count={triggerCount}
         tone="trigger"
       />
-      <span aria-hidden className="text-[11px] text-ink-tertiary">
+      <span aria-hidden className="text-meta text-ink-tertiary">
         →
       </span>
       <FlowStep label="ACTION" count={actionCount} tone={verdictTone(status)} />
@@ -56,7 +56,7 @@ function FlowStep({
   return (
     <span className="inline-flex items-baseline gap-1.5">
       <span className={cn("uppercase", toneClasses.text)}>{label}</span>
-      <span className={cn("text-[12px] font-semibold", toneClasses.strong)}>
+      <span className={cn("text-body font-semibold", toneClasses.strong)}>
         {count}
       </span>
     </span>

@@ -15,7 +15,7 @@ export function EventTags({ event }: EventTagsProps) {
       {tags.map((tag, idx) => (
         <span
           key={`${tag.k}-${idx}`}
-          className="inline-flex items-center rounded-xs px-1.5 py-0.5 font-mono text-[10px] text-ink-muted bg-s2 border border-hair tracking-normal"
+          className="inline-flex items-center rounded-xs px-1.5 py-0.5 font-mono text-mini text-ink-muted bg-s2 border border-hair tracking-normal"
         >
           <span className="text-ink-tertiary mr-[3px]">
             {tag.k}

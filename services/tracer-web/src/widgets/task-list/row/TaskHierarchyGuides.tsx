@@ -57,7 +57,7 @@ export function TaskHierarchyToggle({
       aria-label={collapsed ? "Expand subagents" : "Collapse subagents"}
       aria-expanded={!collapsed}
       className={cn(
-        "inline-flex items-center justify-center h-4 w-4 p-0 border-none bg-transparent text-ink-muted cursor-pointer transition-transform duration-[120ms]",
+        "inline-flex items-center justify-center h-4 w-4 p-0 border-none bg-transparent text-ink-muted cursor-pointer transition-transform duration-150",
         collapsed ? "-rotate-90" : "rotate-0",
       )}
     >

@@ -28,23 +28,23 @@ export function HookSetupNote({ email }: { readonly email: string }) {
 
   return (
     <div className="mt-4 pt-4 border-t border-hair">
-      <label className="text-[12.5px] font-medium text-ink tracking-[-0.01em]">
+      <label className="text-body font-medium text-ink tracking-snug">
         Connect Claude Code hooks
       </label>
       <GuidanceText
         as="p"
-        className="text-[11.5px] text-ink-tertiary mt-0.5 mb-2"
+        className="text-meta text-ink-tertiary mt-0.5 mb-2"
         locale={guidance.locale}
         message={guidance.messages.settings.hookSetup(email)}
       />
-      <pre className="bg-s1 text-ink py-3 px-3 rounded-xs text-[11.5px] font-mono overflow-x-auto m-0">
+      <pre className="bg-s1 text-ink py-3 px-3 rounded-xs text-meta font-mono overflow-x-auto m-0">
         {snippet}
       </pre>
       <div className="flex items-center gap-3 mt-2">
-        <Button variant="ghost" onClick={() => void copy()} className="text-xs">
+        <Button variant="ghost" onClick={() => void copy()} className="text-body">
           {copied ? "Copied ✓" : "Copy snippet"}
         </Button>
-        <span className="text-[11px] text-ink-tertiary">
+        <span className="text-meta text-ink-tertiary">
           or shell: <code>export MONITOR_USER_EMAIL="{email}"</code>
         </span>
       </div>

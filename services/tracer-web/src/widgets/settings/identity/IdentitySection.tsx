@@ -8,10 +8,9 @@ import {
 import { apiErrorMessage } from "~tracer-web/shared/api/api-error-message.js";
 import type { GuidanceMessage } from "~tracer-web/shared/guidance.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
-import { Button, Card, Field, GuidanceText, Input, Modal } from "~tracer-web/shared/ui/index.js";
+import { Button, Card, Field, GuidanceText, Input, Modal, SectionHeading } from "~tracer-web/shared/ui/index.js";
 import { HookSetupNote } from "~tracer-web/widgets/settings/identity/HookSetupNote.js";
 
-/** 사용자 신원. */
 /** 브라우저 요청과 로컬 훅이 공유할 사용자 신원을 설정한다. */
 export function IdentitySection() {
   const guidance = useGuidance();
@@ -45,10 +44,10 @@ export function IdentitySection() {
 
   return (
     <Card surface="canvas" className="py-5 px-6">
-      <h2 className="text-[15px] font-semibold mb-1">User identity</h2>
+      <SectionHeading>User identity</SectionHeading>
       <GuidanceText
         as="p"
-        className="text-ink-muted text-[12.5px] mb-5"
+        className="text-ink-muted text-body mb-5"
         locale={guidance.locale}
         message={guidance.messages.settings.identityIntroduction}
       />
@@ -61,22 +60,22 @@ export function IdentitySection() {
         <div className="flex items-center gap-2 flex-wrap">
           {isLocal ? (
             <>
-              <code className="font-mono text-xs py-1 px-2 bg-s1 rounded-xs">
+              <code className="font-mono text-body py-1 px-2 bg-s1 rounded-xs">
                 local
               </code>
-              <span className="text-ink-tertiary text-[11px]">
+              <span className="text-ink-tertiary text-meta">
                 default — no email set
               </span>
             </>
           ) : (
             <>
-              <code className="font-mono text-xs py-1 px-2 bg-s1 rounded-xs">
+              <code className="font-mono text-body py-1 px-2 bg-s1 rounded-xs">
                 {email ?? userId}
               </code>
-              <span className="text-ink-tertiary text-[11px] whitespace-nowrap">
+              <span className="text-ink-tertiary text-meta whitespace-nowrap">
                 id {userId}
               </span>
-              <Button variant="ghost" onClick={() => setResetOpen(true)} className="text-xs border-0 p-0 underline">
+              <Button variant="ghost" onClick={() => setResetOpen(true)} className="text-body border-0 p-0 underline">
                 Reset to local
               </Button>
             </>
@@ -97,7 +96,7 @@ export function IdentitySection() {
             className="flex-1 font-mono"
           />
           <Button
-            variant="solid"
+            variant="primary"
             disabled={!draft.trim() || submitting}
             onClick={() => void onboard()}
           >
@@ -107,7 +106,7 @@ export function IdentitySection() {
         {error && (
           <GuidanceText
             as="p"
-            className="text-err text-xs mt-2"
+            className="text-err text-body mt-2"
             locale={guidance.locale}
             message={error}
           />
@@ -119,7 +118,7 @@ export function IdentitySection() {
       <Modal
         open={resetOpen}
         onClose={() => setResetOpen(false)}
-        title="Reset to local?"
+        title="Reset to local"
         description={guidance.messages.settings.identityReset}
         descriptionLocale={guidance.locale}
       >

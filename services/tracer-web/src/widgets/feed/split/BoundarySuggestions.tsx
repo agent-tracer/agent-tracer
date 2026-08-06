@@ -42,7 +42,7 @@ export function BoundarySuggestions({
         {pending.map((item) => (
           <li
             key={`${item.sessionId}-${item.fromTurnIndex}`}
-            className="flex items-center justify-between gap-3 text-[12.5px] text-ink"
+            className="flex items-center justify-between gap-3 text-body text-ink"
           >
             <span>
               <span className="text-ink-tertiary">{spanLabel(item)}</span> {item.label}

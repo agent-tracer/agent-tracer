@@ -54,14 +54,14 @@ export function MemoEntryRow({
         <div className="flex flex-col gap-1.5">
           <GuidanceText
             as="p"
-            className="m-0 text-[10.5px] text-ink-tertiary"
+            className="m-0 text-mini text-ink-tertiary"
             locale={locale}
             message={editHint}
           />
           <Input
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            className="text-[12px] py-1"
+            className="text-body py-1"
             autoFocus
           />
           <div className="flex items-center gap-1.5">
@@ -75,10 +75,10 @@ export function MemoEntryRow({
         </div>
       ) : (
         <>
-          <p className="m-0 text-[12.5px] leading-[1.5] text-ink whitespace-pre-wrap">
+          <p className="m-0 text-body leading-normal text-ink whitespace-pre-wrap">
             {memo.body}
           </p>
-          <div className="flex items-center gap-2 mt-1.5 font-mono text-[10px] text-ink-tertiary">
+          <div className="flex items-center gap-2 mt-1.5 font-mono text-mini text-ink-tertiary">
             <span>{memo.author}</span>
             <span className="text-hair-strong">·</span>
             <span>{memo.lastEditedBy}</span>
@@ -103,7 +103,7 @@ export function MemoEntryRow({
           {confirmDelete.armed && (
             <GuidanceText
               as="p"
-              className="m-0 mt-1 text-right text-[10px] text-err"
+              className="m-0 mt-1 text-right text-mini text-err"
               locale={locale}
               message={deleteHint}
             />

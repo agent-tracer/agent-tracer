@@ -13,7 +13,7 @@ import {
 import { apiErrorMessage } from "~tracer-web/shared/api/api-error-message.js";
 import type { GuidanceMessage } from "~tracer-web/shared/guidance.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
-import { GuidanceText, Input } from "~tracer-web/shared/ui/index.js";
+import { Button, GuidanceText, Input, Textarea } from "~tracer-web/shared/ui/index.js";
 import { TagColorPicker } from "~tracer-web/widgets/tags/TagColorPicker.js";
 
 interface TagEditorFormProps {
@@ -69,13 +69,13 @@ export function TagEditorForm({ tag, onClose }: TagEditorFormProps) {
     <form onSubmit={handleSubmit} className="pt-4 px-4 pb-0 flex flex-col gap-3.5">
       <GuidanceText
         as="p"
-        className="m-0 text-[11.5px] text-ink-tertiary"
+        className="m-0 text-meta text-ink-tertiary"
         locale={guidance.locale}
         message={isEdit ? guidance.messages.tags.editDescription : guidance.messages.tags.createDescription}
       />
 
       <div className="flex flex-col gap-1.5 py-3.5 border-t border-hair">
-        <label className="text-[12.5px] font-medium text-ink tracking-[-0.01em]">Name</label>
+        <label className="text-body font-medium text-ink tracking-snug">Name</label>
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -86,42 +86,35 @@ export function TagEditorForm({ tag, onClose }: TagEditorFormProps) {
       </div>
 
       <div className="flex flex-col gap-1.5 py-3.5 border-t border-hair">
-        <label className="text-[12.5px] font-medium text-ink tracking-[-0.01em]">Color</label>
+        <label className="text-body font-medium text-ink tracking-snug">Color</label>
         <TagColorPicker color={color} onChange={setColor} disabled={isPending} />
       </div>
 
       <div className="flex flex-col gap-1.5 py-3.5 border-t border-hair">
-        <label className="text-[12.5px] font-medium text-ink tracking-[-0.01em]">Description</label>
-        <textarea
+        <label className="text-body font-medium text-ink tracking-snug">Description</label>
+        <Textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           maxLength={TAG_DESCRIPTION_MAX_LENGTH}
           rows={2}
           disabled={isPending}
-          className="px-2.5 py-1.5 text-sm rounded-xs border border-hair bg-canvas text-ink outline-none focus-visible:ring-2 focus-visible:ring-primary/45"
         />
       </div>
 
       {error && (
-        <div role="alert" className="m-0 text-xs text-err leading-[1.5]">
+        <div role="alert" className="m-0 text-body text-err leading-normal">
           <GuidanceText locale={guidance.locale} message={error} />
         </div>
       )}
 
       <footer className="sticky bottom-0 -mx-4 mt-1 py-3 px-4 flex justify-end gap-2 bg-s1 border-t border-hair">
-        <button type="button" onClick={onClose} disabled={isPending} className={ghostButtonClassName}>
+        <Button onClick={onClose} disabled={isPending}>
           Cancel
-        </button>
-        <button type="submit" disabled={isPending} className={primaryButtonClassName}>
+        </Button>
+        <Button type="submit" variant="primary" disabled={isPending}>
           {isPending ? "Saving…" : isEdit ? "Save changes" : "Create tag"}
-        </button>
+        </Button>
       </footer>
     </form>
   );
 }
-
-const primaryButtonClassName =
-  "py-[7px] px-3.5 text-[12.5px] font-medium text-canvas bg-primary border border-primary rounded-xs cursor-pointer";
-
-const ghostButtonClassName =
-  "py-[7px] px-3 text-[12.5px] text-ink-muted bg-transparent border border-hair rounded-xs cursor-pointer";

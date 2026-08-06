@@ -31,8 +31,8 @@ export function Drawer({ side, width, label, onDismiss, children }: DrawerProps)
         className={cn(
           "relative min-h-0 overflow-hidden flex flex-col bg-canvas",
           side === "right"
-            ? "ml-auto border-l border-hair shadow-[-4px_0_24px_rgba(0,0,0,0.25)]"
-            : "border-r border-hair shadow-[4px_0_24px_rgba(0,0,0,0.25)]",
+            ? "ml-auto border-l border-hair shadow-elev-2"
+            : "border-r border-hair shadow-elev-2",
         )}
         style={{ width, maxWidth: "100vw" }}
       >

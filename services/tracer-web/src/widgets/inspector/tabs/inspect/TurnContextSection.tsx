@@ -41,7 +41,7 @@ export function TurnContextSection({ turn }: TurnContextSectionProps) {
 
   return (
     <div className="mt-3 rounded-sm px-3 py-2.5 bg-s2 border border-hair">
-      <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.1em] text-ink-tertiary">
+      <div className="flex items-center gap-2 font-mono text-mini uppercase tracking-eyebrow text-ink-tertiary">
         <span>TURN {turn.turnIndex}</span>
         <span>·</span>
         <span>
@@ -50,11 +50,11 @@ export function TurnContextSection({ turn }: TurnContextSectionProps) {
       </div>
       <div className="flex items-center gap-2 mt-2 flex-wrap">
         <VerdictPill verdict={turn.aggregateVerdict} />
-        <span className="font-mono text-[11px] text-ink-subtle">
+        <span className="font-mono text-meta text-ink-subtle">
           {turn.rulesEvaluatedCount}{" "}
           {turn.rulesEvaluatedCount === 1 ? "rule" : "rules"} evaluated
         </span>
-        <span className="font-mono text-[11px] text-ink-tertiary ml-auto">
+        <span className="font-mono text-meta text-ink-tertiary ml-auto">
           {turn.status}
         </span>
       </div>
@@ -65,7 +65,7 @@ export function TurnContextSection({ turn }: TurnContextSectionProps) {
 function VerdictPill({ verdict }: { verdict: VerdictStatus | null }) {
   if (!verdict) {
     return (
-      <span className="inline-flex items-center px-2 py-[1px] rounded-pill font-mono text-[10.5px] text-ink-tertiary border border-hair">
+      <span className="inline-flex items-center px-2 py-[1px] rounded-pill font-mono text-mini text-ink-tertiary border border-hair">
         no verdict
       </span>
     );
@@ -73,7 +73,7 @@ function VerdictPill({ verdict }: { verdict: VerdictStatus | null }) {
   const tone = VERDICT_TONE[verdict];
   return (
     <span
-      className="inline-flex items-center px-2 py-[1px] rounded-pill font-mono text-[10.5px]"
+      className="inline-flex items-center px-2 py-[1px] rounded-pill font-mono text-mini"
       style={{ color: tone.color, background: tone.bg }}
     >
       {tone.label}

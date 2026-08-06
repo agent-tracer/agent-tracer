@@ -36,7 +36,7 @@ export const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>(
           orientation="vertical"
           className="flex w-2 select-none touch-none p-[2px] transition-colors duration-150"
         >
-          <RxScroll.Thumb className="relative flex-1 rounded-full bg-[var(--hair)] hover:bg-[var(--hair-strong)]" />
+          <RxScroll.Thumb className="relative flex-1 rounded-full bg-hair hover:bg-hair-strong" />
         </RxScroll.Scrollbar>
         <RxScroll.Corner />
       </RxScroll.Root>

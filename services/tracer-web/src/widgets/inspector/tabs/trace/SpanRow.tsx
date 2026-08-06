@@ -39,10 +39,10 @@ export function SpanRow({ row }: SpanRowProps) {
       style={{ paddingLeft: 8 + depth * INDENT_PX }}
     >
       <SpanKindChip kind={span.kind} />
-      <span className="flex-1 truncate text-xs text-ink-muted font-mono tracking-[-0.05px]">
+      <span className="flex-1 truncate text-body text-ink-muted font-mono tracking-snug">
         {span.name || span.kind.toLowerCase()}
       </span>
-      <span className="shrink-0 font-mono text-[10.5px] text-ink-tertiary">
+      <span className="shrink-0 font-mono text-mini text-ink-tertiary">
         {startClock}
         {elapsed && <span className="ml-1.5">{elapsed}</span>}
       </span>

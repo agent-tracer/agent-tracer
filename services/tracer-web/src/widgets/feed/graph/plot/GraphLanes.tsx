@@ -39,11 +39,11 @@ export function GraphLanes({ lanes }: GraphLanesProps) {
               >
                 <span
                   aria-hidden
-                  className="w-2 h-2 rounded-[2px] shrink-0"
+                  className="w-2 h-2 rounded-xs shrink-0"
                   style={{ background: theme.color }}
                 />
                 <span
-                  className="font-mono text-[10px] tracking-[0.1em] uppercase whitespace-nowrap"
+                  className="font-mono text-mini tracking-eyebrow uppercase whitespace-nowrap"
                   style={{ color: theme.color }}
                 >
                   {theme.label}

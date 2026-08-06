@@ -94,7 +94,7 @@ export function StatusPill({ task }: StatusPillProps) {
           preferredWidth={160}
           preferredMaxHeight={240}
           gap={4}
-          className="bg-s1 border border-hair rounded-sm p-1 shadow-[0_4px_12px_rgba(0,0,0,0.4)] flex flex-col gap-0.5"
+          className="bg-s1 border border-hair rounded-sm p-1 shadow-elev-1 flex flex-col gap-0.5"
         >
           {STATUSES.map((s) => (
             <button
@@ -105,14 +105,14 @@ export function StatusPill({ task }: StatusPillProps) {
               onClick={() => change(s)}
               disabled={mutation.isPending}
               className={cn(
-                "flex items-center gap-2 py-1.5 px-2 border-0 rounded-xs cursor-pointer text-ink-muted font-mono text-[11px] text-left w-full",
+                "flex items-center gap-2 py-1.5 px-2 border-0 rounded-xs cursor-pointer text-ink-muted font-mono text-meta text-left w-full",
                 s === task.status ? "bg-s2" : "bg-transparent",
               )}
             >
               <StatusDotInline status={s} />
               <span>{STATUS_LABEL[s]}</span>
               {s === task.status && (
-                <span className="ml-auto text-[10px] text-ink-tertiary">
+                <span className="ml-auto text-mini text-ink-tertiary">
                   current
                 </span>
               )}

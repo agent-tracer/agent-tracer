@@ -15,7 +15,7 @@ export function SubagentInsightSection({ taskId }: SubagentInsightSectionProps) 
 
   return (
     <div className="mt-4 pt-3 border-t border-hair">
-      <div className="flex items-center gap-2 mb-2 font-mono text-[10px] uppercase tracking-[0.1em] text-ph-coord">
+      <div className="flex items-center gap-2 mb-2 font-mono text-mini uppercase tracking-eyebrow text-ph-coord">
         <span>Subagents</span>
         <span className="text-ink-muted">{children.length}</span>
       </div>
@@ -26,14 +26,14 @@ export function SubagentInsightSection({ taskId }: SubagentInsightSectionProps) 
               to={`/tasks/${child.id}`}
               className="block px-2.5 py-1.5 rounded-xs hover:bg-s2 bg-canvas border border-hair"
             >
-              <div className="flex items-center gap-2 text-xs text-ink">
+              <div className="flex items-center gap-2 text-body text-ink">
                 <StatusDot status={child.status} />
-                <span className="flex-1 min-w-0 truncate tracking-[-0.05px]">
+                <span className="flex-1 min-w-0 truncate tracking-snug">
                   {child.displayTitle ?? child.title}
                 </span>
               </div>
               {child.runtimeSource && (
-                <div className="mt-0.5 font-mono text-[10px] text-ink-tertiary">
+                <div className="mt-0.5 font-mono text-mini text-ink-tertiary">
                   {child.runtimeSource} · {child.status}
                 </div>
               )}

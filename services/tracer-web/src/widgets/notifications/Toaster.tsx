@@ -36,15 +36,15 @@ function ToastCard({
   return (
     <div
       role="status"
-      className="pointer-events-auto bg-canvas border border-hair rounded-md shadow-[var(--elev-1)] py-2.5 px-3 min-w-[240px] flex items-start gap-2.5"
+      className="pointer-events-auto bg-canvas border border-hair rounded-md shadow-elev-1 py-2.5 px-3 min-w-[240px] flex items-start gap-2.5"
       style={{ borderLeft: `3px solid ${accent}` }}
     >
       <div className="flex-1 min-w-0">
-        <div className="font-sans font-semibold text-[12.5px] text-ink tracking-[-0.05px]">
+        <div className="font-sans font-semibold text-body text-ink tracking-snug">
           {toast.title}
         </div>
         {toast.body && (
-          <div className="mt-0.5 font-sans text-xs text-ink-subtle leading-[1.45] break-words">
+          <div className="mt-0.5 font-sans text-body text-ink-subtle leading-normal break-words">
             {toast.body}
           </div>
         )}
@@ -55,7 +55,7 @@ function ToastCard({
               toast.action!.onClick();
               onDismiss();
             }}
-            className="mt-2 py-1 px-2 font-sans text-[11.5px] font-semibold bg-transparent rounded-xs cursor-pointer tracking-[-0.05px]"
+            className="mt-2 py-1 px-2 font-sans text-meta font-semibold bg-transparent rounded-xs cursor-pointer tracking-snug"
             style={{ color: accent, border: `1px solid ${accent}` }}
           >
             {toast.action.label}
@@ -66,7 +66,7 @@ function ToastCard({
         type="button"
         onClick={onDismiss}
         aria-label="Dismiss notification"
-        className="bg-transparent border-0 text-ink-tertiary cursor-pointer text-sm leading-none p-0.5"
+        className="bg-transparent border-0 text-ink-tertiary cursor-pointer text-lead leading-none p-0.5"
       >
         ×
       </button>

@@ -53,6 +53,9 @@ export const EN_APP = {
   eventsPending: createGuidanceMessage(
     "Events will appear here as the agent runs.",
   ),
+  pageNotFound: createGuidanceMessage(
+    "No screen answers at this address. The link may be out of date, or the path may have been typed by hand.",
+  ),
 } as const;
 
 export const EN_SHELL = {

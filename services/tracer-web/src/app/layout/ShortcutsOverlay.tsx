@@ -48,13 +48,13 @@ export function ShortcutsOverlay() {
       }}
       className="fixed inset-0 z-[1100] flex items-center justify-center overflow-y-auto bg-canvas/70 backdrop-blur-[4px] p-4"
     >
-      <div className="flex max-h-[calc(100dvh-2rem)] w-full max-w-[460px] flex-col overflow-hidden bg-s1 border border-hair rounded-md shadow-[0_20px_50px_-10px_rgba(0,0,0,0.6)]">
+      <div className="flex max-h-[calc(100dvh-2rem)] w-full max-w-[460px] flex-col overflow-hidden bg-s1 border border-hair rounded-md shadow-elev-2">
         <header className="shrink-0 px-4 py-3.5 border-b border-hair flex flex-wrap items-baseline gap-2">
-          <h2 className="m-0 text-[13px] font-semibold tracking-[-0.1px]">
+          <h2 className="m-0 text-lead font-semibold tracking-snug">
             Keyboard shortcuts
           </h2>
           <GuidanceText
-            className="text-[11px] text-ink-subtle"
+            className="text-meta text-ink-subtle"
             locale={guidance.locale}
             message={guidance.messages.shell.shortcutToggle}
           />
@@ -63,7 +63,7 @@ export function ShortcutsOverlay() {
           {NAVIGATION.map((row) => (
             <li
               key={row.keys.join("+")}
-              className="flex items-center gap-3 py-1.5 text-[12.5px] text-ink"
+              className="flex items-center gap-3 py-1.5 text-body text-ink"
             >
               <span className="shrink-0 min-w-14 inline-flex gap-1">
                 {row.keys.map((k) => (
@@ -86,7 +86,7 @@ export function ShortcutsOverlay() {
 
 function Kbd({ children }: { readonly children: React.ReactNode }) {
   return (
-    <kbd className="inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 font-mono text-[11px] text-ink bg-s2 border border-hair-strong border-b-2 rounded">
+    <kbd className="inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 font-mono text-meta text-ink bg-s2 border border-hair-strong border-b-2 rounded">
       {children}
     </kbd>
   );

@@ -49,7 +49,7 @@ export function SessionIdPill({ resumeTarget }: SessionIdPillProps) {
         disabled={state === "opening"}
         className={cn(
           "inline-flex items-center gap-1.5 rounded-pill px-2 py-[2px] bg-transparent tracking-normal",
-          "font-mono text-[10.5px] transition-colors duration-150 border",
+          "font-mono text-mini transition-colors duration-150 border",
           done
             ? "text-ok border-ok"
             : state === "failed"

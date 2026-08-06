@@ -36,7 +36,7 @@ export function RuleGenerationStrip({ record, deletable = false, nowMs }: RuleGe
   return (
     <Card surface="canvas" className="py-3 px-4 flex items-center gap-3">
       <span
-        className={cn("text-[12.5px] font-medium shrink-0", TONE_CLASS[outcome.tone] ?? "text-ink")}
+        className={cn("text-body font-medium shrink-0", TONE_CLASS[outcome.tone] ?? "text-ink")}
         data-testid="generation-headline"
       >
         <GuidanceText locale={guidance.locale} message={outcome.headline} />
@@ -45,20 +45,20 @@ export function RuleGenerationStrip({ record, deletable = false, nowMs }: RuleGe
         <GenerationOutcomeText
           locale={guidance.locale}
           value={outcome.detail}
-          className="text-[12px] text-ink-subtle truncate"
+          className="text-body text-ink-subtle truncate"
         />
       )}
       {record.intent !== null && (
-        <span className="text-[12px] text-ink-tertiary truncate">Intent: {record.intent}</span>
+        <span className="text-body text-ink-tertiary truncate">Intent: {record.intent}</span>
       )}
       <span className="ml-auto flex items-center gap-2 shrink-0">
         {nowMs !== undefined && (
-          <span className="text-[11px] font-mono text-ink-tertiary">
+          <span className="text-meta font-mono text-ink-tertiary">
             {formatRelativeShort(record.createdAt, nowMs)}
           </span>
         )}
         {record.createdRuleIds.length > 0 && (
-          <span className="text-[11px] font-mono text-ink-tertiary">
+          <span className="text-meta font-mono text-ink-tertiary">
             {record.createdRuleIds.length}
           </span>
         )}

@@ -23,7 +23,7 @@ export function GraphAxis({ ticks, leftOffset }: GraphAxisProps) {
           <span
             key={idx}
             className={cn(
-              "absolute -translate-x-1/2 top-0 pt-2.5 font-mono text-[10px] whitespace-nowrap",
+              "absolute -translate-x-1/2 top-0 pt-2.5 font-mono text-mini whitespace-nowrap",
               tick.major ? "text-ink-muted font-medium" : "text-ink-tertiary font-normal",
             )}
             style={{ left: `${tick.leftPercent}%` }}

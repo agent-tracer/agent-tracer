@@ -4,6 +4,7 @@ import type {
   GuidanceMessage,
 } from "~tracer-web/shared/guidance.js";
 import { cn } from "~tracer-web/shared/ui/lib/cn.js";
+import { CONTROL_SURFACE } from "~tracer-web/shared/ui/controls/Input.js";
 import { GuidanceText } from "~tracer-web/shared/ui/index.js";
 
 interface RuleFormFieldPropsBase {
@@ -34,14 +35,14 @@ export function RuleFormField({
 }: RuleFormFieldProps) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-tertiary">
+      <span className="font-mono text-mini uppercase tracking-eyebrow text-ink-tertiary">
         {label}
         {required && <span className="text-err"> *</span>}
       </span>
       {children}
       {hint && (
         <GuidanceText
-          className="text-[11px] text-ink-subtle leading-[1.4]"
+          className="text-meta text-ink-subtle leading-tight"
           locale={hintLocale}
           message={hint}
         />
@@ -62,11 +63,11 @@ export function RuleFormSectionHeading({
 }) {
   return (
     <div className="mt-1.5 pt-2 border-t border-hair flex flex-col gap-0.5">
-      <span className="text-[12.5px] font-semibold text-ink tracking-[-0.05px]">
+      <span className="text-body font-semibold text-ink tracking-snug">
         {label}
       </span>
       <GuidanceText
-        className="text-[11px] text-ink-subtle leading-[1.4]"
+        className="text-meta text-ink-subtle leading-tight"
         locale={hintLocale}
         message={hint}
       />
@@ -79,10 +80,10 @@ export function RuleFormRow({ children }: { readonly children: ReactNode }) {
   return <div className="grid grid-cols-2 gap-3">{children}</div>;
 }
 
-export const ruleFormInputClassName =
-  "w-full py-[7px] px-2.5 text-[12.5px] font-[inherit] text-ink bg-canvas border border-hair rounded-xs outline-none";
+/** 규칙 폼의 컨트롤도 앱의 공통 폼 표면을 그대로 쓰고 너비만 채운다. */
+export const ruleFormInputClassName = cn(CONTROL_SURFACE, "w-full font-[inherit]");
 
 export const ruleFormTextareaClassName = cn(
   ruleFormInputClassName,
-  "resize-y font-mono text-xs leading-[1.5]",
+  "resize-y font-mono leading-normal",
 );

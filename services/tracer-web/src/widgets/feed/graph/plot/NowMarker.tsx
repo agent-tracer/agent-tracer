@@ -18,7 +18,7 @@ export function NowMarker({ nowMs, range }: NowMarkerProps) {
       className="absolute top-0 bottom-0 pointer-events-none w-px bg-ink z-[6]"
       style={{ left: trackLeftCss(leftPercent) }}
     >
-      <span className="absolute left-1/2 -translate-x-1/2 top-1.5 py-px px-1.5 bg-ink text-canvas font-mono text-[8.5px] font-bold tracking-[0.1em] rounded-[2px]">
+      <span className="absolute left-1/2 -translate-x-1/2 top-1.5 py-px px-1.5 bg-ink text-canvas font-mono text-nano font-bold tracking-eyebrow rounded-xs">
         NOW
       </span>
     </div>

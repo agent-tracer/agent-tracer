@@ -53,6 +53,9 @@ export const KO_APP = {
   eventsPending: createGuidanceMessage(
     "에이전트가 실행되면 이벤트가 여기에 표시됩니다.",
   ),
+  pageNotFound: createGuidanceMessage(
+    "이 주소에 응답하는 화면이 없습니다. 오래된 링크이거나 경로를 직접 입력했을 수 있습니다.",
+  ),
 } as const;
 
 export const KO_SHELL = {

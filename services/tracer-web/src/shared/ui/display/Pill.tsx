@@ -12,28 +12,35 @@ interface PillProps extends ComponentPropsWithoutRef<"span"> {
 }
 
 const toneText: Record<PillTone, string> = {
-  neutral: "text-[var(--ink-subtle)]",
-  ok: "text-[var(--ok)]",
-  warn: "text-[var(--warn)]",
-  err: "text-[var(--err)]",
-  primary: "text-[var(--primary-hover)]",
+  neutral: "text-ink-subtle",
+  ok: "text-ok",
+  warn: "text-warn",
+  err: "text-err",
+  primary: "text-primary-hover",
 };
 
 const toneDot: Record<PillTone, string> = {
-  neutral: "bg-[var(--ink-subtle)]",
-  ok: "bg-[var(--ok)]",
-  warn: "bg-[var(--warn)]",
-  err: "bg-[var(--err)]",
-  primary: "bg-[var(--primary)]",
+  neutral: "bg-ink-subtle",
+  ok: "bg-ok",
+  warn: "bg-warn",
+  err: "bg-err",
+  primary: "bg-primary",
 };
 
-export function Pill({ tone = "neutral", dot = false, pulse = false, className, children, ...rest }: PillProps) {
+/** 테두리만 두른 알약이 한 대상의 지금 상태를 말하며 분류는 [Chip]이 맡는다. */
+export function Pill({
+  tone = "neutral",
+  dot = false,
+  pulse = false,
+  className,
+  children,
+  ...rest
+}: PillProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-[var(--radius-pill)]",
-        "border border-[var(--hair)] bg-transparent",
-        "px-2 py-[2px] text-[10.5px] font-[var(--font-mono)]",
+        "inline-flex items-center gap-1.5 rounded-pill border border-hair bg-transparent",
+        "px-2 py-[2px] font-mono text-mini",
         toneText[tone],
         className,
       )}

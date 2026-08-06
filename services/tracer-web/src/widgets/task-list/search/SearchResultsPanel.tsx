@@ -7,7 +7,7 @@ import {
   useSidebarSearchScope,
   useSidebarSearchType,
 } from "~tracer-web/shared/store/index.js";
-import { cn } from "~tracer-web/shared/ui/lib/cn.js";
+import { InlineState, SegmentedButton } from "~tracer-web/shared/ui/index.js";
 import { useNowMs } from "~tracer-web/shared/lib/hooks/use-now-ms.js";
 import {
   EventHitRow,
@@ -49,15 +49,17 @@ export function SearchResultsPanel({ query }: SearchResultsPanelProps) {
         canScopeToTask={selectedTaskId !== null}
       />
       {isLoading ? (
-        <Status label="Searching…" />
+        <InlineState state="empty" dense>Searching…</InlineState>
       ) : isError || !data ? (
-        <Status label="Search failed." tone="err" />
+        <InlineState state="error" dense>Search failed.</InlineState>
       ) : data.tasks.length + data.events.length === 0 ? (
-        <Status label={`No matches for “${query.trim()}”.`} />
+        <InlineState state="empty" dense>
+          {`No matches for “${query.trim()}”.`}
+        </InlineState>
       ) : (
         <>
           {isFetching && (
-            <div className="text-center pb-1 font-mono text-[10px] text-ink-tertiary">
+            <div className="text-center pb-1 font-mono text-mini text-ink-tertiary">
               updating…
             </div>
           )}
@@ -98,12 +100,12 @@ interface TypeToggleProps {
 function TypeToggle({ type, onChange }: TypeToggleProps) {
   return (
     <div className="inline-flex p-0.5 mb-1.5 mx-1 rounded-sm bg-s1 border border-hair">
-      <ScopeButton active={type === "tasks"} onClick={() => onChange("tasks")}>
+      <SegmentedButton active={type === "tasks"} onClick={() => onChange("tasks")}>
         Tasks
-      </ScopeButton>
-      <ScopeButton active={type === "events"} onClick={() => onChange("events")}>
+      </SegmentedButton>
+      <SegmentedButton active={type === "events"} onClick={() => onChange("events")}>
         Events
-      </ScopeButton>
+      </SegmentedButton>
     </div>
   );
 }
@@ -117,13 +119,13 @@ interface ScopeToggleProps {
 function ScopeToggle({ scope, onChange, canScopeToTask }: ScopeToggleProps) {
   return (
     <div className="inline-flex p-0.5 mb-2 mx-1 rounded-sm bg-s1 border border-hair">
-      <ScopeButton
+      <SegmentedButton
         active={scope === "all"}
         onClick={() => onChange("all")}
       >
         All
-      </ScopeButton>
-      <ScopeButton
+      </SegmentedButton>
+      <SegmentedButton
         active={scope === "this-task" && canScopeToTask}
         onClick={() => onChange("this-task")}
         disabled={!canScopeToTask}
@@ -134,45 +136,11 @@ function ScopeToggle({ scope, onChange, canScopeToTask }: ScopeToggleProps) {
         }
       >
         This task
-      </ScopeButton>
+      </SegmentedButton>
     </div>
   );
 }
 
-interface ScopeButtonProps {
-  readonly active: boolean;
-  readonly disabled?: boolean;
-  readonly title?: string;
-  readonly onClick: () => void;
-  readonly children: React.ReactNode;
-}
-
-function ScopeButton({
-  active,
-  disabled,
-  title,
-  onClick,
-  children,
-}: ScopeButtonProps) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      title={title}
-      aria-pressed={active}
-      className={cn(
-        "h-6 px-2.5 rounded-xs text-[11px] font-medium",
-        "transition-colors disabled:opacity-40 disabled:cursor-not-allowed",
-        active
-          ? "bg-s3 text-ink shadow-[0_1px_0_0_var(--hair-strong)]"
-          : "bg-transparent text-ink-subtle shadow-none",
-      )}
-    >
-      {children}
-    </button>
-  );
-}
 
 interface SectionProps {
   readonly title: string;
@@ -183,9 +151,9 @@ interface SectionProps {
 function Section({ title, count, children }: SectionProps) {
   return (
     <div className="mb-3">
-      <div className="flex items-center gap-1.5 px-2 pt-2 pb-1 font-sans text-[10.5px] font-medium tracking-[0.4px] uppercase text-ink-tertiary">
+      <div className="flex items-center gap-1.5 px-2 pt-2 pb-1 font-sans text-mini font-medium tracking-label uppercase text-ink-tertiary">
         <span>{title}</span>
-        <span className="rounded-xs bg-s1 px-1.5 font-mono text-[10px] text-ink-tertiary tracking-normal leading-4">
+        <span className="rounded-xs bg-s1 px-1.5 font-mono text-mini text-ink-tertiary tracking-normal leading-4">
           {count}
         </span>
       </div>
@@ -194,21 +162,4 @@ function Section({ title, count, children }: SectionProps) {
   );
 }
 
-function Status({
-  label,
-  tone = "muted",
-}: {
-  label: string;
-  tone?: "muted" | "err";
-}) {
-  return (
-    <div
-      className={cn(
-        "px-3 py-4 text-center text-xs",
-        tone === "err" ? "text-err" : "text-ink-subtle",
-      )}
-    >
-      {label}
-    </div>
-  );
-}
+

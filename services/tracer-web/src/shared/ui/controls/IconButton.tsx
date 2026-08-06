@@ -1,5 +1,6 @@
 import type { ComponentPropsWithoutRef } from "react";
 import { cn } from "~tracer-web/shared/ui/lib/cn.js";
+import { DISABLED, TRANSITION } from "~tracer-web/shared/ui/lib/interactive.js";
 
 type IconButtonTone = "neutral" | "danger";
 
@@ -10,8 +11,8 @@ interface IconButtonProps extends ComponentPropsWithoutRef<"button"> {
 }
 
 const toneClass: Record<IconButtonTone, string> = {
-  neutral: "text-ink-tertiary border-hair",
-  danger: "text-err border-err",
+  neutral: "text-ink-tertiary border-hair hover:text-ink hover:border-hair-strong",
+  danger: "text-err border-err hover:bg-err/12",
 };
 
 export function IconButton({
@@ -25,8 +26,9 @@ export function IconButton({
     <button
       type={type}
       className={cn(
-        "inline-flex items-center justify-center h-[22px] w-[22px] rounded-xs border",
-        "transition-colors disabled:opacity-40 disabled:pointer-events-none",
+        "inline-flex items-center justify-center h-[22px] w-[22px] rounded-xs border focus-ring",
+        TRANSITION,
+        DISABLED,
         armed ? "bg-err/14 text-err border-err" : toneClass[tone],
         className,
       )}

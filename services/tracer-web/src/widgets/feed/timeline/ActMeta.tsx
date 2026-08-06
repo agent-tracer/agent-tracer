@@ -18,7 +18,7 @@ export function ActMeta({ vm }: ActMetaProps) {
   if (parts.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-2 mt-1 font-mono text-[11px] text-ink-subtle leading-[1.5]">
+    <div className="flex flex-wrap items-center gap-2 mt-1 font-mono text-meta text-ink-subtle leading-normal">
       {parts.map((p, idx) => (
         <span key={idx} className="inline-flex items-center gap-2">
           <span>{p}</span>

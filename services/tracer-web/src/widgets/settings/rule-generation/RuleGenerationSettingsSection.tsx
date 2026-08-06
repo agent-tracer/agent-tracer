@@ -11,7 +11,7 @@ import {
 import { apiErrorMessage } from "~tracer-web/shared/api/api-error-message.js";
 import type { GuidanceMessage } from "~tracer-web/shared/guidance.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
-import { Button, Card, Field, GuidanceText, Input, Select } from "~tracer-web/shared/ui/index.js";
+import { Button, Card, Field, GuidanceText, Input, SectionHeading, Select } from "~tracer-web/shared/ui/index.js";
 import { cn } from "~tracer-web/shared/ui/lib/cn.js";
 
 const LANGUAGE_LABEL: Readonly<Record<string, string>> = {
@@ -69,10 +69,10 @@ export function RuleGenerationSettingsSection() {
 
   return (
     <Card surface="canvas" className="py-5 px-6">
-      <h2 className="text-[15px] font-semibold mb-1">Rule generation</h2>
+      <SectionHeading>Rule generation</SectionHeading>
       <GuidanceText
         as="p"
-        className="text-ink-muted text-[12.5px] mb-5"
+        className="text-ink-muted text-body mb-5"
         locale={guidance.locale}
         message={guidance.messages.settings.ruleGenerationSection}
       />
@@ -98,7 +98,7 @@ export function RuleGenerationSettingsSection() {
           </Button>
           <Button
             variant="ghost"
-            className="text-xs border-0 p-0 underline"
+            className="text-body border-0 p-0 underline"
             onClick={() => void apply({ model: null }, "Model")}
           >
             Reset
@@ -162,7 +162,7 @@ export function RuleGenerationSettingsSection() {
       </Field>
 
       {feedback !== null && (
-        <p className={cn("mt-4 text-xs", feedback.tone === "err" ? "text-err" : "text-ink-muted")}>
+        <p className={cn("mt-4 text-body", feedback.tone === "err" ? "text-err" : "text-ink-muted")}>
           <GuidanceText locale={guidance.locale} message={feedback.message} />
           {feedback.reason !== undefined && (
             <>

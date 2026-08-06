@@ -21,7 +21,7 @@ interface TitleEditorProps {
 }
 
 const TITLE_CLASS_NAME =
-  "m-0 text-[22px] font-semibold tracking-[-0.4px] leading-[1.25] text-ink min-w-0";
+  "m-0 text-display font-semibold tracking-display leading-tight text-ink min-w-0";
 
 /** 태스크 제목의 읽기 모드와 인라인 입력 표면을 제공한다. */
 export function TitleEditor({
@@ -75,7 +75,7 @@ export function TitleEditor({
           aria-busy={disabled}
           aria-label={`Edit task title: ${current}`}
           className={cn(
-            "group w-full min-w-0 rounded-sm border-0 bg-transparent flex items-center gap-1.5 py-0.5 px-1.5 -my-0.5 -mx-1.5 text-left text-[inherit] font-[inherit] leading-[inherit] tracking-[inherit] text-ink transition-colors duration-[120ms]",
+            "group w-full min-w-0 rounded-sm border-0 bg-transparent flex items-center gap-1.5 py-0.5 px-1.5 -my-0.5 -mx-1.5 text-left text-[inherit] font-[inherit] leading-[inherit] tracking-[inherit] text-ink transition-colors duration-150",
             disabled ? "cursor-wait" : "cursor-pointer hover:bg-s1",
           )}
         >

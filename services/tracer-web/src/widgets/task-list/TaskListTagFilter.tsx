@@ -25,7 +25,7 @@ export function TaskListTagFilter() {
       <Tooltip
         content={<GuidanceText locale={guidance.locale} message={guidance.messages.tags.filterDescription} />}
       >
-        <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-tertiary mr-0.5">
+        <span className="font-mono text-mini uppercase tracking-eyebrow text-ink-tertiary mr-0.5">
           Tags
         </span>
       </Tooltip>
@@ -38,8 +38,8 @@ export function TaskListTagFilter() {
             onClick={() => toggle(tag.id)}
             aria-pressed={isOn}
             className={cn(
-              "inline-flex items-center gap-1 py-0.5 px-2 rounded-pill cursor-pointer transition-all duration-[120ms] border",
-              "text-[10.5px] font-medium",
+              "inline-flex items-center gap-1 py-0.5 px-2 rounded-pill cursor-pointer transition-all duration-150 border",
+              "text-mini font-medium",
               isOn
                 ? "border-hair-strong bg-s2 text-ink opacity-100"
                 : "border-hair bg-transparent text-ink-tertiary opacity-70",
@@ -58,7 +58,7 @@ export function TaskListTagFilter() {
         <button
           type="button"
           onClick={clear}
-          className="text-[10.5px] text-ink-tertiary underline decoration-dotted underline-offset-2 hover:text-ink"
+          className="text-mini text-ink-tertiary underline decoration-dotted underline-offset-2 hover:text-ink"
         >
           Clear
         </button>
