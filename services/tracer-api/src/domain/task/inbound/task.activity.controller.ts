@@ -1,6 +1,7 @@
 import { Controller, Get, Headers, NotFoundException, Param } from "@nestjs/common";
 import { MONITOR_USER_HEADER } from "@agent-tracer/kernel";
 import { ListTaskUserInputsUseCase } from "~tracer-api/domain/task/application/query/list.task.user.inputs.usecase.js";
+import { ListBoundariesUseCase } from "~tracer-api/domain/task/application/query/list.boundaries.usecase.js";
 import { ListTurnsUseCase } from "~tracer-api/domain/task/application/query/list.turns.usecase.js";
 import { resolveUserId } from "~tracer-api/support/request-user.js";
 import { pathParamPipe } from "~tracer-api/support/path-param.pipe.js";
@@ -11,6 +12,7 @@ export class TaskActivityController {
     constructor(
         private readonly listTurns: ListTurnsUseCase,
         private readonly listTaskUserInputs: ListTaskUserInputsUseCase,
+        private readonly listBoundaries: ListBoundariesUseCase,
     ) {}
 
     @Get(":taskId/turns")
@@ -19,6 +21,16 @@ export class TaskActivityController {
         @Param("taskId", pathParamPipe) taskId: string,
     ) {
         const result = await this.listTurns.execute(resolveUserId(user), taskId);
+        if (result === null) throw new NotFoundException("Task not found");
+        return result;
+    }
+
+    @Get(":taskId/boundaries")
+    async boundaries(
+        @Headers(MONITOR_USER_HEADER) user: string | undefined,
+        @Param("taskId", pathParamPipe) taskId: string,
+    ) {
+        const result = await this.listBoundaries.execute(resolveUserId(user), taskId);
         if (result === null) throw new NotFoundException("Task not found");
         return result;
     }

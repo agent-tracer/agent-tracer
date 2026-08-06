@@ -22,6 +22,9 @@ export * from "./timeline/turn/turn.assembly.domain.js";
 export * from "./timeline/event/event.presentation.domain.js";
 export * from "./timeline/event/event.repository.js";
 export * from "./timeline/turn/turn.repository.js";
+export * from "./timeline/turn/turn.reassignment.entity.js";
+export * from "./timeline/turn/turn.reassignment.domain.js";
+export * from "./timeline/turn/turn.reassignment.repository.js";
 
 // rule
 export * from "./rule/rule.entity.js";

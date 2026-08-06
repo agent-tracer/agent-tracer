@@ -5,6 +5,7 @@ import { InMemoryTaskRepository } from "~tracer-api/domain/task/port/__fakes__/i
 import { InMemoryTurnReader } from "~tracer-api/domain/task/port/__fakes__/in-memory.turn.reader.js";
 import { InMemoryVerdictReader } from "~tracer-api/domain/task/port/__fakes__/in-memory.verdict.reader.js";
 import { ListTurnsUseCase } from "./list.turns.usecase.js";
+import { InMemoryTurnReassignmentRepository } from "~tracer-api/domain/task/port/__fakes__/in-memory.turn.reassignment.repository.js";
 
 function makeTask(id: string, userId: string): TaskEntity {
     const task = new TaskEntity();
@@ -22,7 +23,7 @@ function makeUseCase(
     taskRepo.seed(...tasks);
     const turnRepo = new InMemoryTurnReader();
     turnRepo.seed(...turns);
-    return new ListTurnsUseCase(taskRepo, turnRepo, verdictReader);
+    return new ListTurnsUseCase(taskRepo, turnRepo, verdictReader, new InMemoryTurnReassignmentRepository());
 }
 
 describe("ListTurnsUseCase", () => {

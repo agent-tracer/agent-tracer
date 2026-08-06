@@ -12,6 +12,10 @@ export class InMemoryTaskRepository implements TaskRepositoryPort {
         for (const task of tasks) this.rows.set(key(task.userId, task.id), task);
     }
 
+    remove(userId: string, taskId: string): void {
+        this.rows.delete(key(userId, taskId));
+    }
+
     seedUserStates(...states: readonly TaskUserStateEntity[]): void {
         for (const state of states) this.userStates.set(key(state.userId, state.taskId), state);
     }

@@ -17,4 +17,20 @@ export class OpenSearchTaskIndex implements TaskSearchIndexPort {
             logWarn({ msg: "task.index_update.skipped", taskId, error: errorMessage(err) });
         }
     }
+
+    async indexTask(userId: string, taskId: string, doc: Record<string, unknown>): Promise<void> {
+        try {
+            await this.client.index({ index: TASKS_INDEX, id: JSON.stringify([userId, taskId]), body: doc });
+        } catch (err) {
+            logWarn({ msg: "task.index_write.skipped", taskId, error: errorMessage(err) });
+        }
+    }
+
+    async removeTask(userId: string, taskId: string): Promise<void> {
+        try {
+            await this.client.delete({ index: TASKS_INDEX, id: JSON.stringify([userId, taskId]) });
+        } catch (err) {
+            logWarn({ msg: "task.index_delete.skipped", taskId, error: errorMessage(err) });
+        }
+    }
 }

@@ -65,6 +65,8 @@ export const AGENT_TRACER_ATTR = {
     turnResponseEventId: "agent_tracer.turn.response_event_id",
     /** 직전 턴의 ID이며, 트레이스가 턴 단위로 갈리므로 OTLP span link로 이어 붙인다. */
     turnPreviousId: "agent_tracer.turn.previous_id",
+    boundaryLabel: "agent_tracer.boundary.label",
+    boundaryBack: "agent_tracer.boundary.back",
 } as const;
 
 /** 턴 전체를 감싸는 invoke_agent span을 하위 조율 활동과 가르는 표식이다. */

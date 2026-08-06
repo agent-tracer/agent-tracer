@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import type { NotificationEnvelope } from "@agent-tracer/kernel";
-import { TurnAssembly, type EventEntity, type TurnEntity } from "@agent-tracer/tracer-model";
+import { resolveTurnTaskId, TurnAssembly, type EventEntity, type TurnEntity } from "@agent-tracer/tracer-model";
 import type { TimelineProjectionRepositories } from "~tracer-api/domain/projection/port/projection.repositories.port.js";
 import { eventNotification } from "~tracer-api/support/notification.factory.js";
 import { buildEventEntity } from "~tracer-api/support/event.fields.js";
@@ -39,8 +39,33 @@ export class TimelineProjection {
             }
         }
 
+        // 분리는 원장 밖 재할당이라 투영이 매번 다시 읽어야 CDC 재전달이 분리를 되돌리지 않는다.
+        if (event.turnId !== null && record.sessionId !== null) {
+            await this.applyReassignment(repositories, record.userId, record.sessionId, event, closedTurn);
+        }
+
         await repositories.events.upsertAll([event]);
         return { event, closedTurn, notifications: [eventNotification(record.userId, event)] };
+    }
+
+    private async applyReassignment(
+        repositories: TimelineProjectionRepositories,
+        userId: string,
+        sessionId: string,
+        event: EventEntity,
+        closedTurn: TurnEntity | null,
+    ): Promise<void> {
+        const ranges = await repositories.findReassignments(userId, sessionId);
+        if (ranges.length === 0) return;
+
+        const turn = closedTurn ?? await repositories.turns.findById(event.turnId as string);
+        if (turn === null) return;
+
+        const owner = resolveTurnTaskId(ranges, turn.turnIndex, turn.taskId);
+        event.taskId = owner;
+        if (turn.taskId === owner) return;
+        turn.taskId = owner;
+        await repositories.turns.upsert(turn);
     }
 
     private async resolveCommentaryTurn(

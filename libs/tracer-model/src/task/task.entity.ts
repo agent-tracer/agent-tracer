@@ -5,6 +5,7 @@ import {
     COMPLETED_TASK_STATUS,
     TITLE_RANKS,
     USER_TASK_ORIGIN,
+    USER_TITLE_RANK,
     type MonitoringTaskKind,
     type TaskOrigin,
     type TaskStatus,
@@ -60,6 +61,10 @@ export class TaskEntity {
     @Column({ name: "background_of_task_id", type: "text", nullable: true })
     backgroundOfTaskId!: string | null;
 
+    // 턴 분리로 갈라져 나온 태스크가 원본을 가리키며, 서브에이전트 계보인 parentTaskId를 재사용하지 않는다.
+    @Column({ name: "split_from_task_id", type: "text", nullable: true })
+    splitFromTaskId!: string | null;
+
     @Column({ name: "created_at", type: timestampColumnType() })
     createdAt!: Date;
 
@@ -74,6 +79,32 @@ export class TaskEntity {
 
     @Column({ name: "last_applied_seq", type: "bigint", nullable: true })
     lastAppliedSeq!: string | null;
+
+    /** 턴 분리가 만드는 태스크이며, 원장 레코드의 taskId로 등장하지 않아 투영이 이 행을 만들거나 덮지 않는다. */
+    static splitFrom(id: string, origin: TaskEntity, title: string, at: Date): TaskEntity {
+        const task = new TaskEntity();
+        task.id = id;
+        task.userId = origin.userId;
+        task.title = title;
+        task.titleRank = USER_TITLE_RANK;
+        task.slug = deriveTaskSlug(title);
+        task.workspacePath = origin.workspacePath;
+        // 끝난 세션의 턴만 옮겨 오므로 이 태스크는 열린 채로 태어나지 않는다.
+        task.status = COMPLETED_TASK_STATUS;
+        task.taskKind = origin.taskKind;
+        task.origin = USER_TASK_ORIGIN;
+        task.cliSource = origin.cliSource;
+        task.parentTaskId = null;
+        task.parentSessionId = null;
+        task.backgroundOfTaskId = null;
+        task.splitFromTaskId = origin.id;
+        task.createdAt = at;
+        task.updatedAt = at;
+        task.lastSessionStartedAt = null;
+        task.lastEventAt = null;
+        task.lastAppliedSeq = null;
+        return task;
+    }
 
     applyLedgerStatusEffect(status: TaskStatus, at: Date, seq: string): boolean {
         if (this.isStaleSeq(seq)) return false;

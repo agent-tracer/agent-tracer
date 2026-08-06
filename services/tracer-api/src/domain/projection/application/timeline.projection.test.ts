@@ -1,13 +1,19 @@
 import { describe, expect, it } from "vitest";
 import { KIND } from "@agent-tracer/kernel";
 import { AGENT_TRACER_ATTR } from "@agent-tracer/kernel";
-import { EventRepository, TurnRepository, type EventEntity, type TurnEntity } from "@agent-tracer/tracer-model";
+import {
+    EventRepository,
+    TurnReassignmentEntity,
+    TurnRepository,
+    type EventEntity,
+    type TurnEntity,
+} from "@agent-tracer/tracer-model";
 import { asRepository, createInMemoryRepository } from "@agent-tracer/tracer-model/__fixtures__/in-memory-repository.js";
 import { TimelineProjection } from "./timeline.projection.js";
 import type { TimelineProjectionRepositories } from "~tracer-api/domain/projection/port/projection.repositories.port.js";
 import type { LedgerRecord } from "~tracer-api/support/ledger.record.js";
 
-function makeRepositories() {
+function makeRepositories(reassignments: readonly TurnReassignmentEntity[] = []) {
     const eventsFake = createInMemoryRepository<EventEntity>();
     const turnsFake = createInMemoryRepository<TurnEntity>();
     const events = new EventRepository(asRepository(eventsFake));
@@ -15,6 +21,8 @@ function makeRepositories() {
     const repositories = {
         events,
         turns,
+        findReassignments: (_userId: string, sessionId: string) =>
+            Promise.resolve(reassignments.filter((row) => row.sessionId === sessionId)),
         findEventById: (id: string) => Promise.resolve(eventsFake.all().find((e) => e.id === id) ?? null),
         findRunningAsyncAction: (taskId: string, asyncTaskId: string) =>
             Promise.resolve(
@@ -214,5 +222,61 @@ describe("TimelineProjection", () => {
         );
 
         expect(completed.event.turnId).toBe(originTurnId);
+    });
+});
+
+describe("TimelineProjection 턴 분리 재할당", () => {
+    function reassignment(from: number, to: number, taskId: string): TurnReassignmentEntity {
+        return TurnReassignmentEntity.create({
+            id: `r-${from}-${to}`,
+            userId: "u1",
+            sessionId: "session-1",
+            fromTurnIndex: from,
+            toTurnIndex: to,
+            taskId,
+            originTaskId: "task-1",
+            movedAt: new Date("2026-01-01T00:00:00.000Z"),
+        });
+    }
+
+    it("구간에 든 턴과 그 이벤트는 옮겨 간 태스크로 투영된다", async () => {
+        const { repositories, turnsFake } = makeRepositories([reassignment(1, 1, "t2")]);
+        const projection = new TimelineProjection();
+
+        const opened = await projection.project(
+            repositories,
+            makeRecord({ id: "event-1", seq: "1", kind: KIND.userMessage }),
+            true,
+        );
+
+        expect(opened.event.taskId).toBe("t2");
+        expect(turnsFake.all()[0]?.taskId).toBe("t2");
+    });
+
+    it("구간 밖의 턴은 원래 태스크에 남는다", async () => {
+        const { repositories, turnsFake } = makeRepositories([reassignment(2, 3, "t2")]);
+        const projection = new TimelineProjection();
+
+        const opened = await projection.project(
+            repositories,
+            makeRecord({ id: "event-1", seq: "1", kind: KIND.userMessage }),
+            true,
+        );
+
+        expect(opened.event.taskId).toBe("task-1");
+        expect(turnsFake.all()[0]?.taskId).toBe("task-1");
+    });
+
+    // 재할당을 투영이 읽지 않으면 CDC가 같은 배치를 다시 보낼 때 분리가 되돌아간다.
+    it("같은 원장 레코드를 다시 투영해도 분리가 유지된다", async () => {
+        const { repositories, turnsFake } = makeRepositories([reassignment(1, 1, "t2")]);
+        const projection = new TimelineProjection();
+        const record = makeRecord({ id: "event-1", seq: "1", kind: KIND.userMessage });
+
+        await projection.project(repositories, record, true);
+        const replayed = await projection.project(repositories, record, true);
+
+        expect(replayed.event.taskId).toBe("t2");
+        expect(turnsFake.all().every((turn) => turn.taskId === "t2")).toBe(true);
     });
 });
