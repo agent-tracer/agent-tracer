@@ -43,6 +43,7 @@ export interface TaskDetailResponse {
   readonly sessions?: readonly SessionDto[];
   readonly resumeTarget?: ResumeTargetDto;
   readonly turns?: readonly TaskTurnSummary[];
+  readonly splits?: readonly TaskSplitRange[];
 }
 
 export interface TaskTimelineResponse {
@@ -52,6 +53,24 @@ export interface TaskTimelineResponse {
 
 export interface TaskTurnsResponse {
   readonly turns: readonly TaskTurnSummary[];
+  readonly splits: readonly TaskSplitRange[];
+}
+
+/** 이 태스크에서 다른 태스크로 옮겨 간 턴 구간이며, 피드가 턴 인덱스가 뛰는 자리를 설명한다. */
+export interface TaskSplitRange {
+  readonly fromTurnIndex: number;
+  readonly toTurnIndex: number;
+  readonly taskId: string;
+  readonly movedAt: string;
+}
+
+/** 실행 중에 남긴 경계 마커가 가리키는 분리 제안 구간이다. */
+export interface TaskBoundarySuggestion {
+  readonly sessionId: string;
+  readonly fromTurnIndex: number;
+  readonly toTurnIndex: number;
+  readonly label: string;
+  readonly markedAt: string;
 }
 
 export interface TaskTurnSummary {

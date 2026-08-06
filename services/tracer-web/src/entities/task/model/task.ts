@@ -18,6 +18,8 @@ export interface MonitoringTask {
   readonly status: MonitoringTaskStatus;
   readonly taskKind?: MonitoringTaskKind;
   readonly parentTaskId?: TaskId;
+  /** 이 태스크가 턴 분리로 갈라져 나온 원본이다. */
+  readonly splitFromTaskId?: TaskId;
   readonly createdAt: string;
   readonly updatedAt: string;
   readonly lastSessionStartedAt?: string;

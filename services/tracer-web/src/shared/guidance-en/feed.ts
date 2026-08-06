@@ -46,6 +46,25 @@ export const EN_FEED = {
     verify: createGuidanceMessage("Actions confirmed by rule verdicts."),
     coordinate: createGuidanceMessage("Subagent creation and handoffs."),
   },
+  splitTurnsAction: createGuidanceMessage(
+    "Move this turn and the ones you pick with it into a task of their own.",
+  ),
+  splitLiveSession: createGuidanceMessage(
+    "This session is still running. You can split its turns once it ends.",
+  ),
+  splitNoRules: createGuidanceMessage(
+    "The new task starts with no rules. Rules approved on this task are not carried over.",
+  ),
+  splitMovedTurns: (from: number, to: number) =>
+    createGuidanceMessage(
+      from === to
+        ? `Turn ${from} moved to another task.`
+        : `Turns ${from}\u2013${to} moved to another task.`,
+    ),
+  splitOrigin: createGuidanceMessage("This task was split out of another one."),
+  revertSplit: createGuidanceMessage(
+    "Put these turns back where they came from and remove this task.",
+  ),
 } as const;
 
 export const EN_TASKS = {
