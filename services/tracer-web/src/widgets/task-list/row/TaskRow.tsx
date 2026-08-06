@@ -85,87 +85,87 @@ export function TaskRow({
         )}
       <TaskHierarchyGuides depth={depth} />
 
-      <div className="grid items-center mb-[3px] [grid-template-columns:auto_auto_minmax(0,1fr)_auto_auto_auto_auto] gap-x-2">
+      <div className="flex items-start gap-2">
         <TaskHierarchyToggle
           hasChildren={hasChildren}
           collapsed={collapsed}
           onToggle={actions.handleToggle}
         />
-        <StatusDot
-          status={status}
-          pulse={task.status === "running"}
-          tooltipContent={
-            <GuidanceText
-              locale={guidance.locale}
-              message={guidance.messages.common.status[status]}
-            />
-          }
-        />
-        <span
-          className={cn(
-            "min-w-0 tracking-snug truncate",
-            isSubagent ? "text-body italic" : "text-lead not-italic",
-            unread
-              ? "font-semibold"
-              : isSubagent
-                ? "font-normal"
-                : "font-medium",
-            isSubagent || task.status === "completed"
-              ? "text-ink-muted"
-              : "text-ink",
-          )}
-        >
-          {task.displayTitle ?? task.title}
+        <span className="flex h-5 shrink-0 items-center">
+          <StatusDot
+            status={status}
+            pulse={task.status === "running"}
+            tooltipContent={
+              <GuidanceText
+                locale={guidance.locale}
+                message={guidance.messages.common.status[status]}
+              />
+            }
+          />
         </span>
-        {task.status === "waiting" && (
-          <Chip tone="warn">await input</Chip>
-        )}
-        <Tooltip
-          content={
-            unread && !actions.active
-              ? `New activity since you last opened this task · ${formatAbsoluteHHmmss(task.updatedAt)}`
-              : formatAbsoluteHHmmss(task.updatedAt)
-          }
-          side="left"
-        >
-          <span
-            className={cn(
-              "font-mono text-mini",
-              unread && !actions.active
-                ? "text-primary font-semibold"
-                : "text-ink-subtle font-normal",
-            )}
-          >
-            {formatRelativeShort(task.updatedAt, nowMs)}
-          </span>
-        </Tooltip>
-        <TaskRowActions
-          archived={archived}
-          archivePending={actions.archivePending}
-          archiveFailed={actions.archiveFailed}
-          unarchiveFailed={actions.unarchiveFailed}
-          deletePending={actions.deletePending}
-          deleteFailed={actions.deleteFailed}
-          deleteArmed={actions.deleteArmed}
-          onArchive={actions.handleArchive}
-          onUnarchive={actions.handleUnarchive}
-          onDelete={actions.handleDelete}
-        />
-      </div>
-
-      {!hideRuntimeBadge && task.runtimeSource && (
-        <div className="flex items-center gap-2 flex-wrap font-mono text-mini text-ink-tertiary">
-          <span className="inline-flex items-center gap-1">
+        {/* 제목과 그 아래 딸린 것들이 한 열에 서야 태그가 제목 왼쪽 끝에 맞는다. */}
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <div className="flex min-w-0 items-center gap-2">
             <span
-              aria-hidden
-              className="h-[5px] w-[5px] rounded-full bg-primary"
+              className={cn(
+                "min-w-0 flex-1 tracking-snug truncate",
+                isSubagent ? "text-body italic" : "text-lead not-italic",
+                unread
+                  ? "font-semibold"
+                  : isSubagent
+                    ? "font-normal"
+                    : "font-medium",
+                isSubagent || task.status === "completed"
+                  ? "text-ink-muted"
+                  : "text-ink",
+              )}
+            >
+              {task.displayTitle ?? task.title}
+            </span>
+            {task.status === "waiting" && <Chip tone="warn">wait</Chip>}
+            <Tooltip
+              content={
+                unread && !actions.active
+                  ? `New activity since you last opened this task · ${formatAbsoluteHHmmss(task.updatedAt)}`
+                  : formatAbsoluteHHmmss(task.updatedAt)
+              }
+              side="left"
+            >
+              <span
+                className={cn(
+                  "font-mono text-mini",
+                  unread && !actions.active
+                    ? "text-primary font-semibold"
+                    : "text-ink-subtle font-normal",
+                )}
+              >
+                {formatRelativeShort(task.updatedAt, nowMs)}
+              </span>
+            </Tooltip>
+            <TaskRowActions
+              archived={archived}
+              archivePending={actions.archivePending}
+              archiveFailed={actions.archiveFailed}
+              unarchiveFailed={actions.unarchiveFailed}
+              deletePending={actions.deletePending}
+              deleteFailed={actions.deleteFailed}
+              deleteArmed={actions.deleteArmed}
+              onArchive={actions.handleArchive}
+              onUnarchive={actions.handleUnarchive}
+              onDelete={actions.handleDelete}
             />
-            {task.runtimeSource}
-          </span>
-        </div>
-      )}
+          </div>
 
-      <TaskRowTags taskId={task.id} />
+          {!hideRuntimeBadge && task.runtimeSource && (
+            <span className="inline-flex items-center gap-1 font-mono text-mini text-ink-tertiary">
+              <span aria-hidden className="h-[5px] w-[5px] rounded-full bg-primary" />
+              {task.runtimeSource}
+            </span>
+          )}
+
+          <TaskRowTags taskId={task.id} />
+        </div>
+      </div>
     </Link>
   );
 }

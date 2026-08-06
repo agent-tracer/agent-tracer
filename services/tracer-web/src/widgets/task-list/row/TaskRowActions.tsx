@@ -35,9 +35,17 @@ export function TaskRowActions({
   onDelete,
 }: TaskRowActionsProps) {
   const lifecycleFailed = archiveFailed || unarchiveFailed;
+  // 알릴 것이 있는 동안에만 자리를 차지하고, 그 밖에는 좁은 사이드바의 폭을 제목에 준다.
+  const pinned =
+    lifecycleFailed || archivePending || deleteArmed || deleteFailed || deletePending;
 
   return (
-    <>
+    <span
+      className={cn(
+        "shrink-0 items-center gap-1",
+        pinned ? "flex" : "hidden group-hover:flex group-focus-within:flex",
+      )}
+    >
       <Tooltip
         content={
           archived
@@ -54,12 +62,6 @@ export function TaskRowActions({
           onClick={archived ? onUnarchive : onArchive}
           aria-label={archived ? "Unarchive task" : "Archive task"}
           tone={lifecycleFailed ? "danger" : "neutral"}
-          className={cn(
-            "transition-opacity",
-            lifecycleFailed || archivePending
-              ? "opacity-100"
-              : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100",
-          )}
         >
           {archived ? <UnarchiveIcon /> : <ArchiveIcon />}
         </IconButton>
@@ -79,16 +81,10 @@ export function TaskRowActions({
           aria-label={deleteArmed ? "Confirm hide" : "Hide task"}
           tone={deleteFailed || deleteArmed ? "danger" : "neutral"}
           armed={deleteArmed}
-          className={cn(
-            "transition-opacity",
-            deleteArmed || deleteFailed || deletePending
-              ? "opacity-100"
-              : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100",
-          )}
         >
           <TrashIcon />
         </IconButton>
       </Tooltip>
-    </>
+    </span>
   );
 }

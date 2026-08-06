@@ -1,4 +1,5 @@
 import { useTagsQuery } from "~tracer-web/entities/tag/api/queries.js";
+import { TagChip } from "~tracer-web/entities/tag/ui/TagChip.js";
 import {
   useClearSidebarTagFilter,
   useGuidance,
@@ -29,6 +30,7 @@ export function TaskListTagFilter() {
           Tags
         </span>
       </Tooltip>
+      {/* 태그는 어디에서나 같은 표식으로 보이고 고른 것인지 아닌지만 선명도로 갈린다. */}
       {tags.map((tag) => {
         const isOn = selectedSet.has(tag.id);
         return (
@@ -37,20 +39,15 @@ export function TaskListTagFilter() {
             type="button"
             onClick={() => toggle(tag.id)}
             aria-pressed={isOn}
+            aria-label={`Filter by ${tag.name}`}
             className={cn(
-              "inline-flex items-center gap-1 py-0.5 px-2 rounded-pill cursor-pointer transition-all duration-150 border",
-              "text-mini font-medium",
+              "rounded-xs transition-opacity duration-150 focus-ring",
               isOn
-                ? "border-hair-strong bg-s2 text-ink opacity-100"
-                : "border-hair bg-transparent text-ink-tertiary opacity-70",
+                ? "opacity-100 ring-1 ring-hair-strong"
+                : "opacity-50 hover:opacity-100",
             )}
           >
-            <span
-              aria-hidden
-              className={cn("w-[7px] h-[7px] rounded-full", isOn ? "opacity-100" : "opacity-40")}
-              style={{ background: tag.color }}
-            />
-            {tag.name}
+            <TagChip tag={tag} dense />
           </button>
         );
       })}

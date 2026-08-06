@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { cn } from "~tracer-web/shared/ui/lib/cn.js";
 import type { GuidanceMessage } from "~tracer-web/shared/guidance.js";
 import { isGuidanceMessage } from "~tracer-web/shared/guidance.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
-import { Button, GuidanceText, Input } from "~tracer-web/shared/ui/index.js";
+import { Button, GuidanceText, Input, PageHeader } from "~tracer-web/shared/ui/index.js";
 import type { RecipeScanJobInput } from "~tracer-web/entities/job/model/recipe-scan.js";
 import type { MonitoringTask } from "~tracer-web/entities/task/model/task.js";
 import type { TaskId } from "~tracer-web/shared/identity.js";
@@ -56,85 +55,91 @@ export function ScanPanel({
     scanError ?? (latestJob?.status === "failed" ? latestJob.error : null);
 
   return (
-    <div className="py-4 px-4 pb-3 border-b border-hair bg-canvas sm:px-6">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <div className="text-title font-semibold text-ink">Recipes</div>
-          <GuidanceText
-            as="div"
-            className="text-body text-ink-muted mt-1 max-w-[720px]"
-            locale={guidance.locale}
-            message={guidance.messages.recipes.introduction}
-          />
-        </div>
-      </div>
-      <div className="mt-3 flex min-w-0 flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-        <div className="flex w-full min-w-0 items-center gap-1.5 sm:w-auto">
-          <span className="shrink-0 text-meta text-ink-muted uppercase tracking-label">Task</span>
-          <TaskPicker
-            tasks={tasks}
-            loading={tasksLoading}
-            selectedTaskId={selectedTaskId}
-            onSelect={setSelectedTaskId}
-            scannedTaskIds={scannedTaskIds}
-            includeArchived={includeArchivedTasks}
-            onIncludeArchivedChange={onIncludeArchivedTasksChange}
+    <>
+      <PageHeader
+        eyebrow="Workspace"
+        title="Recipes"
+        intro={guidance.messages.recipes.introduction}
+        introLocale={guidance.locale}
+        {...(latestJob
+          ? {
+              status: (
+                <>
+                  Last scan: {latestJob.status}
+                  {latestJob.status === "completed" && (
+                    <>
+                      {" "}
+                      · {latestJob.recipes.length} candidate
+                      {latestJob.recipes.length === 1 ? "" : "s"}
+                      {latestJob.taskId ? ` · ${latestJob.taskId.slice(0, 8)}` : ""}
+                    </>
+                  )}
+                </>
+              ),
+            }
+          : {})}
+      />
+      <div className="px-9 py-3 border-b border-hair bg-canvas">
+        {/* 폭을 100%로 고정한 칸이 있으면 그 칸이 줄을 통째로 차지하므로 두지 않는다. */}
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <label className="flex min-w-0 items-center gap-1.5">
+            <span className="shrink-0 text-mini text-ink-tertiary uppercase tracking-eyebrow">
+              Task
+            </span>
+            <TaskPicker
+              tasks={tasks}
+              loading={tasksLoading}
+              selectedTaskId={selectedTaskId}
+              onSelect={setSelectedTaskId}
+              scannedTaskIds={scannedTaskIds}
+              includeArchived={includeArchivedTasks}
+              onIncludeArchivedChange={onIncludeArchivedTasksChange}
+              disabled={isScanning}
+            />
+          </label>
+          <Input
+            value={userPrompt}
+            onChange={(e) => setUserPrompt(e.target.value)}
+            placeholder="What should the recipe capture?"
+            className="min-w-[220px] flex-1"
             disabled={isScanning}
           />
+          <label className="flex min-w-0 items-center gap-1.5">
+            <span className="shrink-0 text-mini text-ink-tertiary uppercase tracking-eyebrow">
+              Backend
+            </span>
+            <AgentBackendSelect
+              value={agentBackend}
+              onChange={onAgentBackendChange}
+              disabled={isScanning}
+              className="min-w-[112px]"
+            />
+          </label>
+          <Button
+            variant="primary"
+            disabled={isScanning || selectedTaskId === null}
+            onClick={() => {
+              if (selectedTaskId === null) return;
+              onScan({
+                taskId: selectedTaskId,
+                ...(userPrompt.trim() ? { userPrompt: userPrompt.trim() } : {}),
+              });
+            }}
+            className="shrink-0"
+          >
+            {isScanning ? "Scanning…" : "Scan"}
+          </Button>
         </div>
-        <Input
-          value={userPrompt}
-          onChange={(e) => setUserPrompt(e.target.value)}
-          placeholder="What should the recipe capture?"
-          className="w-full min-w-0 flex-1 sm:min-w-[260px]"
-          disabled={isScanning}
-        />
-        <div className="flex w-full min-w-0 items-center gap-1.5 sm:w-auto">
-          <span className="shrink-0 text-meta text-ink-muted uppercase tracking-label">Backend</span>
-          <AgentBackendSelect
-            value={agentBackend}
-            onChange={onAgentBackendChange}
-            disabled={isScanning}
-            className="min-w-0 flex-1 sm:min-w-[154px]"
-          />
-        </div>
-        <Button
-          variant="primary"
-          disabled={isScanning || selectedTaskId === null}
-          onClick={() => {
-            if (selectedTaskId === null) return;
-            onScan({
-              taskId: selectedTaskId,
-              ...(userPrompt.trim() ? { userPrompt: userPrompt.trim() } : {}),
-            });
-          }}
-          className={cn("w-full sm:w-auto", isScanning && "bg-s2 text-ink-subtle")}
-        >
-          {isScanning ? "Scanning…" : "Scan now"}
-        </Button>
-        {latestJob && (
-          <span className="text-meta text-ink-muted">
-            Last scan: {latestJob.status}
-            {latestJob.status === "completed" && (
-              <>
-                {" "}
-                · {latestJob.recipes.length} candidate
-                {latestJob.recipes.length === 1 ? "" : "s"}
-                {latestJob.taskId ? ` · ${latestJob.taskId.slice(0, 8)}` : ""}
-              </>
+        {failureMessage && (
+          <div className="mt-2 text-body py-1.5 px-2.5 rounded-sm bg-err/8 text-err">
+            {isGuidanceMessage(failureMessage) ? (
+              <GuidanceText locale={guidance.locale} message={failureMessage} />
+            ) : (
+              failureMessage
             )}
-          </span>
+          </div>
         )}
       </div>
-      {failureMessage && (
-        <div className="mt-2 text-body py-1.5 px-2.5 rounded-sm bg-err/8 text-err">
-          {isGuidanceMessage(failureMessage) ? (
-            <GuidanceText locale={guidance.locale} message={failureMessage} />
-          ) : (
-            failureMessage
-          )}
-        </div>
-      )}
-    </div>
+    </>
   );
 }

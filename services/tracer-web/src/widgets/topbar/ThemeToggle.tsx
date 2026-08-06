@@ -55,7 +55,7 @@ export function ThemeToggle() {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-[calc(100%+4px)] z-50 min-w-[148px] rounded-sm py-1 bg-s1 border border-hair shadow-elev-1"
+          className="absolute right-0 top-[calc(100%+4px)] z-50 w-max min-w-[168px] rounded-sm py-1 bg-s1 border border-hair shadow-elev-1"
         >
           <MenuItem
             label="Light"
@@ -108,12 +108,12 @@ function MenuItem({
       aria-checked={active}
       onClick={onSelect}
       className={cn(
-        "w-full flex items-center gap-2 px-2.5 h-7 text-left hover:bg-s2 text-body",
+        "w-full flex items-center gap-2 px-2.5 h-7 text-left whitespace-nowrap hover:bg-s2 text-body focus-ring",
         active ? "text-ink bg-s2" : "text-ink-muted bg-transparent",
       )}
     >
       <span className="text-ink-tertiary">{icon}</span>
-      <span className="flex-1">{label}</span>
+      <span className="flex-1 shrink-0">{label}</span>
       {active && <CheckIcon size={12} className="text-primary" />}
     </button>
   );

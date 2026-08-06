@@ -45,7 +45,8 @@ export function Chip({ tone = "neutral", className, ...props }: ChipProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-xs px-1.5",
+        // 칩은 한 낱말이라 줄바꿈도 수축도 하지 않으며, 그래야 옆에 선 제목을 밀어내지 않는다.
+        "inline-flex shrink-0 whitespace-nowrap items-center gap-1 rounded-xs px-1.5",
         "font-mono text-micro leading-4 font-semibold uppercase tracking-eyebrow",
         toneClass[tone],
         className,

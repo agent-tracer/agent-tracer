@@ -7,6 +7,7 @@ import {
   useSetTaskTagsMutation,
 } from "~tracer-web/entities/tag/api/mutations.js";
 import { useGuidance } from "~tracer-web/shared/store/index.js";
+import { TagChip } from "~tracer-web/entities/tag/ui/TagChip.js";
 import { AnchoredPopover, GuidanceText, Input } from "~tracer-web/shared/ui/index.js";
 import { cn } from "~tracer-web/shared/ui/lib/cn.js";
 
@@ -151,7 +152,7 @@ export function TaskTagPicker({ taskId }: TaskTagPickerProps) {
               disabled={createMutation.isPending}
               className="w-full px-3 py-2 text-left text-body text-primary-hover border-t border-hair hover:bg-s1"
             >
-              {createMutation.isPending ? "Creating…" : `Create tag "${trimmedQuery}"`}
+              {createMutation.isPending ? "Creating…" : `Create "${trimmedQuery}"`}
             </button>
           )}
         </AnchoredPopover>
@@ -177,7 +178,7 @@ function TagOptionRow({
       onClick={onToggle}
       className={cn("w-full flex items-center gap-2 px-3 py-1.5 text-left hover:bg-s1", checked && "bg-s1")}
     >
-      <span aria-hidden className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: tag.color }} />
+      <TagChip tag={tag} dense />
       <span className="flex-1 truncate text-body text-ink">{tag.name}</span>
       {checked && (
         <span aria-hidden className="text-primary text-meta">

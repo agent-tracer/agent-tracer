@@ -12,9 +12,5 @@ export function TaskRowTags({ taskId }: TaskRowTagsProps) {
   const tags = data?.tags ?? [];
   if (tags.length === 0) return null;
 
-  return (
-    <div className="mt-1">
-      <TagChipList tags={tags} maxVisible={3} />
-    </div>
-  );
+  return <TagChipList tags={tags} maxVisible={3} dense />;
 }
