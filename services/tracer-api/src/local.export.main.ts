@@ -2,9 +2,11 @@ import "reflect-metadata";
 import fs from "node:fs";
 import path from "node:path";
 import { createDataSource, loadApplicationConfig, SQLITE_PROFILE } from "@agent-tracer/platform";
-import { TRACER_ENTITIES } from "@agent-tracer/tracer-model";
+import { IsNull, Not } from "typeorm";
+import { TaskEntity, TRACER_ENTITIES } from "@agent-tracer/tracer-model";
 import { errorMessage, logError, logInfo } from "~tracer-api/support/log.js";
 import {
+    SPLIT_TASK_TABLE,
     USER_OWNED_ENTITIES,
     type LocalStateBundle,
     type ReplayEvent,
@@ -73,6 +75,11 @@ async function exportState(dir: string): Promise<Record<string, number>> {
             bundle.tables[table] = rows;
             counts[table] = rows.length;
         }
+        const splitTasks = await tracer.getRepository(TaskEntity)
+            .find({ where: { splitFromTaskId: Not(IsNull()) } }) as unknown as Record<string, unknown>[];
+        bundle.tables[SPLIT_TASK_TABLE] = splitTasks;
+        counts[SPLIT_TASK_TABLE] = splitTasks.length;
+
         fs.writeFileSync(path.join(dir, "state.json"), JSON.stringify(bundle, null, 2));
         return counts;
     } finally {

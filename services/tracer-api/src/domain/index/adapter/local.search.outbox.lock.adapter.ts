@@ -7,6 +7,8 @@ import {
     RecipeRepository,
     SearchOutboxEntity,
     SearchOutboxRepository,
+    TaskEntity,
+    TaskRepository,
     TaskUserStateEntity,
     TaskUserStateRepository,
 } from "@agent-tracer/tracer-model";
@@ -29,6 +31,7 @@ export class LocalSearchOutboxLockAdapter implements AdvisoryLockPort<SearchOutb
         return {
             searchOutbox: new SearchOutboxRepository(manager.getRepository(SearchOutboxEntity)),
             recipes: new RecipeRepository(manager.getRepository(RecipeEntity)),
+            tasks: new TaskRepository(manager.getRepository(TaskEntity)),
             taskUserStates: new TaskUserStateRepository(manager.getRepository(TaskUserStateEntity)),
             memos: new MemoRepository(manager.getRepository(MemoEntity)),
         };

@@ -6,6 +6,7 @@ import {
     TaskCleanupSuggestionEntity,
     TaskTagEntity,
     TaskUserStateEntity,
+    TurnReassignmentEntity,
     UserEntity,
 } from "@agent-tracer/tracer-model";
 
@@ -21,7 +22,11 @@ export const USER_OWNED_ENTITIES = [
     MemoEntity,
     TaskUserStateEntity,
     TaskCleanupSuggestionEntity,
+    TurnReassignmentEntity,
 ];
+
+/** 분리가 만든 태스크는 원장에 없어 재생으로 되살아나지 않으므로 따로 담는 자리다. */
+export const SPLIT_TASK_TABLE = "split_tasks";
 
 /** 이관 꾸러미가 담는 테이블별 행 목록이다. */
 export interface LocalStateBundle {

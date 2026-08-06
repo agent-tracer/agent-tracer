@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import type { DataSource } from "typeorm";
 import fs from "node:fs";
 import path from "node:path";
 import { createDataSource, loadApplicationConfig, SQLITE_PROFILE } from "@agent-tracer/platform";
@@ -9,11 +10,13 @@ import {
     SEARCH_OUTBOX_TARGET,
     SearchOutboxEntity,
     TaskUserStateEntity,
+    TaskEntity,
     TRACER_ENTITIES,
     type SearchOutboxTarget,
 } from "@agent-tracer/tracer-model";
 import { errorMessage, logError, logInfo } from "~tracer-api/support/log.js";
 import {
+    SPLIT_TASK_TABLE,
     USER_OWNED_ENTITIES,
     type LocalStateBundle,
     type ReplayEvent,
@@ -70,10 +73,32 @@ async function importState(dir: string): Promise<Record<string, number>> {
             const conflictPaths = meta.primaryColumns.map((column) => column.propertyName);
             await tracer.getRepository(entity).upsert(rows, conflictPaths);
         }
+        await importSplitTasks(tracer, bundle, counts);
         return counts;
     } finally {
         await tracer.destroy();
     }
+}
+
+/** 분리가 만든 태스크는 원장 재생이 못 되살리므로 꾸러미에서 그대로 되돌린다. */
+async function importSplitTasks(
+    tracer: DataSource,
+    bundle: LocalStateBundle,
+    counts: Record<string, number>,
+): Promise<void> {
+    const rows = bundle.tables[SPLIT_TASK_TABLE] ?? [];
+    counts[SPLIT_TASK_TABLE] = rows.length;
+    if (rows.length === 0) return;
+    const meta = tracer.getMetadata(TaskEntity);
+    reviveDates(
+        rows,
+        meta.columns.filter((column) => DATE_TYPES.has(String(column.type)))
+            .map((column) => column.propertyName),
+    );
+    await tracer.getRepository(TaskEntity).upsert(
+        rows,
+        meta.primaryColumns.map((column) => column.propertyName),
+    );
 }
 
 /** 검색 대상 엔티티와 아웃박스가 쓰는 대상 이름의 짝이다. */
