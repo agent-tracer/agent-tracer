@@ -15,7 +15,7 @@ function recipe(id: string, useWhen: readonly string[]): RecipeEntity {
             author: RECIPE_EDITOR.agent,
             rev: 1,
             title: "lint pipeline",
-            intent: "커밋 전에 린트를 돌린다",
+            intent: "커밋 전에 린트를 실행한다",
             description: "설명",
             useWhen,
             summaryMd: "요약",

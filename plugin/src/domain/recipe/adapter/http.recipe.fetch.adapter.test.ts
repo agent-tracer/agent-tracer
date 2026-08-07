@@ -39,7 +39,7 @@ describe("HttpRecipeFetchAdapter.fetch", () => {
     it("단계의 verify를 세 갈래 모두 옮긴다", async () => {
         const recipe = await fetched({
             steps: [
-                {order: 1, action: "린트를 돌린다", verify: {kind: "command", commandMatches: ["npm run lint"]}},
+                {order: 1, action: "린트를 실행한다", verify: {kind: "command", commandMatches: ["npm run lint"]}},
                 {order: 2, action: "출력을 본다", verify: {kind: "pattern", pattern: "0 problems"}},
                 {order: 3, action: "파일을 고친다", verify: {kind: "action", tool: "file-write"}},
             ],
@@ -55,13 +55,13 @@ describe("HttpRecipeFetchAdapter.fetch", () => {
     it("verify가 온전하지 않으면 단계를 버리지 않고 확인 신호만 뺀다", async () => {
         const recipe = await fetched({
             steps: [
-                {order: 1, action: "린트를 돌린다", verify: {kind: "command", commandMatches: []}},
+                {order: 1, action: "린트를 실행한다", verify: {kind: "command", commandMatches: []}},
                 {order: 2, action: "출력을 본다", verify: {kind: "action", tool: "telepathy"}},
                 {order: 3, action: "파일을 고친다", verify: null},
             ],
         });
 
-        expect(recipe.steps.map((step) => step.action)).toEqual(["린트를 돌린다", "출력을 본다", "파일을 고친다"]);
+        expect(recipe.steps.map((step) => step.action)).toEqual(["린트를 실행한다", "출력을 본다", "파일을 고친다"]);
         expect(recipe.steps.every((step) => step.verify === undefined)).toBe(true);
     });
 
@@ -107,7 +107,7 @@ describe("HttpRecipeFetchAdapter.fetch", () => {
     });
 
     it("새 칸이 없는 옛 응답도 빈 목록으로 읽는다", async () => {
-        const recipe = await fetched({steps: [{order: 1, action: "린트를 돌린다"}]});
+        const recipe = await fetched({steps: [{order: 1, action: "린트를 실행한다"}]});
 
         expect(recipe.useWhen).toEqual([]);
         expect(recipe.inputs).toEqual([]);
