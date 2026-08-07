@@ -10,6 +10,7 @@ import {
 } from "@agent-tracer/platform";
 import { EventIngestKeyEntity } from "~ingest-api/domain/ingest/adapter/event.ingest.key.entity.js";
 import { LedgerEventEntity } from "~ingest-api/domain/ingest/adapter/ledger.event.entity.js";
+import { LocalLedgerEventEntity } from "~ingest-api/domain/ingest/adapter/local.ledger.event.entity.js";
 import { LEDGER_MIGRATIONS } from "~ingest-api/migrations/registry.js";
 import { errorMessage, logError, logInfo } from "~ingest-api/config/log.js";
 import { resolveIngestRateLimitConfig } from "~ingest-api/domain/ingest/inbound/ingest.rate-limit.guard.js";
@@ -20,15 +21,17 @@ const BODY_LIMIT = "8mb";
 
 async function bootstrap(): Promise<void> {
     const config = loadApplicationConfig();
+    // 로컬 원장은 파티션과 CDC가 없어 스키마를 엔티티 선언에서 세우므로 버전 검사 대상이 아니다.
+    const sqlite = config.eventDb.driver === "sqlite";
     // 마이그레이션은 배포 선행 스텝이 소유하고 부트는 스키마 버전만 검사한다.
     const dataSource = createDataSource({
         db: config.eventDb,
-        entities: [LedgerEventEntity, EventIngestKeyEntity],
+        entities: sqlite ? [LocalLedgerEventEntity] : [LedgerEventEntity, EventIngestKeyEntity],
         migrations: [],
         migrationsRun: false,
     });
     await dataSource.initialize();
-    await assertSchemaUpToDate(dataSource, getMigrationNames(LEDGER_MIGRATIONS));
+    if (!sqlite) await assertSchemaUpToDate(dataSource, getMigrationNames(LEDGER_MIGRATIONS));
 
     const app = await NestFactory.create<NestExpressApplication>(
         IngestApiModule.forRoot(dataSource),
