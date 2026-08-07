@@ -35,7 +35,7 @@ export interface CachedRecipeTouchedFile {
     readonly loadWhen?: string;
 }
 
-/** 캐시가 담는 레시피는 본문 전체이며 활성화 판단은 에이전트가 get_recipe로 직접 열어본 뒤 내린다. */
+/** 캐시가 담는 레시피는 본문 전체이며 활성화 판단은 에이전트가 get_recipe로 직접 조회한 뒤 내린다. */
 export interface CachedRecipe {
     readonly id: string;
     readonly title: string;

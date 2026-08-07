@@ -44,7 +44,7 @@ import {
 import {boundaryLoggedEvent} from "~plugin/domain/session/model/boundary.event.model.js";
 import type {McpToolSpec} from "~plugin/support/mcp.tool.js";
 
-/** 사용자의 /recipe 발화와 같은 명령 접두사를 합성해 기존 스캔 경로를 그대로 태운다. */
+/** 사용자의 /recipe 발화와 같은 명령 접두사를 합성해 기존 스캔 경로를 그대로 실행한다. */
 const MCP_RECIPE_SCAN_PROMPT = "/recipe";
 const UNKNOWN_SESSION = "unknown_session";
 
