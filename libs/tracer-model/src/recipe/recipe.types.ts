@@ -57,7 +57,7 @@ export interface RecipeRevisionInput {
 export interface RecipeCandidateInput {
     readonly id: string;
     readonly userId: string;
-    /** 이 후보를 만든 주체이며 사람이 만든 것과 자동으로 만들어진 것을 가른다. */
+    /** 이 후보를 만든 주체이며 사람이 만든 것과 자동으로 만들어진 것을 구분한다. */
     readonly author: RecipeEditor;
     /** 개정으로 이어진 후보는 부모의 판에 하나를 더한 값을 갖고 그렇지 않으면 1이다. */
     readonly rev: number;

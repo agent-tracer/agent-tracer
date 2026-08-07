@@ -1,7 +1,7 @@
 import type {McpToolSpec} from "~plugin/support/mcp.tool.js";
 import {isRecord} from "~plugin/support/json.js";
 
-/** 워크스페이스 레시피를 질의어로 찾는 도구이며 결정 수준 정보만 돌려준다는 것을 설명에 못박는다. */
+/** 워크스페이스 레시피를 질의어로 찾는 도구이며 결정 수준 정보만 돌려준다는 것을 설명에 고정한다. */
 export const SEARCH_RECIPES_TOOL: McpToolSpec = {
     name: "search_recipes",
     description:
