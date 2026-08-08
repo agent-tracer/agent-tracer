@@ -3,6 +3,7 @@ import { Client } from "@opensearch-project/opensearch";
 import type { EventSearchHit, EventSearchPort, EventSearchQuery } from "~tracer-api/domain/search/port/event.search.port.js";
 import { EVENTS_INDEX, OPENSEARCH_CLIENT } from "~tracer-api/config/opensearch.client.const.js";
 import { readString, readStringArray } from "~tracer-api/domain/search/adapter/opensearch.field.reader.js";
+import { relevanceMust, relevanceSort } from "~tracer-api/domain/search/adapter/opensearch.relevance.js";
 
 interface SearchResponseBody {
     readonly hits: {
@@ -31,17 +32,13 @@ export class OpenSearchEventSearch implements EventSearchPort {
                 },
             });
         }
-        const must = query.q
-            ? [{ multi_match: { query: query.q, fields: ["title", "body"] } }]
-            : [{ match_all: {} }];
-
         const response = await this.client.search({
             index: EVENTS_INDEX,
             body: {
                 size: query.limit,
                 ...(query.offset !== undefined ? { from: query.offset } : {}),
-                sort: [{ occurredAt: "desc" }],
-                query: { bool: { must, filter } },
+                sort: relevanceSort(query.q, "occurredAt"),
+                query: { bool: { must: relevanceMust(query.q, ["title", "body"]), filter } },
             },
         });
         const body = response.body as unknown as SearchResponseBody;

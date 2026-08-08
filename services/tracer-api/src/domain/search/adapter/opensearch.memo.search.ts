@@ -3,6 +3,7 @@ import { Client } from "@opensearch-project/opensearch";
 import type { MemoSearchHit, MemoSearchPort, MemoSearchQuery } from "~tracer-api/domain/search/port/memo.search.port.js";
 import { MEMOS_INDEX, OPENSEARCH_CLIENT } from "~tracer-api/config/opensearch.client.const.js";
 import { readString } from "~tracer-api/domain/search/adapter/opensearch.field.reader.js";
+import { relevanceMust, relevanceSort } from "~tracer-api/domain/search/adapter/opensearch.relevance.js";
 
 interface SearchResponseBody {
     readonly hits: {
@@ -21,15 +22,13 @@ export class OpenSearchMemoSearch implements MemoSearchPort {
             query.hasEvent ? { exists: { field: "eventId" } } : { bool: { must_not: [{ exists: { field: "eventId" } }] } },
         ];
         if (query.taskId !== undefined) filter.push({ term: { taskId: query.taskId } });
-        const must = query.q ? [{ multi_match: { query: query.q, fields: ["body"] } }] : [{ match_all: {} }];
-
         const response = await this.client.search({
             index: MEMOS_INDEX,
             body: {
                 size: query.limit,
                 ...(query.offset !== undefined ? { from: query.offset } : {}),
-                sort: [{ updatedAt: "desc" }],
-                query: { bool: { must, filter } },
+                sort: relevanceSort(query.q, "updatedAt"),
+                query: { bool: { must: relevanceMust(query.q, ["body"]), filter } },
             },
         });
         const body = response.body as unknown as SearchResponseBody;
