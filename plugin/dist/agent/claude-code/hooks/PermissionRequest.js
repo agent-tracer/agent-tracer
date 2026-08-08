@@ -3158,11 +3158,15 @@ var HttpRecipeFetchAdapter = class {
       REQUEST_TIMEOUT_MS
     );
     if (fetched.kind !== "found") return fetched;
-    const payload = "data" in fetched.value ? fetched.value["data"] : fetched.value;
-    const recipe2 = toCachedRecipe(payload);
+    const recipe2 = toCachedRecipe(unwrapRecipe(fetched.value));
     return recipe2 === null ? { kind: "unavailable" } : { kind: "found", value: recipe2 };
   }
 };
+function unwrapRecipe(value) {
+  const payload = "data" in value ? value["data"] : value;
+  if (isRecord(payload) && isRecord(payload["recipe"])) return payload["recipe"];
+  return payload;
+}
 function toCachedRecipe(value) {
   if (!isRecord(value)) return null;
   const id = readString2(value, "id");
